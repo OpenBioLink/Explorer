@@ -1,0 +1,62 @@
+{
+  "name": "client",
+  "version": "0.1.0",
+  "private": true,
+  "proxy": "http://localhost:3001",
+  "dependencies": {
+    "@testing-library/jest-dom": "^5.11.9",
+    "@testing-library/react": "^11.2.5",
+    "@testing-library/user-event": "^12.8.3",
+    "axios": "^0.21.1",
+    "bootstrap": "^4.6.0",
+    "bs-custom-file-input": "^1.3.4",
+    "css-loader": "^5.1.2",
+    "file-loader": "^6.2.0",
+    "html-webpack-plugin": "^5.3.1",
+    "rdflib": "^2.2.0",
+    "react": "^17.0.1",
+    "react-bootstrap": "^1.5.1",
+    "react-dom": "^17.0.1",
+    "react-icons": "^4.2.0",
+    "react-router-dom": "^5.2.0",
+    "react-scripts": "4.0.3",
+    "sql.js": "^1.4.0",
+    "style-loader": "^2.0.0",
+    "universal-cookie": "^4.0.4",
+    "web-vitals": "^1.1.0"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject",
+    "webpack-dev-server": "webpack-dev-server",
+    "dev": "webpack serve --mode=development",
+    "prod": "webpack --mode=production"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "@babel/core": "^7.13.10",
+    "@babel/plugin-proposal-class-properties": "^7.13.0",
+    "@babel/preset-env": "^7.13.10",
+    "@babel/preset-react": "^7.12.13",
+    "react-app-rewired": "^2.1.8"
+  }
+}
