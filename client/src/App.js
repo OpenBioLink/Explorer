@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext, createContext, useState, useEffect } from 'react';
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import {Loader} from './Loader.js'
@@ -9,39 +9,52 @@ import {Explaination} from './Explaination'
 import {
   BrowserRouter as Router,
   Switch,
-  Route
+  Route,
+  Redirect
 } from "react-router-dom";
 import {Button, Navbar, Nav, Form, FormControl} from 'react-bootstrap';
 import { Entity } from './Entity';
-
+import Cookies from 'universal-cookie';
+ 
+const cookies = new Cookies()
 
 class App extends React.Component{
+
+  constructor(){
+    super();
+    this.state = {
+      showLoader: true
+    }
+  }
+
   render(){
     return (
       <div className="App">
-        <Router> 
-          <Header/>  
-          <Switch>               
-            <Route path='/loader'>
-              <Loader/>
-            </Route>   
-            <Route path='/entities'>
-              <Entities/>
-            </Route>
-            <Route path='/entity'>
-              <Entity/>
-            </Route>
-            <Route path='/task'>
-              <Task/>
-            </Route>
-            <Route path='/explaination'>
-              <Explaination/>
-            </Route>
-            <Route path='/'>
-              <Start/>
-            </Route>           
-          </Switch>
+        <ProvideLoaderContext>
+          <Router>
+            <Header/>  
+            <Switch>               
+              <Route path='/loader'>
+                <Loader cookies={cookies}/>
+              </Route>   
+              <LoaderRoute path='/entities'>
+                <Entities/>
+              </LoaderRoute>
+              <LoaderRoute path='/entity'>
+                <Entity/>
+              </LoaderRoute>
+              <LoaderRoute path='/task'>
+                <Task/>
+              </LoaderRoute>
+              <LoaderRoute path='/explaination'>
+                <Explaination/>
+              </LoaderRoute>
+              <LoaderRoute path='/'>
+                <Start/>
+              </LoaderRoute>           
+            </Switch>
           </Router>
+        </ProvideLoaderContext>
       </div>
     );
   }
@@ -71,6 +84,53 @@ class Header extends React.Component{
       </header>
     );
   }
+}
+
+const loaderContext = createContext();
+
+function ProvideLoaderContext({ children }) {
+  const auth = useProvideLoaderContext();
+  return (
+    <loaderContext.Provider value={auth}>
+      {children}
+    </loaderContext.Provider>
+  );
+}
+
+function useLoaderContext() {
+  return useContext(loaderContext);
+}
+
+function useProvideLoaderContext() {
+
+  const getExplainationID = () => {
+    return cookies.get("explainationID");
+  };
+
+  return {
+    getExplainationID
+  };
+}
+
+function LoaderRoute({ children, ...rest }) {
+  let ctxt = useLoaderContext();
+  return (
+    <Route
+      {...rest}
+      render={({ location }) =>
+        ctxt.getExplainationID() ? (
+          children
+        ) : (
+          <Redirect
+            to={{
+              pathname: "/loader",
+              state: { from: location }
+            }}
+          />
+        )
+      }
+    />
+  );
 }
 
 

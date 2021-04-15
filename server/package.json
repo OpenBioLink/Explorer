@@ -4,14 +4,19 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "start": "node server.js",
+    "dev": "node-dev server.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "axios": "^0.21.1",
-    "better-sqlite3": "^7.1.4"
+    "better-sqlite3": "^7.1.4",
+    "form-data": "^4.0.0",
+    "formidable": "^1.2.2",
+    "jszip": "^3.6.0",
+    "node-dev": "^6.7.0",
+    "uuid": "^8.3.2"
   }
 }

@@ -1,22 +1,19 @@
 'use strict';
 
-let queries = require('./remote_db');
-const {runSPARQL} = require('./remote_graph');
+let db = require('./db_explaination');
+let index = require('./db_index');
+let {graph_label: graph} = require('./graph_label');
+const {runSPARQL} = require('./graph_label');
 
-const {tic, toc}  = require('./Util');
-const util = require('util');
+const {tic, toc}  = require('./util');
 
-let methods = {
+let rpcmethods = {
     templ:{
         description: ``,
         params: [],
         returns: [''],
         exec() {
             return new Promise((resolve) => {
-                if (typeof (userObj) !== 'object') {
-                    throw new Error('was expecting an object!');
-                }
-                
             });
         }
     },
@@ -26,194 +23,111 @@ let methods = {
         returns: [''],
         exec() {
             return new Promise((resolve) => {
-                var sql = `select * from dataset;`;
-                resolve(queries.all('index', sql) || {});
+                var datasets = index.getAllDatasets();
+                resolve(datasets || {});
             });
         }
     },
     getAllExplainationsByDatasetID:{
         description: ``,
-        params: [],
+        params: ['datasetID: The id of the dataset'],
         returns: [''],
         exec(body) {
             return new Promise((resolve) => {
-                var sql = `select * from explaination where explaination.datasetid = ${body.datasetID};`;
-                resolve(queries.all('index', sql) || {});
+                var explainations = index.getExplainationsByDatasetID(body.datasetID);
+                resolve(explainations || {});
             });
         }
     },
     getAllTestEntities:{
         description: ``,
         params: [],
-        returns: [''],
+        returns: ['datasetID:the ID of the dataset', 'explainationID: the ID of the explaination file'],
         exec(body) {
             return new Promise((resolve) => {
-                tic();
-                var sql = `
-                    select 
-                        Namespace
-                    from dataset 
-                    where dataset.id = ${body.dbID};
-                    `;
-                var namespace = queries.all('index', sql)[0]["Namespace"];
-
-                var sql = `
-                    select 
-                        distinct Name, entity.Id 
-                    from task 
-                    inner join entity on 
-                        entity.id = task.EntityID;
-                    `;
-                var entities = queries.all(body.dbID, sql)
-
-                toc("Entities");
-                tic();
-                
-                var query = `query=
-                    SELECT ?subject ?object
-                    WHERE {
-                        ?subject <http://www.w3.org/2000/01/rdf-schema#label> ?object 
-                    }
-                    `
-
-                runSPARQL(body.dbID, query).then((data) => {
-                    toc("Labels");
-                    tic();
-                    var label_map = {};
-                    for(var i = 0; i < data["results"]["bindings"].length; i++){
-                        var triple = data["results"]["bindings"][i];
-                        label_map[triple["subject"]["value"].replace(namespace, '')] = triple["object"]["value"]
-                    }
-                    for(var i = 0; i < entities.length; i++){
-                        entities[i].Label = label_map[entities[i]["NAME"]];
-                    }
-                    toc("LabelMap");
-                    resolve(entities || {});
+                var namespace = index.getNamespaceFromDatasetID(body.datasetID)
+                var entities = db.getAllTestEntities(body.explainationID);
+                graph.addLabelsToEntities(body.datasetID, namespace, entities, (labeled_entities) => {
+                    resolve(labeled_entities || {});
                 });
-                
-                
             });
         }
     },
     getTasksByCurie:{
         description: ``,
-        params: [],
-        returns: [''],
+        params: ['explainationID: the ID of the explaination file', 'curie: the curie of the entity'],
+        returns: ['all tasks containing entities with the given curie (curie, rel, ?) or (?, rel, curie)'],
         exec(body) {
             return new Promise((resolve) => {
-                var sql = `
-                    select 
-                        task.ID as TaskID, entity.Id as EntityID, entity.Name as EntityName, relation.Id as RelationID, relation.Name as RelationName, IsHead
-                    from task 
-                    inner join entity on 
-                        entity.id = task.EntityID
-                    inner join relation on 
-                        relation.id = task.RelationID
-                    where entity.Name = '${body.curie}';
-                    `
-                resolve(queries.all(body.dbID, sql) || {});
+                var tasks = db.getTasksByCurie(body.explainationID, body.curie);
+                resolve(tasks || {});
+            });
+        }
+    },
+    getTasksByEntityID:{
+        description: ``,
+        params: ['explainationID: the ID of the explaination file', 'entityID: the internal id of the entity'],
+        returns: ['all tasks containing entities with the given id (id, rel, ?) or (?, rel, id)'],
+        exec(body) {
+            return new Promise((resolve) => {
+                var tasks = db.getTasksByEntityID(body.explainationID, body.entityID);
+                resolve(tasks || {});
+            });
+        }
+    },
+    getTaskByID:{
+        description: ``,
+        params: ['explainationID: the ID of the explaination file', 'entityID: the internal id of the task'], 
+        returns: ['An array of objects with signature (TaskID, EntityID, EntityName, RelationID, RelationName, IsHead)'],
+        exec(body) {
+            return new Promise((resolve) => {
+                var task = db.getTaskByID(body.explainationID, body.entityID);
+                resolve(task || {});
             });
         }
     },
     getPredictionsByTaskID:{
         description: ``,
-        params: [],
+        params: ['datasetID', 'explainationID', 'taskID'],
         returns: [''],
         exec(body) {
             return new Promise((resolve) => {
-                tic();
-                var sql = `
-                    select 
-                        entity.Id as EntityID, entity.Name as EntityName, prediction.confidence as Confidence
-                    from prediction 
-                    inner join entity on 
-                        entity.id = prediction.EntityID
-                    where prediction.TaskID = ${body.taskID};
-                    `;
-                var predictions = queries.all(body.dbID, sql);
-
-                toc("Predictions");
-                tic();
-                var sql = `
-                    select 
-                        Namespace
-                    from dataset 
-                    where dataset.id = ${body.dbID};
-                    `;
-                var namespace = queries.all('index', sql)[0]["Namespace"];
-                console.log(namespace);
-
-                var query = `query=
-                    prefix ns: <${namespace}>
-                    SELECT ?subject ?object
-                    WHERE {
-                        ?subject <http://www.w3.org/2000/01/rdf-schema#label> ?object
-                        VALUES ?subject {
-                            ${predictions.map((elem)=>{return "ns:" + elem["EntityName"].replace(/\//g,"\\/")}).join(" ")}
-                        }
-                    }
-                    `
-                
-                runSPARQL(body.dbID, query).then((data) => {
-                    toc("Labels");
-                    tic();
-                    var label_map = {};
-                    for(var i = 0; i < data["results"]["bindings"].length; i++){
-                        var triple = data["results"]["bindings"][i];
-                        label_map[triple["subject"]["value"].replace(namespace, '')] = triple["object"]["value"]
-                    }
-                    for(var i = 0; i < predictions.length; i++){
-                        predictions[i].Label = label_map[predictions[i]["EntityName"]];
-                    }
-                    toc("LabelMap");
-                    resolve(predictions || {});
-                });
+                var predictions = db.getPredictionsByTaskID(body.explainationID, body.taskID);
+                var namespace = index.getNamespaceFromDatasetID(body.datasetID);
+                graph.addLabelsToPredictions(body.datasetID, namespace, predictions, (labeled_predictions) => {
+                    resolve(labeled_predictions || {});
+                })
             });
         }
     },
     getInfoByCurie:{
         description: ``,
-        params: [],
+        params: ['datasetID', 'curie'],
         returns: [''],
         exec(body) {
             return new Promise((resolve) => {
-                var sql = `
-                        select 
-                            Namespace
-                        from dataset 
-                        where dataset.id = ${body.dbID};
-                        `;
-                var namespace = queries.all('index', sql)[0]["Namespace"];
-
-                var query = `query=
-                    SELECT ?predicate ?object
-                    WHERE {
-                        <${namespace}${body.curie}> ?predicate ?object 
-                    }
-                    `
-
-                runSPARQL(body.dbID, query).then((data) => {
-                    var res = {
-                        Label: null,
-                        Description: null,
-                        Synonyms: null
-                    }
-                    for(var i = 0; i < data["results"]["bindings"].length; i++){
-                        var edge = data["results"]["bindings"][i];
-                        if(edge["predicate"]["value"] === "http://www.w3.org/2000/01/rdf-schema#label"){
-                            res.Label = edge["object"]["value"];
-                        } else if(edge["predicate"]["value"] === "http://www.w3.org/2000/01/rdf-schema#comment"){
-                            res.Description = edge["object"]["value"];
-                        } else if(edge["predicate"]["value"] === "http://www.geneontology.org/formats/oboInOwl#hasExactSynonym"){
-                            res.Synonyms.push(edge["object"]["value"]);
-                        }
-                    }
+                var namespace = index.getNamespaceFromDatasetID(body.datasetID);
+                graph.getInfoByCurie(body.datasetID, namespace, body.curie, (res) => {
+                    resolve(res || {});
+                })
+            });
+        }
+    },
+    getInfoByEntityID:{
+        description: ``,
+        params: ['datasetID', 'explainationID', 'entityID'],
+        returns: [''],
+        exec(body) {
+            return new Promise((resolve) => {
+                var curie = db.getCurieByEntityID(body.explainationID, body.entityID);
+                var namespace = index.getNamespaceFromDatasetID(body.datasetID)
+                graph.getInfoByCurie(body.datasetID, namespace, curie, (res) => {
                     resolve(res || {});
                 });
             });
         }
     },
-    getExplainations:{
+    getExplainationsOld:{
         description: ``,
         params: [],
         returns: [''],
@@ -360,6 +274,97 @@ let methods = {
             });
         }
     },
+    getExplainations:{
+        description: ``,
+        params: ['datasetID', 'explainationID', 'taskID', 'entityID'],
+        returns: [''],
+        exec(body) {
+            //body.taskID, body.entityID
+            return new Promise((resolve) => {
+                tic();
+                var explainations = db.getExplainations(body.explainationID, body.taskID, body.entityID);
+                var [explainations, variables, entities] = getJson(explainations);
+                toc("Rule retrieval and reshape");
+                tic();
+                var namespace = index.getNamespaceFromDatasetID(body.datasetID)
+                graph.addLabelsToExplainations(body.datasetID, namespace, explainations, variables, entities, (labeled_explainations) => {
+                    toc("Added labels");
+                    resolve(labeled_explainations || {});
+                });
+            });
+        }
+    },
 };
 
-module.exports = methods;
+function getJson(explainations){
+    const variables = ["X", "Y", "A", "B", "C"];
+    var entities = new Set();
+    var groups = explainations.reduce((groups, item) => {
+        function splitAtom(atom){
+            var relation = atom.substring(0, atom.indexOf('('));
+            var head = atom.substring(atom.indexOf('(')+1, atom.indexOf(','));
+            var tail = atom.substring(atom.indexOf(',')+1, atom.indexOf(')'));
+            return [head, relation, tail];
+        }
+
+        var [headStr, bodyStr] = item.RuleDefinition.split(" <= ");
+        var [head, relation, tail] = splitAtom(headStr);
+        
+        
+        if(!(variables.includes(head))){
+            entities.add(head);
+        }
+        if(!(variables.includes(tail))){
+            entities.add(tail);
+        }
+        
+        var definition = {
+            relation: relation,
+            head: head,
+            tail: tail,
+            bodies: []
+        }
+        
+        bodyStr.split(", ").forEach((element)=> {
+            var [head, relation, tail] = splitAtom(element);
+            if(!(variables.includes(head))){
+                entities.add(head);
+            }
+            if(!(variables.includes(tail))){
+                entities.add(tail);
+            }
+            definition["bodies"].push({
+                relation: relation,
+                head: head,
+                tail: tail
+            })
+        });
+
+        return {
+            ...groups,
+            [item.ClusterID]: {
+            "ID": item.ClusterID,
+            "Rules": [...(groups[item.ClusterID]?.Rules || []), 
+                {
+                    "ID": item.RuleID,
+                    "Confidence": item.RuleConfidence,
+                    "Definition": definition
+                }
+            ]
+            }
+        }
+    }, {});
+    groups = Object.values(groups);
+    groups.sort((a,b) => {
+        if ( a.Rules[0].Confidence < b.Rules[0].Confidence ){
+            return 1;
+        }
+        if ( a.Rules[0].Confidence > b.Rules[0].Confidence ){
+            return -1;
+        }
+            return 0;
+    });
+    return [groups, variables, entities];
+}
+
+module.exports = rpcmethods;

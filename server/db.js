@@ -9,8 +9,23 @@ let queries = {
         return db;
     },
     all(db_id, sql){
+        console.log(sql);
         let db = this.connectToDB(db_id);
         var rows = db.prepare(sql).all();
+        db.close();
+        return rows
+    },
+    get(db_id, sql){
+        console.log(sql);
+        let db = this.connectToDB(db_id);
+        var rows = db.prepare(sql).get();
+        db.close();
+        return rows
+    },
+    run(db_id, sql){
+        console.log(sql);
+        let db = this.connectToDB(db_id);
+        var rows = db.prepare(sql).run();
         db.close();
         return rows
     }

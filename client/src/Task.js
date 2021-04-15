@@ -19,18 +19,21 @@ export class Task_ extends React.Component{
     constructor(){
         super();
         this.state = {
-            taskID: null,
-            predictions: null
+            entityInfo: null,
+            task: null,
+            predictions: null,
         }
     }
 
     componentDidMount(){
         var params = new URLSearchParams(this.props.location.search);
-        var taskID = params.get("id");
-        this.setState({taskID: taskID});
-        API.getPredictionsByTaskID(cookies.get('datasetID'), taskID, (predictions) => {
+        var id = params.get("id");
+        API.getTaskByID(cookies.get('datasetID'), id, (task) => {
+            API.getInfoByEntityID(cookies.get('datasetID'), cookies.get('explainationID'), task[0]["EntityID"], (info) => {console.log(info);this.setState({entityInfo: info})});
+            this.setState({task: task[0]});
+        });
+        API.getPredictionsByTaskID(cookies.get('datasetID'), cookies.get('explainationID'), id, (predictions) => {
             this.setState({predictions: this.sortPredictions(predictions)});
-            console.log(this.sortPredictions(predictions));
         });
     }
 
@@ -51,13 +54,26 @@ export class Task_ extends React.Component{
     }
 
     onPredictionSelection(entityID){
-        this.props.history.push(`/explaination?taskID=${this.state.taskID}&entityID=${entityID}`);
+        this.props.history.push(`/explaination?taskID=${this.state.task.TaskID}&entityID=${entityID}`);
     }
 
     render(){
         return (
 
             <div>
+                <Container >
+                    <Row>
+                    <Col>
+                        <h2>{(this.state.task && this.state.entityInfo) ? this.state.task.IsHead === 1 ? this.state.entityInfo.Label : "?" : ""}</h2>
+                    </Col>
+                    <Col>
+                        <h2>{(this.state.task && this.state.entityInfo) ? this.state.task.RelationName : ""}</h2>
+                    </Col>
+                    <Col>
+                        <h2>{(this.state.task && this.state.entityInfo) ? this.state.task.IsHead === 0 ? this.state.entityInfo.Label : "?" : ""}</h2>
+                    </Col>
+                    </Row>
+                </Container>
                 <Container fluid>
                     <Row>
                     <Col/>
@@ -69,7 +85,7 @@ export class Task_ extends React.Component{
                                 <Container>
                                 <Row>
                                     <Col>
-                                        {row["Label"]}
+                                        {row["Label"] ? row["Label"] : row["EntityName"]}
                                     </Col>
                                     <Col>
                                         {row["Confidence"]}

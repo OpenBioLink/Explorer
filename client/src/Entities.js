@@ -102,7 +102,9 @@ export function Entities(){
   }
 
   function query_entities(){
-    API.getAllTestEntities(cookies.get('datasetID'), (entities) => {
+    console.log(cookies.get('datasetID'));
+    console.log(cookies.get('explainationID'));
+    API.getAllTestEntities(cookies.get('datasetID'), cookies.get('explainationID'), (entities) => {
       setTotal(Math.floor(entities.length / pageSize));
       setEntityState(sortAsc(entities), true);
     });
@@ -170,7 +172,7 @@ export function Entities(){
   }
 
   function onEntitySelection(row){
-    history.push("/entity?id=" + row["NAME"]);
+    history.push("/entity?id=" + row["ID"]);
   }
 
   function editSearchTerm(term){
