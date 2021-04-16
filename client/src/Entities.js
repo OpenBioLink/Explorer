@@ -16,10 +16,9 @@ export function Entities(){
   const [entities, setEntities] = useHistoryState("entities", null);
   const [asc, setAsc] = useHistoryState("asc", null);
   const [pageSize, setPageSize] = useState(50);
-  const [active, setActive] = useState(0);
-  const [total, setTotal] = useState(null);
+  const [active, setActive] = useHistoryState("active", 0);
   const [skip, setSkip] = useState(2);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useHistoryState("searchTerm", "");
 
   useEffect(() => {
     if(entities == null){
@@ -101,10 +100,7 @@ export function Entities(){
   }
 
   function query_entities(){
-    console.log(cookies.get('datasetID'));
-    console.log(cookies.get('explainationID'));
     API.getAllTestEntities(cookies.get('datasetID'), cookies.get('explainationID'), (entities) => {
-      setTotal(Math.floor(entities.length / pageSize));
       setEntityState(sortAsc(entities), true);
     });
   }
@@ -123,12 +119,22 @@ export function Entities(){
             <FormControl type="text" placeholder="Quicksearch" value={searchTerm} onChange = {(e) => editSearchTerm(e.target.value)} className="mr-sm-2" />
           </Form>
         </Navbar>
-        <Pagination className="Entities-pagination justify-content-center my-2">{getItems()}</Pagination>
-        {entities ? renderResult(entities) : ""}
-        <Pagination className="Entities-pagination justify-content-center my-2">{getItems()}</Pagination>
+        {entities ? renderPagination(entities.filter(row => (searchTerm === "" 
+                || row["NAME"].toLowerCase().includes(searchTerm.toLowerCase()) 
+                || (row["Label"] != null && row["Label"].toLowerCase().includes(searchTerm.toLowerCase()))))) : ""}
       </pre>
     </div>
   );
+
+  function renderPagination(entities){
+    return(
+      <>
+        <Pagination className="Entities-pagination justify-content-center my-2">{getItems(Math.floor(entities.length / pageSize))}</Pagination>
+        {entities ? renderResult(entities) : ""}
+        <Pagination className="Entities-pagination justify-content-center my-2">{getItems(Math.floor(entities.length / pageSize))}</Pagination>
+      </>
+    );
+  }
 
   function renderResult(values) {
     //.filter(row => (this.state.searchTerm === "" || row[0].toLowerCase().includes(this.state.searchTerm.toLowerCase()) || row[2].toLowerCase().includes(this.state.searchTerm.toLowerCase())))
@@ -140,9 +146,6 @@ export function Entities(){
           <Col>
             <ListGroup>
               {values
-              .filter(row => (searchTerm === "" 
-                || row["NAME"].toLowerCase().includes(searchTerm.toLowerCase()) 
-                || (row["Label"] != null && row["Label"].toLowerCase().includes(searchTerm.toLowerCase()))))
               .slice(page2idx(active), page2idx(active + 1)).map(row =>
                 <ListGroup.Item action as="button" eventKey={row["ID"]} onClick={() => onEntitySelection(row)}>
                     <Container>
@@ -171,6 +174,7 @@ export function Entities(){
 
   function editSearchTerm(term){
     console.log(term);
+    setActive(0);
     setSearchTerm(term);
   }
 
@@ -189,17 +193,17 @@ export function Entities(){
     }
   }
 
-  function onNextPage(){
+  function onNextPage(total){
     if(active < total){
       setActive(active + 1);
     }
   }
 
-  function onLastPage(){
+  function onLastPage(total){
     setActive(total);
   }
 
-  function getItems(){
+  function getItems(total){
     let items = [];
     items.push(
       <Pagination.First onClick={() => onFirstPage()}/>
@@ -243,10 +247,10 @@ export function Entities(){
       )
     }
     items.push(
-      <Pagination.Next onClick={() => onNextPage()}/>
+      <Pagination.Next onClick={() => onNextPage(total)}/>
       );
     items.push(
-      <Pagination.Last onClick={() => onLastPage()}/>
+      <Pagination.Last onClick={() => onLastPage(total)}/>
     );
     return items;
   }
