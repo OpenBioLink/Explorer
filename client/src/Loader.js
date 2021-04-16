@@ -81,22 +81,44 @@ export class Loader_ extends React.Component{
     }
 
     onFormPageDone(){
+      console.log(this.state.selected_dataset_id);
+      console.log(this.state.private_dataset);
       // none
       if(this.state.selected_dataset_id === -1){
         this.props.cookies.remove("datasetID");
+        this.props.cookies.remove("datasetLabel");
       // private
       } else if(this.state.selected_dataset_id === -2) {
         this.props.cookies.set("datasetID", this.state.private_dataset);
+        this.props.cookies.set("datasetLabel", this.state.private_dataset);
       } else {
+        const dataset = this.state.datasets.find(x => x["ID"] === this.state.selected_dataset_id);
+        var datasetLabel = dataset ? dataset["Name"] : "";
         this.props.cookies.set("datasetID", this.state.selected_dataset_id);
+        this.props.cookies.set("datasetLabel", datasetLabel);
       }
-      this.props.cookies.set("explainationID", this.state.selected_explaination_id);
+
+      // none
+      if(this.state.selected_explaination_id === -1){
+        this.props.cookies.remove("explainationID");
+        this.props.cookies.remove("explainationLabel");
+      // private
+      } else if(this.state.selected_explaination_id === -2) {
+        this.props.cookies.set("explainationID", this.state.private_explaination);
+        this.props.cookies.set("explainationLabel", this.state.private_explaination);
+      } else {
+        const explaination = this.state.explainations.find(x => x["ID"] === this.state.selected_explaination_id);
+        var explainationLabel = explaination ? explaination["Label"] !== "" ? explaination["Label"] : from_timestamp(explaination["Date"]) : "";
+        this.props.cookies.set("explainationID", this.state.selected_explaination_id);
+        this.props.cookies.set("explainationLabel", explainationLabel);
+      }
       this.props.history.push("/entities");
     }
 
 // Modals
 
     onDatasetSelection(dataset_id){
+      console.log(dataset_id);
       this.setState({selected_dataset_id: dataset_id});
     }
 

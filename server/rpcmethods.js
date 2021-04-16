@@ -45,10 +45,12 @@ let rpcmethods = {
         returns: ['datasetID:the ID of the dataset', 'explainationID: the ID of the explaination file'],
         exec(body) {
             return new Promise((resolve) => {
+                tic();
                 var namespace = index.getNamespaceFromDatasetID(body.datasetID)
                 var entities = db.getAllTestEntities(body.explainationID);
                 graph.addLabelsToEntities(body.datasetID, namespace, entities, (labeled_entities) => {
                     resolve(labeled_entities || {});
+                    toc("getAllTestEntities");
                 });
             });
         }

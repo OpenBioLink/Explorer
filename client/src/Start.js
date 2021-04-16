@@ -3,7 +3,6 @@ import PropTypes from "prop-types";
 import { withRouter } from "react-router";
 import './App.css';
 import {Button} from 'react-bootstrap';
-const util = require('./Util');
 
 class Start_ extends React.Component{
 
@@ -26,7 +25,7 @@ class Start_ extends React.Component{
         return (
 
             <div>
-                Information...
+                Under construction...
             </div>
         );
     }

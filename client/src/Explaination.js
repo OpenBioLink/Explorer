@@ -9,7 +9,6 @@ import { RiArrowDropDownLine, RiArrowDropRightLine } from "react-icons/ri";
 import Cookies from 'universal-cookie';
  
 const cookies = new Cookies();
-const util = require('./Util');
 const API = require('./API');
 
 export class Explaination_ extends React.Component{
@@ -66,7 +65,7 @@ export class Explaination_ extends React.Component{
     render(){
         return (
             <div>
-            <Container>
+            <Container className="my-2">
                 <Row>
                     <Col>
                         <h2>{this.state.X ? this.state.X : ""}</h2>

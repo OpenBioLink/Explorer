@@ -6,7 +6,6 @@ import {Button, Pagination, Modal, Badge, Container, Row, Col} from 'react-boots
 import Cookies from 'universal-cookie';
  
 const cookies = new Cookies();
-const util = require('./Util');
 const API = require('./API');
 
 export class Entity_ extends React.Component{
@@ -61,7 +60,7 @@ export class Entity_ extends React.Component{
                 <Modal.Dialog className="w-none w-50 mw-100">
                 <Modal.Header className="justify-content-center">
                     <h2>
-                        {this.state.info?.Curie}: {this.state.info?.Label ? this.state.info?.Label : ""} <Badge variant="secondary">Movie</Badge>
+                        {this.state.info?.Curie}: {this.state.info?.Label ? this.state.info?.Label : ""}
                     </h2>
                 </Modal.Header>
                 <Modal.Body>

@@ -7,9 +7,8 @@ import {ImSortAlphaDesc, ImSortAlphaAsc} from "react-icons/im";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { useHistoryState } from "./HistoryState";
 import Cookies from 'universal-cookie';
- 
+import {tic, toc} from './util'
 const cookies = new Cookies();
-const util = require('./Util');
 const API = require('./API');
 
 export function Entities(){
@@ -35,14 +34,14 @@ export function Entities(){
   }
 
   function sort(){
-      util.tic();
+      tic();
       var entities_ = [...entities];
       if(asc === true){
         setEntityState(sortDesc(entities_), false);
       } else {
         setEntityState(sortAsc(entities_), true);
       }
-      util.toc("sort");
+      toc("sort");
     }
 
   function sortAsc(entities){
@@ -121,17 +120,12 @@ export function Entities(){
                 <ImSortAlphaDesc/>
               }
             </Button>
-            <DropdownButton id="dropdown-basic-button" title="Category" className="mr-sm-2">
-              <Dropdown.Item href="#/action-1">All</Dropdown.Item>
-              <Dropdown.Item href="#/action-2">Another action</Dropdown.Item>
-              <Dropdown.Item href="#/action-3">Something else</Dropdown.Item>
-            </DropdownButton>
             <FormControl type="text" placeholder="Quicksearch" value={searchTerm} onChange = {(e) => editSearchTerm(e.target.value)} className="mr-sm-2" />
           </Form>
         </Navbar>
-        <Pagination className="Entities-pagination justify-content-center">{getItems()}</Pagination>
+        <Pagination className="Entities-pagination justify-content-center my-2">{getItems()}</Pagination>
         {entities ? renderResult(entities) : ""}
-        <Pagination className="Entities-pagination justify-content-center">{getItems()}</Pagination>
+        <Pagination className="Entities-pagination justify-content-center my-2">{getItems()}</Pagination>
       </pre>
     </div>
   );
@@ -150,13 +144,13 @@ export function Entities(){
                 || row["NAME"].toLowerCase().includes(searchTerm.toLowerCase()) 
                 || (row["Label"] != null && row["Label"].toLowerCase().includes(searchTerm.toLowerCase()))))
               .slice(page2idx(active), page2idx(active + 1)).map(row =>
-                <ListGroup.Item action as="button" variant="dark"  eventKey={row["ID"]} onClick={() => onEntitySelection(row)}>
+                <ListGroup.Item action as="button" eventKey={row["ID"]} onClick={() => onEntitySelection(row)}>
                     <Container>
                       <Row>
-                        <Col>
+                        <Col className="text-wrap">
                           {row["NAME"]}
                         </Col>
-                        <Col>
+                        <Col className="text-wrap">
                           {row["Label"]}
                         </Col>
                       </Row>

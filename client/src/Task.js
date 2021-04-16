@@ -28,7 +28,8 @@ export class Task_ extends React.Component{
     componentDidMount(){
         var params = new URLSearchParams(this.props.location.search);
         var id = params.get("id");
-        API.getTaskByID(cookies.get('datasetID'), id, (task) => {
+        API.getTaskByID(cookies.get('explainationID'), id, (task) => {
+            console.log(task);
             API.getInfoByEntityID(cookies.get('datasetID'), cookies.get('explainationID'), task[0]["EntityID"], (info) => {console.log(info);this.setState({entityInfo: info})});
             this.setState({task: task[0]});
         });
@@ -61,7 +62,7 @@ export class Task_ extends React.Component{
         return (
 
             <div>
-                <Container >
+                <Container className="my-2">
                     <Row>
                     <Col>
                         <h2>{(this.state.task && this.state.entityInfo) ? this.state.task.IsHead === 1 ? this.state.entityInfo.Label : "?" : ""}</h2>
