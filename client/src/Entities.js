@@ -48,14 +48,17 @@ export function Entities(){
     return entities.sort((a,b) => {
       var nameA = a["Label"];
       var nameB = b["Label"];
+      
+      var isNameA = !((nameA == null) || (nameA === ""))
+      var isNameB = !((nameB == null) || (nameB === ""))
 
-      if(nameA == null && nameB != null){
+      if(!isNameA && isNameB){
         return 1;
       }
-      else if(nameA != null && nameB == null){
+      else if(isNameA && !isNameB){
         return -1;
       }
-      else if(nameA != null && nameB != null){
+      else if(isNameA && isNameB){
         nameA = nameA.toUpperCase();
         nameB = nameB.toUpperCase();
         if (nameA < nameB) {
@@ -77,13 +80,16 @@ export function Entities(){
       var nameA = a["Label"]; // Groß-/Kleinschreibung ignorieren
       var nameB = b["Label"]; // Groß-/Kleinschreibung ignorieren#
 
-      if(nameA == null && nameB != null){
+      var isNameA = !((nameA == null) || (nameA === ""))
+      var isNameB = !((nameB == null) || (nameB === ""))
+
+      if(!isNameA && isNameB){
         return -1;
       }
-      else if(nameA != null && nameB == null){
+      else if(isNameA && !isNameB){
         return 1;
       }
-      else if(nameA != null && nameB != null){
+      else if(isNameA && isNameB){
         nameA = nameA.toUpperCase();
         nameB = nameB.toUpperCase();
         if (nameA < nameB) {
@@ -101,7 +107,6 @@ export function Entities(){
 
   function query_entities(){
     API.getAllTestEntities(cookies.get('datasetID'), cookies.get('explainationID'), (entities) => {
-      console.log(entities);
       setEntityState(sortAsc(entities), true);
     });
   }
