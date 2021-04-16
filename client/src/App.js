@@ -72,20 +72,21 @@ class Header_ extends React.Component{
   }
 
   componentDidMount(){
-    var datasetid_ = cookies.get("datasetID");
-    var explainationid_ = cookies.get("explainationID");
+    var datasetid_ = cookies.get("datasetLabel");
+    var explainationid_ = cookies.get("explainationLabel");
     
     if(datasetid_ !== undefined){
-      this.setState({dataset: cookies.get("datasetLabel")});
+      this.setState({dataset: datasetid_});
     }
     if(explainationid_ !== undefined){
-      this.setState({explaination: cookies.get("explainationLabel")});
+      this.setState({explaination: explainationid_});
     }
-    cookies.addChangeListener((name, value, options) => {
-      if(name === "datasetID"){
-        this.setState({dataset: cookies.get("datasetLabel")});
-      } else if(name === "explainationID"){
-        this.setState({explaination: cookies.get("explainationLabel")});
+    cookies.addChangeListener((element) => {
+      console.log(element.name);
+      if(element.name === "datasetLabel"){
+        this.setState({dataset: element.value});
+      } else if(element.name === "explainationLabel"){
+        this.setState({explaination: element.value});
       }
     });
   }

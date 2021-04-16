@@ -101,6 +101,7 @@ export function Entities(){
 
   function query_entities(){
     API.getAllTestEntities(cookies.get('datasetID'), cookies.get('explainationID'), (entities) => {
+      console.log(entities);
       setEntityState(sortAsc(entities), true);
     });
   }

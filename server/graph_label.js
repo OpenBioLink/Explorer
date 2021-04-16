@@ -169,7 +169,7 @@ let graph_label = {
             var res = {
                 Label: null,
                 Description: null,
-                Synonyms: null,
+                Synonyms: [],
                 Curie: curie
             }
             for(var i = 0; i < data["results"]["bindings"].length; i++){
