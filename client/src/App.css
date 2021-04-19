@@ -60,11 +60,6 @@
   width: 75%;
 }
 
-.Dataset-modal{
-  margin: auto;
-  max-width: 75% !important;
-}
-
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg);

@@ -8,7 +8,7 @@ let db_index = {
         select 
             Namespace
         from dataset 
-        where dataset.id = ${datasetID};
+        where dataset.id = '${datasetID}';
         `;
         var dataset = queries.get('index', sql);
         if(dataset){

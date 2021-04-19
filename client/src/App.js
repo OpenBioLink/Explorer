@@ -8,6 +8,8 @@ import {Entities} from './Entities'
 import {Start} from './Start'
 import {Task} from './Task'
 import {Explaination} from './Explaination'
+import { Entity } from './Entity';
+import { Feedback } from './Feedback';
 import {
   BrowserRouter as Router,
   Switch,
@@ -15,7 +17,6 @@ import {
   Redirect
 } from "react-router-dom";
 import {Button, Navbar, Nav, Form, FormControl} from 'react-bootstrap';
-import { Entity } from './Entity';
 import Cookies from 'universal-cookie';
  
 const cookies = new Cookies()
@@ -44,9 +45,12 @@ class App extends React.Component{
               <LoaderRoute path='/explaination'>
                 <Explaination/>
               </LoaderRoute>
+              <Route path='/feedback'>
+                <Feedback/>
+              </Route> 
               <LoaderRoute path='/'>
                 <Start/>
-              </LoaderRoute>           
+              </LoaderRoute>
             </Switch>
           </Router>
         </ProvideLoaderContext>
@@ -99,17 +103,20 @@ class Header_ extends React.Component{
     return(
       <header className="App-header">
         <Navbar bg="dark" variant="dark">
-            <Navbar.Brand href="/entities">Explorer</Navbar.Brand>
+            <Navbar.Brand href="/entities">
+              Explorer (alpha)
+            </Navbar.Brand>
             <Nav className="mr-auto">
               <Nav.Link href="/overview">Overview</Nav.Link>
               <Nav.Link href="/entities">Entities</Nav.Link>
+              <Nav.Link href="/feedback">Feedback</Nav.Link>
             </Nav>
             <Navbar.Collapse className="justify-content-end">
               <Navbar.Text className="mr-2">
-                Dataset: <a href="#login">{this.state.dataset}</a>
+                Dataset: {this.state.dataset}
               </Navbar.Text>
               <Navbar.Text className="mr-2">
-                Explaination: <a href="#login">{this.state.explaination}</a>
+                Explaination: {this.state.explaination}
               </Navbar.Text>
               <Button size="sm" variant="outline-success" onClick={() => this.onLoadOther()}>Load other</Button>
             </Navbar.Collapse>

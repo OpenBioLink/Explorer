@@ -27,7 +27,7 @@ export class Loader_ extends React.Component{
         if(pk){
           this.setState({selected_dataset_id: res.find(x => x["ID"] === pk)["ID"]});
         } else {
-          this.setState({selected_dataset_id: res[0]["ID"]});
+          this.setState({selected_dataset_id: res.length > 0 ? res[0]["ID"] : null});
         }
       });
     }
@@ -46,7 +46,7 @@ export class Loader_ extends React.Component{
             if(pk){
               this.setState({selected_explaination_id: res.find(x => x["ID"] === pk)["ID"]});
             } else {
-              this.setState({selected_explaination_id: res[0]["ID"]});
+              this.setState({selected_explaination_id:  res.length > 0 ? res[0]["ID"] : null});
             }
           } else {
             this.setState({selected_explaination_id: null});
@@ -65,62 +65,95 @@ export class Loader_ extends React.Component{
         selected_dataset_id: null,
         private_dataset: null,
         selected_explaination_id: null,
-        private_explaination: null
+        private_explaination: null,
+
+        searchTerm: "",
+
+        show_alert: false,
+        alert_message: ""
       };
     }
 
 // Page handling
 
     onFormPageNext(){
-      this.setState({formPage: 1});
-      this.query_explainations(this.state.selected_dataset_id);
+      if(this.state.selected_dataset_id === -2 && (this.state.private_dataset == null || this.state.private_dataset === "")) {
+        this.setState({
+          show_alert: true,
+          alert_message: "Please select a public dataset or enter a private key"
+        });
+      } else if((this.state.selected_dataset_id == null || this.state.selected_dataset_id === "")) {
+        this.setState({
+          show_alert: true,
+          alert_message: "Please select a public dataset or enter a private key"
+        });
+      } else {
+        this.setState({
+          formPage: 1,
+          searchTerm: "",
+        });
+        this.query_explainations(this.state.selected_dataset_id);
+      }
     }
 
     onFormPagePrevious(){
-      this.setState({formPage: 0});
+      this.setState({
+        formPage: 0,
+        searchTerm: ""
+      });
     }
 
     onFormPageDone(){
-      console.log(this.state.selected_dataset_id);
-      console.log(this.state.private_dataset);
-      // none
-      if(this.state.selected_dataset_id === -1){
-        this.props.cookies.remove("datasetID");
-        this.props.cookies.remove("datasetLabel");
-      // private
-      } else if(this.state.selected_dataset_id === -2) {
-        this.props.cookies.set("datasetID", this.state.private_dataset);
-        this.props.cookies.set("datasetLabel", this.state.private_dataset);
+      if(this.state.selected_explaination_id === -2 && (this.state.private_explaination == null || this.state.private_explaination === "")) {
+        this.setState({
+          show_alert: true,
+          alert_message: "Please select a public explaination or enter a private key"
+        });
+      } else if((this.state.selected_explaination_id == null || this.state.selected_explaination_id === "")) {
+        this.setState({
+          show_alert: true,
+          alert_message: "Please select a public explaination or enter a private key"
+        });
       } else {
-        const dataset = this.state.datasets.find(x => x["ID"] === this.state.selected_dataset_id);
-        var datasetLabel = dataset ? dataset["Name"] : "";
-        this.props.cookies.set("datasetID", this.state.selected_dataset_id);
-        this.props.cookies.set("datasetLabel", datasetLabel);
-      }
 
-      // none
-      if(this.state.selected_explaination_id === -1){
-        this.props.cookies.remove("explainationID");
-        this.props.cookies.remove("explainationLabel");
-      // private
-      } else if(this.state.selected_explaination_id === -2) {
-        this.props.cookies.set("explainationID", this.state.private_explaination);
-        this.props.cookies.set("explainationLabel", this.state.private_explaination);
-      } else {
-        const explaination = this.state.explainations.find(x => x["ID"] === this.state.selected_explaination_id);
-        var explainationLabel = explaination ? explaination["Label"] !== "" ? explaination["Label"] : from_timestamp(explaination["Date"]) : "";
-        this.props.cookies.set("explainationID", this.state.selected_explaination_id);
-        this.props.cookies.set("explainationLabel", explainationLabel);
+        // none
+        if(this.state.selected_dataset_id === -1){
+          this.props.cookies.remove("datasetID");
+          this.props.cookies.remove("datasetLabel");
+        // private
+        } else if(this.state.selected_dataset_id === -2) {
+          this.props.cookies.set("datasetID", this.state.private_dataset);
+          this.props.cookies.set("datasetLabel", this.state.private_dataset);
+        } else {
+          const dataset = this.state.datasets.find(x => x["ID"] === this.state.selected_dataset_id);
+          var datasetLabel = dataset ? dataset["Name"] : "";
+          this.props.cookies.set("datasetID", this.state.selected_dataset_id);
+          this.props.cookies.set("datasetLabel", datasetLabel);
+        }
+
+        // none
+        if(this.state.selected_explaination_id === -1){
+          this.props.cookies.remove("explainationID");
+          this.props.cookies.remove("explainationLabel");
+        // private
+        } else if(this.state.selected_explaination_id === -2) {
+          this.props.cookies.set("explainationID", this.state.private_explaination);
+          this.props.cookies.set("explainationLabel", this.state.private_explaination);
+        } else {
+          const explaination = this.state.explainations.find(x => x["ID"] === this.state.selected_explaination_id);
+          var explainationLabel = explaination ? explaination["Label"] !== "" ? explaination["Label"] : from_timestamp(explaination["Date"]) : "";
+          this.props.cookies.set("explainationID", this.state.selected_explaination_id);
+          this.props.cookies.set("explainationLabel", explainationLabel);
+        }
+        // removes session storage (entities, asc, active page...)
+        window.sessionStorage.clear();
+        this.props.history.push("/entities");
       }
-      // removes session storage (entities, asc, active page...)
-      window.sessionStorage.clear();
-      this.props.history.push("/entities");
     }
 
 // Modals
 
     onDatasetSelection(dataset_id){
-      console.log(dataset_id);
       this.setState({selected_dataset_id: dataset_id});
     }
 
@@ -158,7 +191,7 @@ export class Loader_ extends React.Component{
       if(this.state.formPage === 0){
         return (
           <div className="App-content">
-            <Modal.Dialog className="Dataset-modal">
+            <Modal.Dialog className="mx-auto mw-100 w-75 mb-2">
               <Modal.Header>
                 <Modal.Title>Select a dataset</Modal.Title>
                 <LocalDatasetModal onUpload={(pk, published) => {this.onUploadLocalDataset(pk, published)}}/>
@@ -170,17 +203,6 @@ export class Loader_ extends React.Component{
                 <Row>
                   <Col sm={4}>
                     <ListGroup className="pr-1 text-left" style={{overflowY: "auto", height: "400px"}}>
-                      <ListGroup.Item action eventKey={-1} onClick={() => this.onDatasetSelection(-1)}>
-                          <Container>
-                            <Row>
-                              <Col>
-                                No dataset
-                              </Col>
-                              <Col>
-                              </Col>
-                            </Row>
-                          </Container>
-                      </ListGroup.Item>
                       <ListGroup.Item action eventKey={-2} onClick={() => this.onDatasetSelection(-2)}>
                           <Container>
                             <Row>
@@ -192,7 +214,7 @@ export class Loader_ extends React.Component{
                             </Row>
                           </Container>
                       </ListGroup.Item>
-                      { this.state.datasets.map((row) =>
+                      { this.state.datasets.filter(x => (this.state.searchTerm === "" || x["Name"].toLowerCase().includes(this.state.searchTerm.toLowerCase()))).map((row) =>
                         <ListGroup.Item action eventKey={row["ID"]} onClick={() => this.onDatasetSelection(row["ID"])}>
                           <Container>
                             <Row>
@@ -259,10 +281,12 @@ export class Loader_ extends React.Component{
               </Tab.Container>
               </Modal.Body>
               <Modal.Footer>
-                <FormControl type="text" placeholder="Search" className=" mr-sm-2" />
+                <FormControl type="text" placeholder="Search" value={this.state.searchTerm} onChange={(e) => this.setState({searchTerm: e.target.value})} className=" mr-sm-2" />
               </Modal.Footer>
             </Modal.Dialog>
-
+            <Alert className="mx-auto mw-100 w-75 mb-2" variant="danger" show={this.state.show_alert} onClose={() => this.setState({show_alert: false})} dismissible>
+              {this.state.alert_message}
+            </Alert>
             <Button variant="primary" onClick={() => this.onFormPageNext()}>
               Next
             </Button>
@@ -273,7 +297,7 @@ export class Loader_ extends React.Component{
       else if(this.state.formPage === 1){
         return (
           <div className="App-content">
-            <Modal.Dialog scrollable={true} className="Dataset-modal">
+            <Modal.Dialog scrollable={true} className="mx-auto mw-100 w-75 mb-2">
               <Modal.Header>
                 <Modal.Title>Select an explaination file</Modal.Title>
                 <LocalExplainationModal datasetid={this.state.selected_dataset_id} onUpload={(pk, published) => {this.onUploadLocalExplaination(pk, published)}}/>
@@ -294,7 +318,7 @@ export class Loader_ extends React.Component{
                               </Row>
                             </Container>
                         </ListGroup.Item>
-                        { this.state.explainations.map((row) =>
+                        { this.state.explainations.filter(x => (this.state.searchTerm === "" || x["Label"].toLowerCase().includes(this.state.searchTerm.toLowerCase()))).map((row) =>
                           <ListGroup.Item action eventKey={row["ID"]} onClick={() => this.onExplainationSelection(row["ID"])}>
                             <Container>
                               <Row>
@@ -384,10 +408,12 @@ export class Loader_ extends React.Component{
                 </Tab.Container>
               </Modal.Body>
               <Modal.Footer>
-                <FormControl type="text" placeholder="Search" className=" mr-sm-2" />
+                <FormControl type="text" placeholder="Search" value={this.state.searchTerm} onChange={(e) => this.setState({searchTerm: e.target.value})} className=" mr-sm-2" />
               </Modal.Footer>
             </Modal.Dialog>
-
+            <Alert className="mx-auto mw-100 w-75 mb-2" variant="danger" show={this.state.show_alert} onClose={() => this.setState({show_alert: false})} dismissible>
+              {this.state.alert_message}
+            </Alert>
             
             <table className="w-100">
               <tbody>
@@ -416,37 +442,54 @@ export class Loader_ extends React.Component{
   function LocalDatasetModal(props) {
 
     const [show, setShow] = useState(false);
-    const [publish, setPublish] = useState(true);
+    const [publish, setPublish] = useState(false);
     const [published, setPublished] = useState(false);
     const [status, setStatus] = useState(null);
     const [now, setNow] = useState(0);
     const [pk, setPk] = useState("");
 
+    const [disable, setDisable] = useState(false);
+    const [showAlert, setShowAlert] = useState(false);
+    const [alertMessage, setAlertMessage] = useState("");
+
     function onSubmitLocalDataset(e){
       e.preventDefault();
-      console.log("AHOI");
-      API.callDatasetOperation(e.target, ["label_graph"], (status, progress, pk, published) => {
-          console.log(status + " " + progress);
-          if(status === "done"){
-            //this.closeLocalDatasetModal(true);
-            setStatus('done');
-            setPk(pk);
-            setNow(0);
-            setPublished(published);
-          } else if(status === "zip") {
-            setStatus('zip');
-            setNow(0);
-          } else {
-            if(progress < 100){
-              setStatus('upload');
-              setNow(progress);
-            } else {
-              setStatus('server');
+      console.log(e.target);
+      if(e.target.elements.label_graph.files.length === 0){
+        setAlertMessage("Please select a label graph file.")
+        setShowAlert(true);
+      } else if(e.target.elements.namespace.value == null || e.target.elements.namespace.value === "") {
+        setAlertMessage("Please set the namespace used for the nodes in the knowledge graph.")
+        setShowAlert(true);
+      } else if(e.target.elements.publish.value === 'on' && e.target.elements.dbName.value === ""){
+        setAlertMessage("Please enter a Name for the dataset.")
+        setShowAlert(true);
+      } else {
+        setDisable(true);
+        API.callDatasetOperation(e.target, ["label_graph"], (status, progress, pk, published) => {
+            console.log(status + " " + progress);
+            if(status === "done"){
+              //this.closeLocalDatasetModal(true);
+              setStatus('done');
+              setDisable(false);
+              setPk(pk);
               setNow(0);
+              setPublished(published);
+            } else if(status === "zip") {
+              setStatus('zip');
+              setNow(0);
+            } else {
+              if(progress < 100){
+                setStatus('upload');
+                setNow(progress);
+              } else {
+                setStatus('server');
+                setNow(0);
+              }
+              
             }
-            
-          }
-      });
+        }); 
+      }
     }
 
     useEffect(() => {   
@@ -454,7 +497,7 @@ export class Loader_ extends React.Component{
     });
 
     function onClose(){
-      setPublish(true);
+      setPublish(false);
       setPublished(false);
       setStatus(null);
       setNow(0);
@@ -470,17 +513,17 @@ export class Loader_ extends React.Component{
 
     return(
       <>
-        <Button variant="primary"  onClick={() => setShow(true)}>
+        <Button variant="primary" onClick={() => setShow(true)}>
           Load local dataset
         </Button>
-        <Modal show={show} onHide={onClose}>
-        <Modal.Header closeButton>
+        <Modal show={show} onHide={onClose} keyboard={!disable} backdrop={disable ? "static" : true}> 
+        <Modal.Header closeButton style={disable ? {pointerEvents: "none"} : {}}>
           <Modal.Title>Load local dataset</Modal.Title>
         </Modal.Header>
-        <Modal.Body>
+        <Modal.Body style={disable ? {pointerEvents: "none"} : {}}>
         <Form onSubmit={(e) => {onSubmitLocalDataset(e)}}>
           <FormControl name="method" value="create" className="d-none"/>
-          <Form.Group>
+          <Form.Group hidden>
             <Form.Label>Dataset</Form.Label>
             <Form.File 
               className="mb-2"
@@ -501,11 +544,12 @@ export class Loader_ extends React.Component{
               />
             </Form.Group>
             <Form.Group>
-              <Form.Label>Label graph</Form.Label>
+              <Form.Label>Label graph*</Form.Label>
               <InputGroup className="mb-2">
                 <Form.File
                   name="label_graph"
                   label="Label graph"
+                  accept=".ttl, .txt, .xml, .n3, .jsonld, .nt, .trig, .rdf, .nq"
                   custom
                   />
                 
@@ -536,15 +580,15 @@ export class Loader_ extends React.Component{
               <Form.Label>Scope</Form.Label>
               <InputGroup className="mb-3">
                 <select className="form-control" name="publish" onChange={(e) => setPublish(e.target.value === "on")}>
-                    <option value="on" selected>Public</option>
-                    <option value="off" >Private</option>
+                    <option value="off" selected>Private</option>
+                    <option value="on">Public</option>
                   </select>
               </InputGroup>
             </Form.Group>
             {publish ?
               <>
                 <Form.Group controlId="dbName">
-                  <Form.Label>Dataset name</Form.Label>
+                  <Form.Label>Dataset name*</Form.Label>
                   <Form.Control 
                     name="dbName"
                     placeholder="Dataset name" />
@@ -598,6 +642,9 @@ export class Loader_ extends React.Component{
                   </Alert>
                 : ""
               }
+              <Alert className="text-left mt-2 mb-0" variant="danger" show={showAlert} onClose={() => setShowAlert(false)} dismissible>
+                {alertMessage}
+              </Alert>
               <Button variant="secondary" className="mt-3 mr-2" onClick={onClose}>
                 Close
               </Button>
@@ -633,35 +680,46 @@ export class Loader_ extends React.Component{
   function LocalExplainationModal(props) {
 
     const [show, setShow] = useState(false);
-    const [publish, setPublish] = useState(true);
+    const [publish, setPublish] = useState(false);
     const [published, setPublished] = useState(false);
     const [status, setStatus] = useState(null);
     const [now, setNow] = useState(0);
     const [pk, setPk] = useState("");
 
+    const [disable, setDisable] = useState(false);
+    const [showAlert, setShowAlert] = useState(false);
+    const [alertMessage, setAlertMessage] = useState("");
+
     function onSubmitLocalExplaination(e){
       e.preventDefault();
-      API.callExplainationOperation(e.target, ["explainationfile"], (status, progress, pk, published) => {
-          console.log(status + " " + progress);
-          if(status === "done"){
-            setStatus('done');
-            setPk(pk);
-            setNow(0);
-            setPublished(published);
-          } else if(status === "zip") {
-            setStatus('zip');
-            setNow(0);
-          } else {
-            if(progress < 100){
-              setStatus('upload');
-              setNow(progress);
+      if(e.target.elements.explainationfile.files.length === 0){
+        setAlertMessage("Please select an explaination file");
+        setShowAlert(true);
+      } else {
+        setDisable(true);
+        API.callExplainationOperation(e.target, ["explainationfile"], (status, progress, pk, published) => {
+            console.log(status + " " + progress);
+            if(status === "done"){
+              setStatus('done');
+              setDisable(false);
+              setPk(pk);
+              setNow(0);
+              setPublished(published);
+            } else if(status === "zip") {
+              setStatus('zip');
+              setNow(0);
             } else {
-              setStatus('server');
-              setNow(0);;
+              if(progress < 100){
+                setStatus('upload');
+                setNow(progress);
+              } else {
+                setStatus('server');
+                setNow(0);;
+              }
+              
             }
-            
-          }
-      });
+        });
+      }
     }
 
     useEffect(() => {   
@@ -669,7 +727,7 @@ export class Loader_ extends React.Component{
     });
 
     function onClose(){
-      setPublish(true);
+      setPublish(false);
       setPublished(false);
       setStatus(null);
       setNow(0);
@@ -688,19 +746,20 @@ export class Loader_ extends React.Component{
         <Button variant="primary"  onClick={() => setShow(true)}>
           Load local explaination
         </Button>
-        <Modal show={show} onHide={onClose}>
-        <Modal.Header closeButton>
+        <Modal show={show} onHide={onClose} keyboard={!disable} backdrop={disable ? "static" : true}>
+        <Modal.Header closeButton style={disable ? {pointerEvents: "none"} : {}}>
           <Modal.Title>Load local explaination</Modal.Title>
         </Modal.Header>
-        <Modal.Body>
+        <Modal.Body style={disable ? {pointerEvents: "none"} : {}}>
         <Form onSubmit={(e) => {onSubmitLocalExplaination(e)}}>
           <FormControl name="method" value="create" className="d-none"/>
           <FormControl name="datasetid" value={props.datasetid} className="d-none"/>
           <Form.Group>
-            <Form.Label>Explaination</Form.Label>
+            <Form.Label>Explaination*</Form.Label>
             <Form.File 
               name="explainationfile"
               label="Explaination file"
+              accept=".db"
               custom
               />
             </Form.Group>
@@ -708,8 +767,8 @@ export class Loader_ extends React.Component{
               <Form.Label>Scope</Form.Label>
               <InputGroup className="mb-3">
                 <select className="form-control" name="publish" onChange={(e) => setPublish(e.target.value === "on")}>
-                    <option value="on" selected>Public</option>
-                    <option value="off" >Private</option>
+                    <option value="off" selected>Private</option>
+                    <option value="on">Public</option>
                   </select>
               </InputGroup>
             </Form.Group>
@@ -791,6 +850,9 @@ export class Loader_ extends React.Component{
                   </Alert>
                 : ""
               }
+              <Alert className="text-left mt-2 mb-0" variant="danger" show={showAlert} onClose={() => setShowAlert(false)} dismissible>
+                {alertMessage}
+              </Alert>
               <Button variant="secondary" className="mt-3 mr-2" onClick={onClose}>
                 Close
               </Button>
