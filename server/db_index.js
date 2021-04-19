@@ -18,7 +18,7 @@ let db_index = {
             select 
                 Namespace
             from Temp_Dataset 
-            where Temp_Dataset.id = ${datasetID};
+            where Temp_Dataset.id = '${datasetID}';
             `;
             dataset = queries.get('index', sql);
             if(dataset){

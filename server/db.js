@@ -6,7 +6,7 @@ const fs = require('fs');
 function createIndex(){
     let db = new Database(`./db/index.db`, { verbose: console.log });
 
-    sql = `
+    var sql = `
     CREATE TABLE "Dataset" (
         "ID"	TEXT NOT NULL,
         "Name"	TEXT NOT NULL,
@@ -15,7 +15,7 @@ function createIndex(){
         "Namespace"	TEXT NOT NULL,
         PRIMARY KEY("ID")
     );`
-    db.prepare(sql).run(sql);
+    db.prepare(sql).run();
     sql = `
     CREATE TABLE "Explaination" (
         "ID"	TEXT NOT NULL,
@@ -29,7 +29,7 @@ function createIndex(){
         PRIMARY KEY("ID"),
         FOREIGN KEY("DatasetID") REFERENCES "Dataset"("ID")
     );`
-    db.prepare(sql).run(sql);
+    db.prepare(sql).run();
     sql = `
     CREATE TABLE "Temp_Dataset" (
         "ID"	TEXT NOT NULL,
@@ -38,7 +38,7 @@ function createIndex(){
         PRIMARY KEY("ID")
     );
     `
-    db.prepare(sql).run(sql);
+    db.prepare(sql).run();
     sql = `
     CREATE TABLE "Temp_Explaination" (
         "ID"	TEXT NOT NULL,
@@ -46,7 +46,7 @@ function createIndex(){
         "Date"	INTEGER NOT NULL,
         PRIMARY KEY("ID")
     );`
-    db.prepare(sql).run(sql);
+    db.prepare(sql).run();
     return db;
 }
 
