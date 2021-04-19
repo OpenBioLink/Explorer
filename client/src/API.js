@@ -1,5 +1,6 @@
 
 import JSZip from 'jszip'
+import pako from 'pako'
 
 function callRPC(func, body, callback){
     var jsonReq = {
@@ -22,13 +23,10 @@ export function callDatasetOperation(form, zip_files, callback){
 
     zip_files.forEach(element => {
         callback('zip', null, null, null);
-        var zip = new JSZip();
-        console.log("StartZIP");
-        zip.file("zipped.dat", form[element].files[0]);
-        zip.generateAsync({
-            type: "blob",
-            compression: "DEFLATE"
-        }).then(function (blob) {
+        var reader = new FileReader();
+        reader.onload = function(evt) {
+            const compressed = pako.deflate(reader.result);
+            var blob = new Blob([ compressed ], { type: 'application/octet-stream'});
             console.log("sucess");
             data.set(element, blob);
             // cannot use fetch here, need to track upload progress
@@ -44,7 +42,8 @@ export function callDatasetOperation(form, zip_files, callback){
                 callback('done', null, jsonResponse["pk"], jsonResponse["published"]);
             });
             request.send(data);
-        });
+        }
+        reader.readAsArrayBuffer(form[element].files[0]);
     });
 }
 
@@ -54,13 +53,11 @@ export function callExplainationOperation(form, zip_files, callback){
 
     zip_files.forEach(element => {
         callback('zip', null, null, null);
-        var zip = new JSZip();
-        zip.file("zipped.dat", form[element].files[0]);
-        zip.generateAsync({
-            type: "blob",
-            compression: "DEFLATE"
-        }).then(function (blob) {
+        var reader = new FileReader();
+        reader.onload = function(evt) {
             console.log("sucess");
+            const compressed = pako.deflate(reader.result);
+            var blob = new Blob([ compressed ], { type: 'application/octet-stream'});
             data.set(element, blob);
             // cannot use fetch here, need to track upload progress
             let request = new XMLHttpRequest();
@@ -75,7 +72,8 @@ export function callExplainationOperation(form, zip_files, callback){
                 callback('done', null, jsonResponse["pk"], jsonResponse["published"]);
             });
             request.send(data);
-        });
+        };
+        reader.readAsArrayBuffer(form[element].files[0]);
     });
 
     

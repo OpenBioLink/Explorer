@@ -3,7 +3,7 @@
 let index = require('./db_index');
 const { v4: uuidv4 } = require('uuid');
 const fs = require('fs');
-var JSZip = require("jszip");
+var zlib = require("zlib");
 
 
 
@@ -66,25 +66,21 @@ let explainationmethods = {
                 console.log(fields)
                 console.log(files)
 
-                fs.readFile(files.explainationfile.path, function(err, data) {
-                    if (err) throw err;
-                    JSZip.loadAsync(data).then(function (zip) {
-                        zip.file("zipped.dat").async('nodebuffer').then((blob) => {
-                            fs.writeFile('./db/' + id + '.db', blob, function (err) {
-                                if (err) throw err;
-                                console.log('Saved!');
-                                if(publish){
-                                    index.publishNewExplaination(id, datasetid, label, date, comment, method, ruleconfig, clusteringconfig);
-                                } else {
-                                    index.addTempExplaination(id, datasetid, date);
-                                }
-                                resolve({
-                                    pk: id,
-                                    published: publish,
-                                    success: true
-                                })
-                            }); 
-                        })
+                const fileContents = fs.createReadStream(files.explainationfile.path);
+                const writeStream = fs.createWriteStream('./db/' + id + '.db');
+                const unzip = zlib.createUnzip();
+                fileContents.pipe(unzip).pipe(writeStream);
+
+                writeStream.on('finish', function(){
+                    if(publish){
+                        index.publishNewExplaination(id, datasetid, label, date, comment, method, ruleconfig, clusteringconfig);
+                    } else {
+                        index.addTempExplaination(id, datasetid, date);
+                    }
+                    resolve({
+                        pk: id,
+                        published: publish,
+                        success: true
                     });
                 });
             });
