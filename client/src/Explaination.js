@@ -76,13 +76,13 @@ export class Explaination_ extends React.Component{
             <Container className="my-2">
                 <Row>
                     <Col>
-                        <h2>{this.state.XLabel ? this.state.XLabel : ""}</h2>
+                        <h2><a href={'/entity?term=' + this.state.X}>{this.state.XLabel ? this.state.XLabel : ""}</a></h2>
                     </Col>
                     <Col>
                         <h2>{this.state.task ? this.state.task.RelationName : ""}</h2>
                     </Col>
                     <Col>
-                        <h2>{this.state.YLabel ? this.state.YLabel : ""}</h2>
+                        <h2><a href={'/entity?term=' + this.state.Y}>{this.state.YLabel ? this.state.YLabel : ""}</a></h2>
                     </Col>
                 </Row>
             </Container>

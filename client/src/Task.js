@@ -4,6 +4,7 @@ import { withRouter } from "react-router";
 import './App.css';
 import {Container, Row, Col, ListGroup} from 'react-bootstrap';
 import Cookies from 'universal-cookie';
+import {AiFillCheckCircle} from 'react-icons/ai'
  
 const cookies = new Cookies();
 const API = require('./API');
@@ -34,6 +35,7 @@ export class Task_ extends React.Component{
             this.setState({task: task[0]});
         });
         API.getPredictionsByTaskID(cookies.get('datasetID'), cookies.get('explainationID'), id, (predictions) => {
+            console.log(predictions);
             this.setState({predictions: this.sortPredictions(predictions)});
         });
     }
@@ -83,13 +85,16 @@ export class Task_ extends React.Component{
                         {this.state.predictions ? 
                         this.state.predictions.map(row =>
                             <ListGroup.Item action as="button" variant="dark" onClick={() => this.onPredictionSelection(row["EntityID"])}>
-                                <Container>
+                                <Container fluid>
                                 <Row>
-                                    <Col>
+                                    <Col sm={6}>
                                         {row["Label"] ? row["Label"] : row["EntityName"]}
                                     </Col>
-                                    <Col>
+                                    <Col sm={5}>
                                         {row["Confidence"]}
+                                    </Col>
+                                    <Col sm={1}>
+                                        {row["Hit"] == 1 ? <AiFillCheckCircle/> : ""}
                                     </Col>
                                 </Row>
                                 </Container>

@@ -55,7 +55,7 @@ let db_explainations = {
     getPredictionsByTaskID(explainationID, taskID){
         var sql = `
         select 
-            entity.Id as EntityID, entity.Name as EntityName, prediction.confidence as Confidence
+            entity.Id as EntityID, entity.Name as EntityName, prediction.confidence as Confidence, prediction.hit as Hit
         from prediction 
         inner join entity on 
             entity.id = prediction.EntityID
