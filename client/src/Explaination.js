@@ -27,6 +27,8 @@ export class Explaination_ extends React.Component{
             predictionInfo: null,
             X: null,
             Y: null,
+            XLabel: null,
+            YLabel: null,
             explaination: null
         }
     }
@@ -38,20 +40,26 @@ export class Explaination_ extends React.Component{
         API.getTaskByID(cookies.get('explainationID'), taskID, (task) => {
             API.getInfoByEntityID(cookies.get('datasetID'), cookies.get('explainationID'), task[0]["EntityID"], (entityInfo) => {
                 API.getInfoByEntityID(cookies.get('datasetID'), cookies.get('explainationID'), entityID, (predictionInfo) => {
-                    var X,Y = null;
+                    var X, Y, XLabel, YLabel = null;
                     if(task[0]["IsHead"] === 1){
-                        X = entityInfo.Label ? entityInfo.Label : entityInfo.Curie;
-                        Y = predictionInfo.Label ? predictionInfo.Label : predictionInfo.Curie; 
+                        X = entityInfo.Curie
+                        XLabel = entityInfo.Label ? entityInfo.Label : entityInfo.Curie;
+                        Y = predictionInfo.Curie
+                        YLabel = predictionInfo.Label ? predictionInfo.Label : predictionInfo.Curie; 
                     } else {
-                        X = predictionInfo.Label ? predictionInfo.Label : predictionInfo.Curie; 
-                        Y = entityInfo.Label ? entityInfo.Label : entityInfo.Curie;
+                        X = predictionInfo.Curie
+                        XLabel = predictionInfo.Label ? predictionInfo.Label : predictionInfo.Curie;
+                        Y = entityInfo.Curie
+                        YLabel = entityInfo.Label ? entityInfo.Label : entityInfo.Curie;
                     }
                     this.setState({
                         task: task[0],
                         entityInfo : entityInfo,
                         predictionInfo: predictionInfo,
                         X: X,
-                        Y: Y
+                        Y: Y,
+                        XLabel: XLabel,
+                        YLabel: YLabel
                     });
                 });
             });
@@ -68,13 +76,13 @@ export class Explaination_ extends React.Component{
             <Container className="my-2">
                 <Row>
                     <Col>
-                        <h2>{this.state.X ? this.state.X : ""}</h2>
+                        <h2>{this.state.XLabel ? this.state.XLabel : ""}</h2>
                     </Col>
                     <Col>
                         <h2>{this.state.task ? this.state.task.RelationName : ""}</h2>
                     </Col>
                     <Col>
-                        <h2>{this.state.Y ? this.state.Y : ""}</h2>
+                        <h2>{this.state.YLabel ? this.state.YLabel : ""}</h2>
                     </Col>
                 </Row>
             </Container>
@@ -92,30 +100,30 @@ export class Explaination_ extends React.Component{
                                                     {rule.Definition.bodies.map((body) =>
                                                                 <tr>
                                                                     <td className="w-25 border-top-0">
-                                                                        {(this.state.X && this.state.Y) ?
+                                                                        {(this.state.XLabel && this.state.YLabel) ?
                                                                             body.headLabel ? 
-                                                                                body.headLabel 
+                                                                                <a href={'/entity?term=' + body.head}>{body.headLabel}</a> 
                                                                             : body.head === "X" ? 
-                                                                                <b>{this.state.X}</b>
+                                                                                <b><a href={'/entity?term=' + this.state.X}>{this.state.XLabel}</a></b>
                                                                             : body.head === "Y" ? 
-                                                                                <b>{this.state.Y}</b>
+                                                                                <b><a href={'/entity?term=' + this.state.Y}>{this.state.YLabel}</a> </b>
                                                                             : body.head
-                                                                            : body.head
+                                                                            : ""
                                                                         }
                                                                     </td>
                                                                     <td className="w-50 border-top-0">
                                                                         {body.relation}
                                                                     </td>
                                                                     <td className="w-25 border-top-0">
-                                                                        {(this.state.X && this.state.Y) ?
+                                                                        {(this.state.XLabel && this.state.YLabel) ?
                                                                             body.tailLabel ? 
-                                                                                body.tailLabel 
+                                                                                <a href={'/entity?term=' + body.tail}>{body.tailLabel}</a> 
                                                                             : body.tail === "X" ? 
-                                                                                <b>{this.state.X}</b>
+                                                                                <b><a href={'/entity?term=' + this.state.X}>{this.state.XLabel}</a></b>
                                                                             : body.tail === "Y" ? 
-                                                                                <b>{this.state.Y}</b> 
+                                                                                <b><a href={'/entity?term=' + this.state.Y}>{this.state.YLabel}</a> </b> 
                                                                             : body.tail
-                                                                            : body.tail
+                                                                            : ""
                                                                         }
                                                                     </td>
                                                                 </tr>

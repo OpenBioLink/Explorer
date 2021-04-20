@@ -34,6 +34,22 @@ let datasetmethods = {
                 var publish = fields.publish === "on" ? true : false;
                 var id = uuidv4();
 
+                createNewDataset(id, files.label_graph.path, fields.rdftype, (success) => {
+                    if(success){
+                        if(publish){
+                            index.publishNewDataset(id, dbName, dbVersion, dbDescription, namespace);
+                        } else {
+                            index.addTempDataset(id, namespace, parseInt(Date.now() / 1000));
+                        }
+                        resolve({
+                            pk: id,
+                            published: publish,
+                            success: success
+                        });
+                    }
+                });
+
+                /*
                 const fileContents = fs.createReadStream(files.label_graph.path);
                 const writeStream = fs.createWriteStream(files.label_graph.path + "_");
                 const unzip = zlib.createUnzip();
@@ -56,6 +72,7 @@ let datasetmethods = {
                         }
                     });
                 });
+                */
             });
         }
     },

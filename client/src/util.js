@@ -27,3 +27,65 @@ export function toc(msg) {
   var dt = performance.now() - tictime;
   console.log((msg || 'toc') + ": " + dt + "ms");
 }
+
+export function sortAsc(entities){
+    // Sortieren nach Wert
+    return entities.sort((a,b) => {
+      var nameA = a["Label"];
+      var nameB = b["Label"];
+      
+      var isNameA = !((nameA == null) || (nameA === ""))
+      var isNameB = !((nameB == null) || (nameB === ""))
+
+      if(!isNameA && isNameB){
+        return 1;
+      }
+      else if(isNameA && !isNameB){
+        return -1;
+      }
+      else if(isNameA && isNameB){
+        nameA = nameA.toUpperCase();
+        nameB = nameB.toUpperCase();
+        if (nameA < nameB) {
+          return -1;
+        }
+        else if (nameA > nameB) {
+          return 1;
+        } else {
+          return 0;
+        }
+      } else {
+        return 0;
+      }
+    });
+  }
+
+export function sortDesc(entities){
+    return entities.sort((a, b) =>{
+      var nameA = a["Label"]; // Groß-/Kleinschreibung ignorieren
+      var nameB = b["Label"]; // Groß-/Kleinschreibung ignorieren#
+
+      var isNameA = !((nameA == null) || (nameA === ""))
+      var isNameB = !((nameB == null) || (nameB === ""))
+
+      if(!isNameA && isNameB){
+        return -1;
+      }
+      else if(isNameA && !isNameB){
+        return 1;
+      }
+      else if(isNameA && isNameB){
+        nameA = nameA.toUpperCase();
+        nameB = nameB.toUpperCase();
+        if (nameA < nameB) {
+          return 1;
+        }
+        else if (nameA > nameB) {
+          return -1;
+        }
+        return 0;
+      } else {
+        return 0;
+      }
+    });
+  }

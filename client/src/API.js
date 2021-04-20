@@ -20,7 +20,21 @@ function callRPC(func, body, callback){
 
 export function callDatasetOperation(form, zip_files, callback){
     let data = new FormData(form);
+    let request = new XMLHttpRequest();
 
+    request.open('POST', '/dataset');
+    request.upload.addEventListener('progress', (e) => {
+        let perc = parseInt((e.loaded / e.total) * 100);
+        callback('progress', perc, null, false);
+    })
+    request.addEventListener('load', function(response){
+        var jsonResponse = JSON.parse(response.currentTarget.responseText)
+        callback('done', null, jsonResponse["pk"], jsonResponse["published"]);
+    });
+    request.send(data);
+
+    // Zipping is very slow
+    /*
     zip_files.forEach(element => {
         callback('zip', null, null, null);
         var reader = new FileReader();
@@ -45,12 +59,29 @@ export function callDatasetOperation(form, zip_files, callback){
         }
         reader.readAsArrayBuffer(form[element].files[0]);
     });
+    */
 }
 
 export function callExplainationOperation(form, zip_files, callback){
     console.log("FORMDATA");
     let data = new FormData(form);
 
+    // cannot use fetch here, need to track upload progress
+    let request = new XMLHttpRequest();
+    request.open('POST', '/expl');
+
+    request.upload.addEventListener('progress', (e) => {
+        let perc = parseInt((e.loaded / e.total) * 100);
+        callback('progress', perc, null, null);
+    })
+    request.addEventListener('load', (response) => {
+        var jsonResponse = JSON.parse(response.currentTarget.responseText);
+        callback('done', null, jsonResponse["pk"], jsonResponse["published"]);
+    });
+    request.send(data);
+
+    // zipping is very slow
+    /*
     zip_files.forEach(element => {
         callback('zip', null, null, null);
         var reader = new FileReader();
@@ -75,7 +106,7 @@ export function callExplainationOperation(form, zip_files, callback){
         };
         reader.readAsArrayBuffer(form[element].files[0]);
     });
-
+    */
     
 }
 

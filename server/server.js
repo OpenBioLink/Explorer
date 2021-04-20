@@ -38,7 +38,7 @@ let routes = {
             });
         });
     },
-    '/explaination': function(fields, files){
+    '/expl': function(fields, files){
         return new Promise((resolve, reject) => {
             let execPromise = null;
             if (explainationmethods[fields.method] && typeof (explainationmethods[fields.method].exec) === 'function') {
@@ -131,7 +131,7 @@ function requestListener(request, response) {
     let parseUrl = url.parse(reqUrl, true);
     let pathname = parseUrl.pathname;
 
-    if(pathname == "/dataset" || pathname == "/explaination"){
+    if(pathname == "/dataset" || pathname == "/expl"){
         //maxFileSize = 2GB
         var form = new formidable.IncomingForm({maxFileSize:2000*1024*1024});
         form.parse(request, function (err, fields, files) {

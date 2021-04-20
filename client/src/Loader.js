@@ -5,7 +5,7 @@ import PropTypes from "prop-types";
 import { withRouter } from "react-router";
 import { FaRegCopy } from 'react-icons/fa'
 import bsCustomFileInput from 'bs-custom-file-input';
-import {from_timestamp, from_method_short} from './util';
+import {from_timestamp, from_method_short, sortAsc} from './util';
 const API = require('./API');
 
 export class Loader_ extends React.Component{
@@ -70,7 +70,9 @@ export class Loader_ extends React.Component{
         searchTerm: "",
 
         show_alert: false,
-        alert_message: ""
+        alert_message: "",
+
+        show_done_spinner: false
       };
     }
 
@@ -115,7 +117,7 @@ export class Loader_ extends React.Component{
           alert_message: "Please select a public explaination or enter a private key"
         });
       } else {
-
+        this.setState({show_done_spinner: true});
         // none
         if(this.state.selected_dataset_id === -1){
           this.props.cookies.remove("datasetID");
@@ -147,7 +149,13 @@ export class Loader_ extends React.Component{
         }
         // removes session storage (entities, asc, active page...)
         window.sessionStorage.clear();
-        this.props.history.push("/entities");
+
+        API.getAllTestEntities(this.props.cookies.get('datasetID'), this.props.cookies.get('explainationID'), (entities) => {
+          window.sessionStorage.setItem('entities', JSON.stringify(sortAsc(entities)));
+          window.sessionStorage.setItem('asc', 'true');
+          this.setState({show_done_spinner: false});
+          this.props.history.push("/entities");
+        });
       }
     }
 
@@ -425,6 +433,15 @@ export class Loader_ extends React.Component{
                   </td>
                   <td className="w-50 text-left">
                     <Button variant="primary" className="ml-1" onClick={() => this.onFormPageDone()}>
+                      {this.state.show_done_spinner ? 
+                        <Spinner
+                          className="mr-1"
+                          animation="border"
+                          size="sm"
+                          role="status"
+                          aria-hidden="true"
+                        />
+                      : ""}
                       Done
                     </Button>
                   </td>
