@@ -32,12 +32,12 @@ export class Entity_ extends React.Component{
         
         if(params.has("id")){
             var id = params.get("id");
-            API.getInfoByEntityID(cookies.get('datasetID'), cookies.get('explainationID'), id, (info) => this.setState({info: info}));
-            API.getTasksByEntityID(cookies.get('explainationID'), id, (tasks) => this.addTasks(tasks));
+            API.getInfoByEntityID(cookies.get('datasetID'), cookies.get('explanationID'), id, (info) => this.setState({info: info}));
+            API.getTasksByEntityID(cookies.get('explanationID'), id, (tasks) => this.addTasks(tasks));
         } else if(params.has("term")){
             var curie = params.get("term");
             API.getInfoByCurie(cookies.get('datasetID'), curie, (info) => this.setState({info: info}));
-            API.getTasksByCurie(cookies.get('explainationID'), curie, (tasks) => this.addTasks(tasks));
+            API.getTasksByCurie(cookies.get('explanationID'), curie, (tasks) => this.addTasks(tasks));
         }
         
     }

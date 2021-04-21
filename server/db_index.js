@@ -32,7 +32,7 @@ let db_index = {
         var sql = `select * from dataset;`;
         return queries.all('index', sql);
     },
-    getExplainationsByDatasetID(datasetID){
+    getExplanationsByDatasetID(datasetID){
         var sql = `select * from explaination where explaination.datasetid = '${datasetID}';`;
         return queries.all('index', sql);
     },
@@ -46,14 +46,14 @@ let db_index = {
         var res = queries.run('index', sql);
         return res;
     },
-    publishNewExplaination(id, datasetid, label, date, comment, method, ruleconfig, clusteringconfig){
+    publishNewExplanation(id, datasetid, label, date, comment, method, ruleconfig, clusteringconfig){
         // TBD check if datasetID is published (shouldnt work anyway as foreign key)
         var sql = `INSERT into Explaination (ID, DatasetID, Label, Date, Comment, Method, RuleConfig, ClusteringConfig) 
                     VALUES ('${id}', '${datasetid}', '${label}', ${date}, '${comment}', '${method}', '${ruleconfig}', '${clusteringconfig}')`;
         var res = queries.run('index', sql);
         console.log(res);
     },
-    addTempExplaination(id, datasetid, date){
+    addTempExplanation(id, datasetid, date){
         var sql = `INSERT into Temp_Explaination (ID, DatasetID, Date) VALUES ('${id}', '${datasetid}', ${date})`;
         var res = queries.run('index', sql);
         console.log(res);

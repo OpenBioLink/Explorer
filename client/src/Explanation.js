@@ -11,7 +11,7 @@ import Cookies from 'universal-cookie';
 const cookies = new Cookies();
 const API = require('./API');
 
-export class Explaination_ extends React.Component{
+export class Explanation_ extends React.Component{
 
     static propTypes = {
         match: PropTypes.object.isRequired,
@@ -29,7 +29,7 @@ export class Explaination_ extends React.Component{
             Y: null,
             XLabel: null,
             YLabel: null,
-            explaination: null
+            explanation: null
         }
     }
 
@@ -37,9 +37,9 @@ export class Explaination_ extends React.Component{
         var params = new URLSearchParams(this.props.location.search);
         var taskID = params.get("taskID");
         var entityID = params.get("entityID");
-        API.getTaskByID(cookies.get('explainationID'), taskID, (task) => {
-            API.getInfoByEntityID(cookies.get('datasetID'), cookies.get('explainationID'), task[0]["EntityID"], (entityInfo) => {
-                API.getInfoByEntityID(cookies.get('datasetID'), cookies.get('explainationID'), entityID, (predictionInfo) => {
+        API.getTaskByID(cookies.get('explanationID'), taskID, (task) => {
+            API.getInfoByEntityID(cookies.get('datasetID'), cookies.get('explanationID'), task[0]["EntityID"], (entityInfo) => {
+                API.getInfoByEntityID(cookies.get('datasetID'), cookies.get('explanationID'), entityID, (predictionInfo) => {
                     var X, Y, XLabel, YLabel = null;
                     if(task[0]["IsHead"] === 1){
                         X = entityInfo.Curie
@@ -64,9 +64,9 @@ export class Explaination_ extends React.Component{
                 });
             });
         });
-        API.getExplainations(cookies.get('datasetID'), cookies.get('explainationID'), taskID, entityID, (explaination) => {
-            console.log(explaination);
-            this.setState({explaination: explaination});
+        API.getExplanations(cookies.get('datasetID'), cookies.get('explanationID'), taskID, entityID, (explanation) => {
+            console.log(explanation);
+            this.setState({explanation: explanation});
         });
     }
 
@@ -87,8 +87,8 @@ export class Explaination_ extends React.Component{
                 </Row>
             </Container>
                 <Accordion defaultActiveKey="0" className="w-75 m-auto">
-                {this.state.explaination ? 
-                this.state.explaination.map(cluster =>
+                {this.state.explanation ? 
+                this.state.explanation.map(cluster =>
                         <Card>
                             <CustomToggle eventKey={String(cluster["ID"])} confidence={cluster["Rules"][0]["Confidence"]} />
                             <Accordion.Collapse eventKey={String(cluster["ID"])}>
@@ -146,7 +146,7 @@ export class Explaination_ extends React.Component{
     }
 }
 
-export const Explaination = withRouter(Explaination_);
+export const Explanation = withRouter(Explanation_);
 
 
 function CustomToggle({eventKey, clusterID, confidence}) {

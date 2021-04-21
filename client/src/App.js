@@ -7,7 +7,7 @@ import {Loader} from './Loader.js'
 import {Entities} from './Entities'
 import {Start} from './Start'
 import {Task} from './Task'
-import {Explaination} from './Explaination'
+import {Explanation} from './Explanation'
 import { Entity } from './Entity';
 import { Feedback } from './Feedback';
 import {
@@ -42,8 +42,8 @@ class App extends React.Component{
               <LoaderRoute path='/task'>
                 <Task/>
               </LoaderRoute>
-              <LoaderRoute path='/explaination'>
-                <Explaination/>
+              <LoaderRoute path='/explanation'>
+                <Explanation/>
               </LoaderRoute>
               <Route path='/feedback'>
                 <Feedback/>
@@ -71,26 +71,26 @@ class Header_ extends React.Component{
     super();
     this.state={
       dataset: "-",
-      explaination: "-"
+      explanation: "-"
     }
   }
 
   componentDidMount(){
     var datasetid_ = cookies.get("datasetLabel");
-    var explainationid_ = cookies.get("explainationLabel");
+    var explanationid_ = cookies.get("explanationLabel");
     
     if(datasetid_ !== undefined){
       this.setState({dataset: datasetid_});
     }
-    if(explainationid_ !== undefined){
-      this.setState({explaination: explainationid_});
+    if(explanationid_ !== undefined){
+      this.setState({explanation: explanationid_});
     }
     cookies.addChangeListener((element) => {
       console.log(element.name);
       if(element.name === "datasetLabel"){
         this.setState({dataset: element.value});
-      } else if(element.name === "explainationLabel"){
-        this.setState({explaination: element.value});
+      } else if(element.name === "explanationLabel"){
+        this.setState({explanation: element.value});
       }
     });
   }
@@ -116,7 +116,7 @@ class Header_ extends React.Component{
                 Dataset: {this.state.dataset}
               </Navbar.Text>
               <Navbar.Text className="mr-2">
-                Explaination: {this.state.explaination}
+                Explanation: {this.state.explanation}
               </Navbar.Text>
               <Button size="sm" variant="outline-success" onClick={() => this.onLoadOther()}>Load other</Button>
             </Navbar.Collapse>
@@ -144,12 +144,12 @@ function useLoaderContext() {
 
 function useProvideLoaderContext() {
 
-  const getExplainationID = () => {
-    return cookies.get("explainationID");
+  const getExplanationID = () => {
+    return cookies.get("explanationID");
   };
 
   return {
-    getExplainationID
+    getExplanationID
   };
 }
 
@@ -159,7 +159,7 @@ function LoaderRoute({ children, ...rest }) {
     <Route
       {...rest}
       render={({ location }) =>
-        ctxt.getExplainationID() ? (
+        ctxt.getExplanationID() ? (
           children
         ) : (
           <Redirect

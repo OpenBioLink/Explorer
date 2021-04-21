@@ -4,7 +4,7 @@ let http = require('http');
 let url = require('url');
 let rpcmethods = require('./rpcmethods');
 let datasetmethods = require('./datasetmethods');
-let explainationmethods = require('./explainationmethods');
+let explanationmethods = require('./explanationmethods');
 let types = require('./types');
 const fs = require('fs');
 var formidable = require('formidable');
@@ -41,8 +41,8 @@ let routes = {
     '/expl': function(fields, files){
         return new Promise((resolve, reject) => {
             let execPromise = null;
-            if (explainationmethods[fields.method] && typeof (explainationmethods[fields.method].exec) === 'function') {
-                execPromise = explainationmethods[fields.method].exec.call(null, fields, files);
+            if (explanationmethods[fields.method] && typeof (explanationmethods[fields.method].exec) === 'function') {
+                execPromise = explanationmethods[fields.method].exec.call(null, fields, files);
                 if (!(execPromise instanceof Promise)) {
                     throw new Error(`exec on ${key} did not return a promise`);
                 }

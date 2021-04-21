@@ -7,7 +7,7 @@ var zlib = require("zlib");
 
 
 
-let explainationmethods = {
+let explanationmethods = {
     templ:{
         description: ``,
         params: [],
@@ -66,14 +66,14 @@ let explainationmethods = {
                 console.log(fields)
                 console.log(files)
 
-                var oldpath = files.explainationfile.path;
+                var oldpath = files.explanationfile.path;
                 var newpath = './db/' + id + '.db';
                 fs.rename(oldpath, newpath, function (err) {
                     if (err) throw err;
                     if(publish){
-                        index.publishNewExplaination(id, datasetid, label, date, comment, method, ruleconfig, clusteringconfig);
+                        index.publishNewExplanation(id, datasetid, label, date, comment, method, ruleconfig, clusteringconfig);
                     } else {
-                        index.addTempExplaination(id, datasetid, date);
+                        index.addTempExplanation(id, datasetid, date);
                     }
                     resolve({
                         pk: id,
@@ -85,16 +85,16 @@ let explainationmethods = {
                 
 
                 /*
-                const fileContents = fs.createReadStream(files.explainationfile.path);
+                const fileContents = fs.createReadStream(files.explanationfile.path);
                 const writeStream = fs.createWriteStream('./db/' + id + '.db');
                 const unzip = zlib.createUnzip();
                 fileContents.pipe(unzip).pipe(writeStream);
 
                 writeStream.on('finish', function(){
                     if(publish){
-                        index.publishNewExplaination(id, datasetid, label, date, comment, method, ruleconfig, clusteringconfig);
+                        index.publishNewExplanation(id, datasetid, label, date, comment, method, ruleconfig, clusteringconfig);
                     } else {
-                        index.addTempExplaination(id, datasetid, date);
+                        index.addTempExplanation(id, datasetid, date);
                     }
                     resolve({
                         pk: id,
@@ -108,4 +108,4 @@ let explainationmethods = {
     },
 };
 
-module.exports = explainationmethods;
+module.exports = explanationmethods;

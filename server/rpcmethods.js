@@ -1,6 +1,6 @@
 'use strict';
 
-let db = require('./db_explaination');
+let db = require('./db_explanation');
 let index = require('./db_index');
 let {graph_label: graph} = require('./graph_label');
 const {runSPARQL} = require('./graph_label');
@@ -28,26 +28,26 @@ let rpcmethods = {
             });
         }
     },
-    getAllExplainationsByDatasetID:{
+    getAllExplanationsByDatasetID:{
         description: ``,
         params: ['datasetID: The id of the dataset'],
         returns: [''],
         exec(body) {
             return new Promise((resolve) => {
-                var explainations = index.getExplainationsByDatasetID(body.datasetID);
-                resolve(explainations || {});
+                var explanations = index.getExplanationsByDatasetID(body.datasetID);
+                resolve(explanations || {});
             });
         }
     },
     getAllTestEntities:{
         description: ``,
         params: [],
-        returns: ['datasetID:the ID of the dataset', 'explainationID: the ID of the explaination file'],
+        returns: ['datasetID:the ID of the dataset', 'explanationID: the ID of the explanation file'],
         exec(body) {
             return new Promise((resolve) => {
                 tic();
                 var namespace = index.getNamespaceFromDatasetID(body.datasetID)
-                var entities = db.getAllTestEntities(body.explainationID);
+                var entities = db.getAllTestEntities(body.explanationID);
                 graph.addLabelsToEntities(body.datasetID, namespace, entities, (labeled_entities) => {
                     resolve(labeled_entities || {});
                     toc("getAllTestEntities");
@@ -57,44 +57,44 @@ let rpcmethods = {
     },
     getTasksByCurie:{
         description: ``,
-        params: ['explainationID: the ID of the explaination file', 'curie: the curie of the entity'],
+        params: ['explanationID: the ID of the explanation file', 'curie: the curie of the entity'],
         returns: ['all tasks containing entities with the given curie (curie, rel, ?) or (?, rel, curie)'],
         exec(body) {
             return new Promise((resolve) => {
-                var tasks = db.getTasksByCurie(body.explainationID, body.curie);
+                var tasks = db.getTasksByCurie(body.explanationID, body.curie);
                 resolve(tasks || {});
             });
         }
     },
     getTasksByEntityID:{
         description: ``,
-        params: ['explainationID: the ID of the explaination file', 'entityID: the internal id of the entity'],
+        params: ['explanationID: the ID of the explanation file', 'entityID: the internal id of the entity'],
         returns: ['all tasks containing entities with the given id (id, rel, ?) or (?, rel, id)'],
         exec(body) {
             return new Promise((resolve) => {
-                var tasks = db.getTasksByEntityID(body.explainationID, body.entityID);
+                var tasks = db.getTasksByEntityID(body.explanationID, body.entityID);
                 resolve(tasks || {});
             });
         }
     },
     getTaskByID:{
         description: ``,
-        params: ['explainationID: the ID of the explaination file', 'entityID: the internal id of the task'], 
+        params: ['explanationID: the ID of the explanation file', 'entityID: the internal id of the task'], 
         returns: ['An array of objects with signature (TaskID, EntityID, EntityName, RelationID, RelationName, IsHead)'],
         exec(body) {
             return new Promise((resolve) => {
-                var task = db.getTaskByID(body.explainationID, body.entityID);
+                var task = db.getTaskByID(body.explanationID, body.entityID);
                 resolve(task || {});
             });
         }
     },
     getPredictionsByTaskID:{
         description: ``,
-        params: ['datasetID', 'explainationID', 'taskID'],
+        params: ['datasetID', 'explanationID', 'taskID'],
         returns: [''],
         exec(body) {
             return new Promise((resolve) => {
-                var predictions = db.getPredictionsByTaskID(body.explainationID, body.taskID);
+                var predictions = db.getPredictionsByTaskID(body.explanationID, body.taskID);
                 var namespace = index.getNamespaceFromDatasetID(body.datasetID);
                 graph.addLabelsToPredictions(body.datasetID, namespace, predictions, (labeled_predictions) => {
                     resolve(labeled_predictions || {});
@@ -117,11 +117,11 @@ let rpcmethods = {
     },
     getInfoByEntityID:{
         description: ``,
-        params: ['datasetID', 'explainationID', 'entityID'],
+        params: ['datasetID', 'explanationID', 'entityID'],
         returns: [''],
         exec(body) {
             return new Promise((resolve) => {
-                var curie = db.getCurieByEntityID(body.explainationID, body.entityID);
+                var curie = db.getCurieByEntityID(body.explanationID, body.entityID);
                 var namespace = index.getNamespaceFromDatasetID(body.datasetID)
                 graph.getInfoByCurie(body.datasetID, namespace, curie, (res) => {
                     resolve(res || {});
@@ -129,7 +129,7 @@ let rpcmethods = {
             });
         }
     },
-    getExplainationsOld:{
+    getExplanationsOld:{
         description: ``,
         params: [],
         returns: [''],
@@ -156,11 +156,11 @@ let rpcmethods = {
                         and cluster.PredictionEntityId = ${body.entityID}
                     ;
                     `;
-                var explaination = queries.all(body.dbID, sql);
+                var explanation = queries.all(body.dbID, sql);
  
                 const variables = ["X", "Y", "A", "B", "C"];
                 var entities = new Set();
-                var groups = explaination.reduce((groups, item) => {
+                var groups = explanation.reduce((groups, item) => {
                     function splitAtom(atom){
                         var relation = atom.substring(0, atom.indexOf('('));
                         var head = atom.substring(atom.indexOf('(')+1, atom.indexOf(','));
@@ -276,32 +276,32 @@ let rpcmethods = {
             });
         }
     },
-    getExplainations:{
+    getExplanations:{
         description: ``,
-        params: ['datasetID', 'explainationID', 'taskID', 'entityID'],
+        params: ['datasetID', 'explanationID', 'taskID', 'entityID'],
         returns: [''],
         exec(body) {
             //body.taskID, body.entityID
             return new Promise((resolve) => {
                 tic();
-                var explainations = db.getExplainations(body.explainationID, body.taskID, body.entityID);
-                var [explainations, variables, entities] = getJson(explainations);
+                var explanations = db.getExplanations(body.explanationID, body.taskID, body.entityID);
+                var [explanations, variables, entities] = getJson(explanations);
                 toc("Rule retrieval and reshape");
                 tic();
                 var namespace = index.getNamespaceFromDatasetID(body.datasetID)
-                graph.addLabelsToExplainations(body.datasetID, namespace, explainations, variables, entities, (labeled_explainations) => {
+                graph.addLabelsToExplanations(body.datasetID, namespace, explanations, variables, entities, (labeled_explanations) => {
                     toc("Added labels");
-                    resolve(labeled_explainations || {});
+                    resolve(labeled_explanations || {});
                 });
             });
         }
     },
 };
 
-function getJson(explainations){
+function getJson(explanations){
     const variables = ["X", "Y", "A", "B", "C"];
     var entities = new Set();
-    var groups = explainations.reduce((groups, item) => {
+    var groups = explanations.reduce((groups, item) => {
         function splitAtom(atom){
             var relation = atom.substring(0, atom.indexOf('('));
             var head = atom.substring(atom.indexOf('(')+1, atom.indexOf(','));

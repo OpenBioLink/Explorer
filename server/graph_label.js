@@ -117,7 +117,7 @@ let graph_label = {
             callback(predictions);
         });
     },
-    addLabelsToExplainations(datasetID, namespace, groups, variables, entities, callback){
+    addLabelsToExplanations(datasetID, namespace, groups, variables, entities, callback){
         var query = `query=
             prefix ns: <${namespace}>
             SELECT ?subject ?object

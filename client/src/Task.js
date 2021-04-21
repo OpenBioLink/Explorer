@@ -29,12 +29,12 @@ export class Task_ extends React.Component{
     componentDidMount(){
         var params = new URLSearchParams(this.props.location.search);
         var id = params.get("id");
-        API.getTaskByID(cookies.get('explainationID'), id, (task) => {
+        API.getTaskByID(cookies.get('explanationID'), id, (task) => {
             console.log(task);
-            API.getInfoByEntityID(cookies.get('datasetID'), cookies.get('explainationID'), task[0]["EntityID"], (info) => {console.log(info);this.setState({entityInfo: info})});
+            API.getInfoByEntityID(cookies.get('datasetID'), cookies.get('explanationID'), task[0]["EntityID"], (info) => {console.log(info);this.setState({entityInfo: info})});
             this.setState({task: task[0]});
         });
-        API.getPredictionsByTaskID(cookies.get('datasetID'), cookies.get('explainationID'), id, (predictions) => {
+        API.getPredictionsByTaskID(cookies.get('datasetID'), cookies.get('explanationID'), id, (predictions) => {
             console.log(predictions);
             this.setState({predictions: this.sortPredictions(predictions)});
         });
@@ -57,7 +57,7 @@ export class Task_ extends React.Component{
     }
 
     onPredictionSelection(entityID){
-        this.props.history.push(`/explaination?taskID=${this.state.task.TaskID}&entityID=${entityID}`);
+        this.props.history.push(`/explanation?taskID=${this.state.task.TaskID}&entityID=${entityID}`);
     }
 
     render(){

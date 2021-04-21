@@ -2,8 +2,8 @@
 
 let queries = require('./db');
 
-let db_explainations = {
-    getAllTestEntities(explainationID){
+let db_explanations = {
+    getAllTestEntities(explanationID){
         var sql = `
         select 
             distinct Name, entity.Id 
@@ -11,9 +11,9 @@ let db_explainations = {
         inner join entity on 
             entity.id = task.EntityID;
         `;
-        return queries.all(explainationID, sql)
+        return queries.all(explanationID, sql)
     },
-    getTasksByCurie(explainationID, curie){
+    getTasksByCurie(explanationID, curie){
         var sql = `
         select 
             task.ID as TaskID, entity.Id as EntityID, entity.Name as EntityName, relation.Id as RelationID, relation.Name as RelationName, IsHead
@@ -24,9 +24,9 @@ let db_explainations = {
             relation.id = task.RelationID
         where entity.Name = '${curie}';
         `
-        return queries.all(explainationID, sql);
+        return queries.all(explanationID, sql);
     },
-    getTasksByEntityID(explainationID, entityID){
+    getTasksByEntityID(explanationID, entityID){
         var sql = `
         select 
             task.ID as TaskID, entity.Id as EntityID, entity.Name as EntityName, relation.Id as RelationID, relation.Name as RelationName, IsHead
@@ -37,9 +37,9 @@ let db_explainations = {
             relation.id = task.RelationID
         where entity.ID = '${entityID}';
         `
-        return queries.all(explainationID, sql);
+        return queries.all(explanationID, sql);
     },
-    getTaskByID(explainationID, entityID){
+    getTaskByID(explanationID, entityID){
         var sql = `
         select 
             task.ID as TaskID, entity.Id as EntityID, entity.Name as EntityName, relation.Id as RelationID, relation.Name as RelationName, IsHead
@@ -50,9 +50,9 @@ let db_explainations = {
             relation.id = task.RelationID
         where task.ID = '${entityID}';
         `
-        return queries.all(explainationID, sql);
+        return queries.all(explanationID, sql);
     },
-    getPredictionsByTaskID(explainationID, taskID){
+    getPredictionsByTaskID(explanationID, taskID){
         var sql = `
         select 
             entity.Id as EntityID, entity.Name as EntityName, prediction.confidence as Confidence, prediction.hit as Hit
@@ -61,18 +61,18 @@ let db_explainations = {
             entity.id = prediction.EntityID
         where prediction.TaskID = ${taskID};
         `;
-        return queries.all(explainationID, sql);
+        return queries.all(explanationID, sql);
     },
-    getCurieByEntityID(explainationID, entityID){
+    getCurieByEntityID(explanationID, entityID){
         var sql = `
         select 
             name
         from entity 
         where id = ${entityID};
         `;
-        return queries.all(explainationID, sql)[0]["NAME"];
+        return queries.all(explanationID, sql)[0]["NAME"];
     },
-    getExplainations(explainationID, taskID, entityID){
+    getExplanations(explanationID, taskID, entityID){
         var sql = `
         select 
             Rule.CLUSTER_ID as ClusterID,
@@ -87,8 +87,8 @@ let db_explainations = {
             and Rule_Entity.EntityID = ${entityID}
         order by RuleConfidence desc;
         `;
-        return queries.all(explainationID, sql);
+        return queries.all(explanationID, sql);
     }
 }
 
-module.exports = db_explainations
+module.exports = db_explanations

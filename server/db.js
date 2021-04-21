@@ -17,7 +17,7 @@ function createIndex(){
     );`
     db.prepare(sql).run();
     sql = `
-    CREATE TABLE "Explaination" (
+    CREATE TABLE "Explanation" (
         "ID"	TEXT NOT NULL,
         "DatasetID"	TEXT NOT NULL,
         "Label"	TEXT,
@@ -40,7 +40,7 @@ function createIndex(){
     `
     db.prepare(sql).run();
     sql = `
-    CREATE TABLE "Temp_Explaination" (
+    CREATE TABLE "Temp_Explanation" (
         "ID"	TEXT NOT NULL,
         "DatasetID"	TEXT NOT NULL,
         "Date"	INTEGER NOT NULL,

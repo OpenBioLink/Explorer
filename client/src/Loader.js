@@ -32,24 +32,24 @@ export class Loader_ extends React.Component{
       });
     }
 
-    query_explainations(datasetId, pk){
+    query_explanations(datasetId, pk){
       if(datasetId === -1){
 
       } else if(datasetId === -2){
 
       } else {
-        API.getAllExplainationsByDatasetID(datasetId, (res) => {
+        API.getAllExplanationsByDatasetID(datasetId, (res) => {
           this.setState({
-            explainations: res,
+            explanations: res,
           })
           if(res.length > 0){
             if(pk){
-              this.setState({selected_explaination_id: res.find(x => x["ID"] === pk)["ID"]});
+              this.setState({selected_explanation_id: res.find(x => x["ID"] === pk)["ID"]});
             } else {
-              this.setState({selected_explaination_id:  res.length > 0 ? res[0]["ID"] : null});
+              this.setState({selected_explanation_id:  res.length > 0 ? res[0]["ID"] : null});
             }
           } else {
-            this.setState({selected_explaination_id: null});
+            this.setState({selected_explanation_id: null});
           }
         });
       }
@@ -60,12 +60,12 @@ export class Loader_ extends React.Component{
 
       this.state = {
         datasets: [],
-        explainations: [],
+        explanations: [],
         formPage: 0,
         selected_dataset_id: null,
         private_dataset: null,
-        selected_explaination_id: null,
-        private_explaination: null,
+        selected_explanation_id: null,
+        private_explanation: null,
 
         searchTerm: "",
 
@@ -94,7 +94,7 @@ export class Loader_ extends React.Component{
           formPage: 1,
           searchTerm: "",
         });
-        this.query_explainations(this.state.selected_dataset_id);
+        this.query_explanations(this.state.selected_dataset_id);
       }
     }
 
@@ -106,15 +106,15 @@ export class Loader_ extends React.Component{
     }
 
     onFormPageDone(){
-      if(this.state.selected_explaination_id === -2 && (this.state.private_explaination == null || this.state.private_explaination === "")) {
+      if(this.state.selected_explanation_id === -2 && (this.state.private_explanation == null || this.state.private_explanation === "")) {
         this.setState({
           show_alert: true,
-          alert_message: "Please select a public explaination or enter a private key"
+          alert_message: "Please select a public explanation or enter a private key"
         });
-      } else if((this.state.selected_explaination_id == null || this.state.selected_explaination_id === "")) {
+      } else if((this.state.selected_explanation_id == null || this.state.selected_explanation_id === "")) {
         this.setState({
           show_alert: true,
-          alert_message: "Please select a public explaination or enter a private key"
+          alert_message: "Please select a public explanation or enter a private key"
         });
       } else {
         this.setState({show_done_spinner: true});
@@ -134,23 +134,23 @@ export class Loader_ extends React.Component{
         }
 
         // none
-        if(this.state.selected_explaination_id === -1){
-          this.props.cookies.remove("explainationID");
-          this.props.cookies.remove("explainationLabel");
+        if(this.state.selected_explanation_id === -1){
+          this.props.cookies.remove("explanationID");
+          this.props.cookies.remove("explanationLabel");
         // private
-        } else if(this.state.selected_explaination_id === -2) {
-          this.props.cookies.set("explainationID", this.state.private_explaination);
-          this.props.cookies.set("explainationLabel", this.state.private_explaination);
+        } else if(this.state.selected_explanation_id === -2) {
+          this.props.cookies.set("explanationID", this.state.private_explanation);
+          this.props.cookies.set("explanationLabel", this.state.private_explanation);
         } else {
-          const explaination = this.state.explainations.find(x => x["ID"] === this.state.selected_explaination_id);
-          var explainationLabel = explaination ? explaination["Label"] !== "" ? explaination["Label"] : from_timestamp(explaination["Date"]) : "";
-          this.props.cookies.set("explainationID", this.state.selected_explaination_id);
-          this.props.cookies.set("explainationLabel", explainationLabel);
+          const explanation = this.state.explanations.find(x => x["ID"] === this.state.selected_explanation_id);
+          var explanationLabel = explanation ? explanation["Label"] !== "" ? explanation["Label"] : from_timestamp(explanation["Date"]) : "";
+          this.props.cookies.set("explanationID", this.state.selected_explanation_id);
+          this.props.cookies.set("explanationLabel", explanationLabel);
         }
         // removes session storage (entities, asc, active page...)
         window.sessionStorage.clear();
 
-        API.getAllTestEntities(this.props.cookies.get('datasetID'), this.props.cookies.get('explainationID'), (entities) => {
+        API.getAllTestEntities(this.props.cookies.get('datasetID'), this.props.cookies.get('explanationID'), (entities) => {
           window.sessionStorage.setItem('entities', JSON.stringify(sortAsc(entities)));
           window.sessionStorage.setItem('asc', 'true');
           this.setState({show_done_spinner: false});
@@ -165,8 +165,8 @@ export class Loader_ extends React.Component{
       this.setState({selected_dataset_id: dataset_id});
     }
 
-    onExplainationSelection(explaination_id){
-      this.setState({selected_explaination_id: explaination_id});
+    onExplanationSelection(explanation_id){
+      this.setState({selected_explanation_id: explanation_id});
     }
 
     onUploadLocalDataset(pk, published){
@@ -181,15 +181,15 @@ export class Loader_ extends React.Component{
       }
     }
 
-    onUploadLocalExplaination(pk, published){
+    onUploadLocalExplanation(pk, published){
       if(published){
-        this.query_explainations(this.state.selected_dataset_id, pk);
-        this.onExplainationSelection(pk);
+        this.query_explanations(this.state.selected_dataset_id, pk);
+        this.onExplanationSelection(pk);
       } else {
         this.setState({
-          private_explaination: pk
+          private_explanation: pk
         });
-        this.onExplainationSelection(-2);
+        this.onExplanationSelection(-2);
       }
       
     }
@@ -242,7 +242,7 @@ export class Loader_ extends React.Component{
                   <Col sm={8} className="my-auto">
                     <Tab.Content className="text-center">
                       <Tab.Pane eventKey={-1}>
-                        The explorer can be used without a specified dataset, however nodes of the explaination file will appear as they appear in the dataset (without a label). Furthermore the visualization of the graph is not available.
+                        The explorer can be used without a specified dataset, however nodes of the explanation file will appear as they appear in the dataset (without a label). Furthermore the visualization of the graph is not available.
                       </Tab.Pane>
                       <Tab.Pane eventKey={-2}>
                         { this.state.private_dataset ? 
@@ -307,27 +307,27 @@ export class Loader_ extends React.Component{
           <div className="App-content">
             <Modal.Dialog scrollable={true} className="mx-auto mw-100 w-75 mb-2">
               <Modal.Header>
-                <Modal.Title>Select an explaination file</Modal.Title>
-                <LocalExplainationModal datasetid={this.state.selected_dataset_id} onUpload={(pk, published) => {this.onUploadLocalExplaination(pk, published)}}/>
+                <Modal.Title>Select an explanation file</Modal.Title>
+                <LocalExplanationModal datasetid={this.state.selected_dataset_id} onUpload={(pk, published) => {this.onUploadLocalExplanation(pk, published)}}/>
               </Modal.Header>
               <Modal.Body>
-                <Tab.Container id="list-group-tabs-example" activeKey={this.state.selected_explaination_id}>
+                <Tab.Container id="list-group-tabs-example" activeKey={this.state.selected_explanation_id}>
                   <Row>
                     <Col sm={4}>
                       <ListGroup className="pr-1 text-left" style={{overflowY: "auto", height: "400px"}}>
-                        <ListGroup.Item action eventKey={-2} onClick={() => this.onExplainationSelection(-2)}>
+                        <ListGroup.Item action eventKey={-2} onClick={() => this.onExplanationSelection(-2)}>
                             <Container className="content-justify-left">
                               <Row>
                                 <Col className="w-50">
-                                  Private explaination
+                                  Private explanation
                                 </Col>
                                 <Col className="w-50">
                                 </Col>
                               </Row>
                             </Container>
                         </ListGroup.Item>
-                        { this.state.explainations.filter(x => (this.state.searchTerm === "" || x["Label"].toLowerCase().includes(this.state.searchTerm.toLowerCase()))).map((row) =>
-                          <ListGroup.Item action eventKey={row["ID"]} onClick={() => this.onExplainationSelection(row["ID"])}>
+                        { this.state.explanations.filter(x => (this.state.searchTerm === "" || x["Label"].toLowerCase().includes(this.state.searchTerm.toLowerCase()))).map((row) =>
+                          <ListGroup.Item action eventKey={row["ID"]} onClick={() => this.onExplanationSelection(row["ID"])}>
                             <Container>
                               <Row>
                                 <Col className="w-50">
@@ -345,16 +345,16 @@ export class Loader_ extends React.Component{
                     <Col sm={8} className="my-auto">
                       <Tab.Content >
                         <Tab.Pane eventKey={-2}>
-                          { this.state.private_explaination ? 
+                          { this.state.private_explanation ? 
                             <>
-                              <p>Your uploaded private explaination. Please copy and save your private key for later reuse.</p>
+                              <p>Your uploaded private explanation. Please copy and save your private key for later reuse.</p>
                               <InputGroup className="mb-0">
                                 <FormControl
                                   readOnly
-                                  value={this.state.private_explaination}
+                                  value={this.state.private_explanation}
                                 />
                                 <InputGroup.Append>
-                                  <Button variant="outline-secondary" className="d-flex" onClick={() => {navigator.clipboard.writeText(this.state.private_explaination)}}>
+                                  <Button variant="outline-secondary" className="d-flex" onClick={() => {navigator.clipboard.writeText(this.state.private_explanation)}}>
                                     <FaRegCopy className="m-auto"/>
                                   </Button>
                                 </InputGroup.Append>
@@ -363,7 +363,7 @@ export class Loader_ extends React.Component{
                             :
                             <>
                               <p>Here you can import your private key</p>
-                              <Form onSubmit={(e)=> {e.preventDefault();console.log(e);this.setState({private_explaination: e.currentTarget.elements.private.value});}}>
+                              <Form onSubmit={(e)=> {e.preventDefault();console.log(e);this.setState({private_explanation: e.currentTarget.elements.private.value});}}>
                                 <InputGroup className="mb-0">
                                   <FormControl
                                     name="private"
@@ -378,7 +378,7 @@ export class Loader_ extends React.Component{
                             </>
                           }
                         </Tab.Pane>
-                        { this.state.explainations.map((row) =>
+                        { this.state.explanations.map((row) =>
                           <Tab.Pane className="text-left" style={{overflowY: "auto", height: "400px"}} eventKey={row["ID"]}>
                             <table>
                               <tbody>
@@ -694,7 +694,7 @@ export class Loader_ extends React.Component{
     </>);
   }
 
-  function LocalExplainationModal(props) {
+  function LocalExplanationModal(props) {
 
     const [show, setShow] = useState(false);
     const [publish, setPublish] = useState(false);
@@ -707,14 +707,14 @@ export class Loader_ extends React.Component{
     const [showAlert, setShowAlert] = useState(false);
     const [alertMessage, setAlertMessage] = useState("");
 
-    function onSubmitLocalExplaination(e){
+    function onSubmitLocalExplanation(e){
       e.preventDefault();
-      if(e.target.elements.explainationfile.files.length === 0){
-        setAlertMessage("Please select an explaination file");
+      if(e.target.elements.explanationfile.files.length === 0){
+        setAlertMessage("Please select an explanation file");
         setShowAlert(true);
       } else {
         setDisable(true);
-        API.callExplainationOperation(e.target, ["explainationfile"], (status, progress, pk, published) => {
+        API.callExplanationOperation(e.target, ["explanationfile"], (status, progress, pk, published) => {
             console.log(status + " " + progress);
             if(status === "done"){
               setStatus('done');
@@ -761,21 +761,21 @@ export class Loader_ extends React.Component{
     return(
       <>
         <Button variant="primary"  onClick={() => setShow(true)}>
-          Load local explaination
+          Load local explanation
         </Button>
         <Modal show={show} onHide={onClose} keyboard={!disable} backdrop={disable ? "static" : true}>
         <Modal.Header closeButton style={disable ? {pointerEvents: "none"} : {}}>
-          <Modal.Title>Load local explaination</Modal.Title>
+          <Modal.Title>Load local explanation</Modal.Title>
         </Modal.Header>
         <Modal.Body style={disable ? {pointerEvents: "none"} : {}}>
-        <Form onSubmit={(e) => {onSubmitLocalExplaination(e)}}>
+        <Form onSubmit={(e) => {onSubmitLocalExplanation(e)}}>
           <FormControl name="method" value="create" className="d-none"/>
           <FormControl name="datasetid" value={props.datasetid} className="d-none"/>
           <Form.Group>
-            <Form.Label>Explaination*</Form.Label>
+            <Form.Label>Explanation*</Form.Label>
             <Form.File 
-              name="explainationfile"
-              label="Explaination file"
+              name="explanationfile"
+              label="Explanation file"
               accept=".db"
               custom
               />
@@ -863,7 +863,7 @@ export class Loader_ extends React.Component{
                   </Alert>
                 : status === "done" && published ?
                   <Alert variant="success" className="text-center mt-2 mb-0">
-                    Upload completed!<br/>You can now select your explaination from the list.
+                    Upload completed!<br/>You can now select your explanation from the list.
                   </Alert>
                 : ""
               }
@@ -883,7 +883,7 @@ export class Loader_ extends React.Component{
                     role="status"
                     aria-hidden="true"
                   />
-                  {publish? "Upload and publish explaination" : "Upload explaination"}
+                  {publish? "Upload and publish explanation" : "Upload explanation"}
                 </Button>
               : status === "done" ?
                 <Button variant="primary" className="mt-3" onClick={(e) => onContinue(e)}>
@@ -891,7 +891,7 @@ export class Loader_ extends React.Component{
                 </Button>
               :
                 <Button type="submit" variant="primary" className="mt-3" >
-                  {publish? "Upload and publish explaination" : "Upload explaination"}
+                  {publish? "Upload and publish explanation" : "Upload explanation"}
                 </Button>
               }
             </Form.Group>

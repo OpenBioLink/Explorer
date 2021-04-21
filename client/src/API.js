@@ -62,7 +62,7 @@ export function callDatasetOperation(form, zip_files, callback){
     */
 }
 
-export function callExplainationOperation(form, zip_files, callback){
+export function callExplanationOperation(form, zip_files, callback){
     console.log("FORMDATA");
     let data = new FormData(form);
 
@@ -92,7 +92,7 @@ export function callExplainationOperation(form, zip_files, callback){
             data.set(element, blob);
             // cannot use fetch here, need to track upload progress
             let request = new XMLHttpRequest();
-            request.open('POST', '/explaination');
+            request.open('POST', '/explanation');
         
             request.upload.addEventListener('progress', (e) => {
                 let perc = parseInt((e.loaded / e.total) * 100);
@@ -114,44 +114,44 @@ export function getAllDatasets(callback){
     callRPC("getAllDatasets", {}, callback);
 }
 
-export function getAllExplainationsByDatasetID(datasetID, callback){
-    callRPC("getAllExplainationsByDatasetID", {
+export function getAllExplanationsByDatasetID(datasetID, callback){
+    callRPC("getAllExplanationsByDatasetID", {
         "datasetID": datasetID
     }, callback);
 }
 
-export function getAllTestEntities(datasetID, explainationID, callback){
+export function getAllTestEntities(datasetID, explanationID, callback){
     callRPC("getAllTestEntities", {
         "datasetID": datasetID, 
-        "explainationID": explainationID
+        "explanationID": explanationID
     }, callback);
 }
 
-export function getTasksByCurie(explainationID, curie, callback){
+export function getTasksByCurie(explanationID, curie, callback){
     callRPC("getTasksByCurie", {
-        "explainationID": explainationID, 
+        "explanationID": explanationID, 
         "curie": curie
     }, callback);
 }
 
-export function getTasksByEntityID(explainationID, entityID, callback){
+export function getTasksByEntityID(explanationID, entityID, callback){
     callRPC("getTasksByEntityID", {
-        "explainationID": explainationID, 
+        "explanationID": explanationID, 
         "entityID": entityID
     }, callback);
 }
 
-export function getTaskByID(explainationID, entityID, callback){
+export function getTaskByID(explanationID, entityID, callback){
     callRPC("getTaskByID", {
-        "explainationID": explainationID, 
+        "explanationID": explanationID, 
         "entityID": entityID
     }, callback);
 }
 
-export function getPredictionsByTaskID(datasetID, explainationID, taskID, callback){
+export function getPredictionsByTaskID(datasetID, explanationID, taskID, callback){
     callRPC("getPredictionsByTaskID", {
         "datasetID": datasetID, 
-        "explainationID": explainationID, 
+        "explanationID": explanationID, 
         "taskID": taskID
     }, callback);
 }
@@ -163,18 +163,18 @@ export function getInfoByCurie(datasetID, curie, callback){
     }, callback);
 }
 
-export function getInfoByEntityID(datasetID, explainationID, entityID, callback){
+export function getInfoByEntityID(datasetID, explanationID, entityID, callback){
     callRPC("getInfoByEntityID", {
         "datasetID": datasetID, 
-        "explainationID": explainationID, 
+        "explanationID": explanationID, 
         "entityID": entityID
     }, callback);
 }
 
-export function getExplainations(datasetID, explainationID, taskID, entityID, callback){
-    callRPC("getExplainations", {
+export function getExplanations(datasetID, explanationID, taskID, entityID, callback){
+    callRPC("getExplanations", {
         "datasetID": datasetID, 
-        "explainationID": explainationID, 
+        "explanationID": explanationID, 
         "taskID": taskID, 
         "entityID": entityID
     }, callback);
