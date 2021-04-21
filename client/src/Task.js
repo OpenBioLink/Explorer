@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from "prop-types";
 import { withRouter } from "react-router";
 import './App.css';
-import {Container, Row, Col, ListGroup} from 'react-bootstrap';
+import {Container, Row, Col, ListGroup, OverlayTrigger, Tooltip} from 'react-bootstrap';
 import Cookies from 'universal-cookie';
 import {AiFillCheckCircle} from 'react-icons/ai'
  
@@ -93,8 +93,19 @@ export class Task_ extends React.Component{
                                     <Col sm={5}>
                                         {row["Confidence"]}
                                     </Col>
-                                    <Col sm={1}>
-                                        {row["Hit"] == 1 ? <AiFillCheckCircle/> : ""}
+                                    <Col sm={1}>  
+                                        {row["Hit"] == 1 ? 
+                                            <OverlayTrigger
+                                                key='bottom'
+                                                placement='bottom'
+                                                overlay={
+                                                    <Tooltip id={`tooltip-bottom`}>
+                                                        This prediction is a hit in the test set, which means that this triple appears in a set that was excluded from the training. Entities without a checkmark represent new knowledge, but their correctness can not be validated.
+                                                    </Tooltip>
+                                                }>
+                                                <AiFillCheckCircle/> 
+                                            </OverlayTrigger>
+                                        : ""}
                                     </Col>
                                 </Row>
                                 </Container>
