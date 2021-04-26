@@ -6,5 +6,8 @@ function toc(msg) {
   console.log((msg || 'toc') + ": " + dt + "ms");
 }
 
+const variables = ["X", "Y", "A", "B", "C"];
+
 exports.tic = tic;
 exports.toc = toc;
+exports.variables = variables;

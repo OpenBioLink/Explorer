@@ -3,7 +3,7 @@
 const axios = require('axios');
 const fs = require('fs');
 var FormData = require('form-data');
-const {tic, toc}  = require('./util');
+const {tic, toc, variables}  = require('./util');
 
 const endpoint = "http://localhost:3030"
 
@@ -183,6 +183,46 @@ let graph_label = {
                 }
             }
             callback(res);
+        });
+    },
+    getInstantiations(datasetID, namespace, head, tail, rule, callback){
+        console.log(rule);
+        var used_variables = new Set();
+
+        function getEntity(entity){
+            if(!variables.includes(entity)){
+                return "<" + namespace + entity + ">";
+            } else if(entity === "X"){
+                return "<" + namespace + head + ">";
+            } else if(entity === "Y") {
+                return "<" + namespace + tail + ">";
+            } else {
+                used_variables.add("?" + entity);
+                return "?" + entity + "_"
+            }
+        }
+        function getRelation(relation){
+            return "<" + namespace + relation + ">";
+        }
+
+        var where = "";
+        rule.bodies.forEach((element) => {
+            where = where + getEntity(element.head) + " " + getRelation(element.relation) + " " + getEntity(element.tail) + " . \n";
+        });
+
+        used_variables.forEach((element) => {
+            where = where + element + "_ <http://www.w3.org/2000/01/rdf-schema#label> " + element + " . \n"
+        });
+
+        var query = `query=
+            SELECT ${[...used_variables].join(" ")}
+            WHERE {
+                ${where}
+            }
+        `
+        console.log(query);
+        runSPARQL(datasetID, query).then((data) => {
+            callback(data["results"]["bindings"])
         });
     }
 }

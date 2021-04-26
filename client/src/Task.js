@@ -31,8 +31,8 @@ export class Task_ extends React.Component{
         var id = params.get("id");
         API.getTaskByID(cookies.get('explanationID'), id, (task) => {
             console.log(task);
-            API.getInfoByEntityID(cookies.get('datasetID'), cookies.get('explanationID'), task[0]["EntityID"], (info) => {console.log(info);this.setState({entityInfo: info})});
-            this.setState({task: task[0]});
+            API.getInfoByEntityID(cookies.get('datasetID'), cookies.get('explanationID'), task["EntityID"], (info) => {console.log(info);this.setState({entityInfo: info})});
+            this.setState({task: task});
         });
         API.getPredictionsByTaskID(cookies.get('datasetID'), cookies.get('explanationID'), id, (predictions) => {
             console.log(predictions);
@@ -91,7 +91,7 @@ export class Task_ extends React.Component{
                                         {row["Label"] ? row["Label"] : row["EntityName"]}
                                     </Col>
                                     <Col sm={5}>
-                                        {row["Confidence"]}
+                                        {row["Confidence"].toFixed(5)}
                                     </Col>
                                     <Col sm={1}>  
                                         {row["Hit"] == 1 ? 

@@ -50,7 +50,7 @@ let db_explanations = {
             relation.id = task.RelationID
         where task.ID = '${entityID}';
         `
-        return queries.all(explanationID, sql);
+        return queries.get(explanationID, sql);
     },
     getPredictionsByTaskID(explanationID, taskID){
         var sql = `
@@ -62,6 +62,18 @@ let db_explanations = {
         where prediction.TaskID = ${taskID};
         `;
         return queries.all(explanationID, sql);
+    },
+    getPredictionByID(explanationID, taskID, entityID){
+        var sql = `
+        select 
+            entity.Id as EntityID, entity.Name as EntityName, prediction.confidence as Confidence, prediction.hit as Hit
+        from prediction 
+        inner join entity on 
+            entity.id = prediction.EntityID
+        where prediction.TaskID = ${taskID}
+        and prediction.EntityID = ${entityID};
+        `;
+        return queries.get(explanationID, sql);
     },
     getCurieByEntityID(explanationID, entityID){
         var sql = `
@@ -78,6 +90,8 @@ let db_explanations = {
             Rule.CLUSTER_ID as ClusterID,
             Rule.ID as RuleID, 
             Rule.CONFIDENCE as RuleConfidence, 
+            Rule.CorrectlyPredicted as RuleCorrectlyPredicted, 
+            Rule.Predicted as RulePredicted, 
             Rule.DEF as RuleDefinition
         from Rule 
         inner join Rule_Entity on
@@ -88,6 +102,16 @@ let db_explanations = {
         order by RuleConfidence desc;
         `;
         return queries.all(explanationID, sql);
+    },
+    getRuleByID(explanationID, ruleID){
+        var sql = `
+        select 
+            *
+        from Rule 
+        where 
+            Rule.ID = ${ruleID}
+        `;
+        return queries.get(explanationID, sql);
     }
 }
 

@@ -17,7 +17,7 @@ function createIndex(){
     );`
     db.prepare(sql).run();
     sql = `
-    CREATE TABLE "Explanation" (
+    CREATE TABLE "Explaination" (
         "ID"	TEXT NOT NULL,
         "DatasetID"	TEXT NOT NULL,
         "Label"	TEXT,

@@ -156,6 +156,15 @@ export function getPredictionsByTaskID(datasetID, explanationID, taskID, callbac
     }, callback);
 }
 
+export function getPredictionInfo(datasetID, explanationID, taskID, entityID, callback){
+    callRPC("getPredictionInfo", {
+        "datasetID": datasetID, 
+        "explanationID": explanationID, 
+        "taskID": taskID,
+        "entityID": entityID
+    }, callback);
+}
+
 export function getInfoByCurie(datasetID, curie, callback){
     callRPC("getInfoByCurie", {
         "datasetID": datasetID, 
@@ -177,5 +186,15 @@ export function getExplanations(datasetID, explanationID, taskID, entityID, call
         "explanationID": explanationID, 
         "taskID": taskID, 
         "entityID": entityID
+    }, callback);
+}
+
+export function getInstantiations(datasetID, explanationID, ruleID, head, tail, callback){
+    callRPC("getInstantiations", {
+        "datasetID": datasetID, 
+        "explanationID": explanationID, 
+        "ruleID": ruleID,
+        "head": head,
+        "tail": tail
     }, callback);
 }
