@@ -132,8 +132,8 @@ function requestListener(request, response) {
     let pathname = parseUrl.pathname;
 
     if(pathname == "/dataset" || pathname == "/expl"){
-        //maxFileSize = 2GB
-        var form = new formidable.IncomingForm({maxFileSize:2000*1024*1024});
+        //maxFileSize = 20GB
+        var form = new formidable.IncomingForm({maxFileSize:20000*1024*1024});
         form.parse(request, function (err, fields, files) {
             if(err){
                 console.log(`Request was expecting a form... Error: ${err.toString()}`);

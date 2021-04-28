@@ -55,7 +55,7 @@ export class Entity_ extends React.Component{
 
     loadIncomingEdges(){
         if(!this.state.incomingEdges){
-            API.getIncomingEdges(cookies.get('datasetID'), this.state.curie, (incoming) => this.setState({incomingEdges: incoming}));
+            API.getIncomingEdges(cookies.get('datasetID'), this.state.curie, (incoming) => {this.setState({incomingEdges: incoming})});
         }
     }
 
@@ -212,20 +212,23 @@ export class Entity_ extends React.Component{
                                         <Accordion.Collapse eventKey="outgoing">
                                             <Table className="mb-2">
                                                 <tbody>
-                                                    {this.state.outgoingEdges && Object.entries(this.state.outgoingEdges).map(rel =>
+                                                    {this.state.outgoingEdges ?
+                                                        Object.entries(this.state.outgoingEdges).length > 0 ?
+                                                        Object.entries(this.state.outgoingEdges).map(rel =>
                                                         <>
                                                             {rel[1].map(obj => 
                                                             <tr>
-                                                                <td className="w-75 text-left">
+                                                                <td className="w-50 text-left border-right">
                                                                     {rel[0]}
                                                                 </td>
-                                                                <td className="w-25 text-center">
+                                                                <td className="w-50 text-center">
                                                                     <a href={'/entity?term=' + obj[1]}>{obj[0] ? obj[0] : obj[1]}</a>
                                                                 </td>
                                                             </tr>
                                                             )}
-                                                        </>
-                                                    )}
+                                                        </>)
+                                                    : <p className="mt-3 text-center">No outgoing edges</p>
+                                                    : "" }
                                                 </tbody>
                                             </Table>
                                         </Accordion.Collapse>
@@ -242,15 +245,15 @@ export class Entity_ extends React.Component{
                                             <Table className="mb-2">
                                                 <tbody>
                                                     {this.state.incomingEdges ?
-                                                        this.state.incomingEdges.length > 0 ?
+                                                        Object.entries(this.state.incomingEdges).length > 0 ?
                                                             Object.entries(this.state.incomingEdges).map(rel =>
                                                             <>
                                                                 {rel[1].map(obj => 
                                                                 <tr>
-                                                                    <td className="w-25 text-center">
+                                                                    <td className="w-50 border-right text-center">
                                                                         <a href={'/entity?term=' + obj[1]}>{obj[0] ? obj[0] : obj[1]}</a>
                                                                     </td>
-                                                                    <td className="w-75 text-right">
+                                                                    <td className="w-50 text-right">
                                                                         {rel[0]}
                                                                     </td>
                                                                 </tr>

@@ -312,12 +312,13 @@ let graph_label = {
             PREFIX obl:  <http://ai-strategies.org/ns/>
             SELECT ?predicate ?object ?label
             WHERE {
-                <<<${namespace}${curie}> ?predicate ?object>> obl:split obl:test .
+                <<<${namespace}${curie}> ?predicate ?object>> obl:split obl:train .
                 OPTIONAL{ ?object <http://www.w3.org/2000/01/rdf-schema#label> ?label .}
             }
             `
         runSPARQL(datasetID, query).then((data) => {
-            if(Object.entries(data["results"]["bindings"][0]).length > 0){
+            console.log(data);
+            if(data["results"]["bindings"].length > 0 && Object.entries(data["results"]["bindings"][0]).length > 0){
                 for(var i = 0; i < data["results"]["bindings"].length; i++){
                     var edge = data["results"]["bindings"][i];
                     console.log(edge);
@@ -341,7 +342,7 @@ let graph_label = {
             PREFIX obl:  <http://ai-strategies.org/ns/>
             SELECT ?subject ?predicate ?label
             WHERE {
-                <<?subject ?predicate <${namespace}${curie}>>> obl:split obl:test .
+                <<?subject ?predicate <${namespace}${curie}>>> obl:split obl:train .
                 OPTIONAL{ ?subject <http://www.w3.org/2000/01/rdf-schema#label> ?label .}
             }
             `
