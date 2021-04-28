@@ -260,8 +260,8 @@ let graph_label = {
         runSPARQL(datasetID, query).then((data) => {
             var edge = data["results"]["bindings"][0];
             var res = {
-                Label: edge["label"]["value"],
-                Description: edge["comment"]["value"],
+                Label: edge["label"]?.value,
+                Description: edge["comment"]?.value,
                 Synonyms: [],
                 Labels: [],
                 Curie: curie
