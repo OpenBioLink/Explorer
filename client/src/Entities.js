@@ -37,14 +37,12 @@ export function Entities(){
   }
 
   function sort(){
-      tic();
       var entities_ = [...entities];
       if(asc === true){
         setEntityState(sortDesc(entities_), false);
       } else {
         setEntityState(sortAsc(entities_), true);
       }
-      toc("sort");
     }
 
   function query_entities(){
@@ -137,7 +135,6 @@ export function Entities(){
   }
 
   function editSearchTerm(term){
-    console.log(term);
     setActive(0);
     setSearchTerm(term);
   }

@@ -63,9 +63,6 @@ let explanationmethods = {
                     clusteringconfig = pass.join("\n");
                 }
 
-                console.log(fields)
-                console.log(files)
-
                 var oldpath = files.explanationfile.path;
                 var newpath = './db/' + id + '.db';
                 fs.rename(oldpath, newpath, function (err) {

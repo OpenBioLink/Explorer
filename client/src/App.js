@@ -86,7 +86,6 @@ class Header_ extends React.Component{
       this.setState({explanation: explanationid_});
     }
     cookies.addChangeListener((element) => {
-      console.log(element.name);
       if(element.name === "datasetLabel"){
         this.setState({dataset: element.value});
       } else if(element.name === "explanationLabel"){

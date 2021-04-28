@@ -85,7 +85,6 @@ let routes = {
             }
 
             Promise.all(promiseArr).then(iter => {
-                //console.log(iter);
                 let response = {};
                 iter.forEach((val, index) => {
                     response[keys[index]] = val;

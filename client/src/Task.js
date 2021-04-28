@@ -30,12 +30,10 @@ export class Task_ extends React.Component{
         var params = new URLSearchParams(this.props.location.search);
         var id = params.get("id");
         API.getTaskByID(cookies.get('explanationID'), id, (task) => {
-            console.log(task);
             API.getInfoByEntityID(cookies.get('datasetID'), cookies.get('explanationID'), task["EntityID"], (info) => {console.log(info);this.setState({entityInfo: info})});
             this.setState({task: task});
         });
         API.getPredictionsByTaskID(cookies.get('datasetID'), cookies.get('explanationID'), id, (predictions) => {
-            console.log(predictions);
             this.setState({predictions: this.sortPredictions(predictions)});
         });
     }

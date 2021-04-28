@@ -51,12 +51,10 @@ let db_index = {
         var sql = `INSERT into Explaination (ID, DatasetID, Label, Date, Comment, Method, RuleConfig, ClusteringConfig) 
                     VALUES ('${id}', '${datasetid}', '${label}', ${date}, '${comment}', '${method}', '${ruleconfig}', '${clusteringconfig}')`;
         var res = queries.run('index', sql);
-        console.log(res);
     },
     addTempExplanation(id, datasetid, date){
         var sql = `INSERT into Temp_Explaination (ID, DatasetID, Date) VALUES ('${id}', '${datasetid}', ${date})`;
         var res = queries.run('index', sql);
-        console.log(res);
     }
 }
 

@@ -9,7 +9,7 @@ const {tic, toc, variables}  = require('./util');
 const endpoint = "http://localhost:9999/blazegraph"
 
 async function runSPARQL(dbID, query){
-    console.log(query)
+    console.log(query);
     var url = `${endpoint}/namespace/${dbID}/sparql`
     var response = await axios({
         method: 'post',
@@ -50,7 +50,7 @@ function createNewDatasetFuseki(dbID, filepath, rdftype, callback){
             console.log(response.status + " Inserted data");
             callback(true);
         }).catch((err) => {
-            console.log(err.toJSON());
+            console.log(err);
             cleanup(`${adm_url}/${dbID}`);
             callback(false);
         })
@@ -220,8 +220,6 @@ let graph_label = {
             }
             `
         runSPARQL(datasetID, query).then((data) => {
-            toc("Labels");
-            tic();
             var label_map = {};
             for(var i = 0; i < data["results"]["bindings"].length; i++){
                 var triple = data["results"]["bindings"][i];
@@ -260,8 +258,8 @@ let graph_label = {
         runSPARQL(datasetID, query).then((data) => {
             var edge = data["results"]["bindings"][0];
             var res = {
-                Label: edge["label"]?.value,
-                Description: edge["comment"]?.value,
+                Label: edge?.label?.value,
+                Description: edge?.comment?.value,
                 Synonyms: [],
                 Labels: [],
                 Curie: curie
@@ -273,7 +271,6 @@ let graph_label = {
                 OPTIONAL {<${namespace}${curie}> <http://www.geneontology.org/formats/oboInOwl#hasExactSynonym> ?synonym .}
             }`
             runSPARQL(datasetID, query).then((data) => {
-                console.log(data);
                 if(Object.entries(data["results"]["bindings"][0]).length > 0){
                     for(var i = 0; i < data["results"]["bindings"].length; i++){
                         var edge = data["results"]["bindings"][i];
@@ -317,11 +314,9 @@ let graph_label = {
             }
             `
         runSPARQL(datasetID, query).then((data) => {
-            console.log(data);
             if(data["results"]["bindings"].length > 0 && Object.entries(data["results"]["bindings"][0]).length > 0){
                 for(var i = 0; i < data["results"]["bindings"].length; i++){
                     var edge = data["results"]["bindings"][i];
-                    console.log(edge);
                     res[edge["predicate"]["value"].replace(namespace, '')].push([edge["label"]?.value, edge["object"]["value"].replace(namespace, '')]);
                 }   
             }           
@@ -355,7 +350,6 @@ let graph_label = {
         });
     },
     getInstantiations(datasetID, namespace, head, tail, rule, callback){
-        console.log(rule);
         var used_variables = new Set();
 
         function getEntity(entity){
@@ -380,7 +374,7 @@ let graph_label = {
         });
 
         used_variables.forEach((element) => {
-            where = where + "?" + element + "_ <http://www.w3.org/2000/01/rdf-schema#label> " + "?" + element + " . \n"
+            where = where + "OPTIONAL { ?" + element + "_ <http://www.w3.org/2000/01/rdf-schema#label> " + "?" + element + " . }\n"
         });
 
         var query = `query=
@@ -398,7 +392,7 @@ let graph_label = {
                 used_variables.forEach((element) => {
                     var variable = {};
                     variable.variable = element;
-                    variable.label = edge[element]["value"];
+                    variable.label = edge[element]?.value;
                     variable.curie = edge[element + "_"]["value"].replace(namespace, '');
                     instantiation.push(variable);
                 });

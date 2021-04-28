@@ -32,7 +32,6 @@ export class Entity_ extends React.Component{
     }
 
     componentDidMount(){
-        console.log(this.props);
         var params = new URLSearchParams(this.props.location.search);
         var curie = params.get("term");
         this.setState({curie: curie});
@@ -86,7 +85,6 @@ export class Entity_ extends React.Component{
     }
 
     render(){
-        console.log(this.state.outgoingEdges);
         return (
             
             <div>

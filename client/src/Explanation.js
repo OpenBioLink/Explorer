@@ -40,7 +40,6 @@ export class Explanation_ extends React.Component{
         var entityID = params.get("entityID");
         API.getPredictionInfo(cookies.get('datasetID'), cookies.get('explanationID'), taskID, entityID, (res) => {
             this.setState({info: res});
-            console.log(res);
         });
         API.getExplanations(cookies.get('datasetID'), cookies.get('explanationID'), taskID, entityID, (explanation) => {
             console.log(explanation);
@@ -54,7 +53,6 @@ export class Explanation_ extends React.Component{
             showInstantiations: true
         })
         API.getInstantiations(cookies.get('datasetID'), cookies.get('explanationID'), rule["ID"], this.state.info.head.curie, this.state.info.tail.curie, (instantiations) => {
-            console.log(instantiations);
             this.setState({
                 instantiations: instantiations
             });
@@ -128,26 +126,26 @@ export class Explanation_ extends React.Component{
                                                     body.headLabel ? 
                                                         <a href={'/entity?term=' + body.head}>{body.headLabel}</a> 
                                                     : body.head === "X" ? 
-                                                        <a href={'/entity?term=' + this.state.info.head.curie}>{this.state.info.head.label}</a>
+                                                        <a href={'/entity?term=' + this.state.info.head.curie}>{this.state.info.head.label ? this.state.info.head.label : this.state.info.head.curie }</a>
                                                     : body.head === "Y" ? 
-                                                        <a href={'/entity?term=' + this.state.info.tail.curie}>{this.state.info.tail.label}</a>
+                                                        <a href={'/entity?term=' + this.state.info.tail.curie}>{this.state.info.tail.label ? this.state.info.tail.label: this.state.info.tail.curie}</a>
                                                     : body.head
-                                                    : ""
+                                                    : "Hi"
                                                 }
                                             </td>
                                             <td className="w-50 border-top-0">
                                                 {body.relation}
                                             </td>
                                             <td className="w-25 border-top-0">
-                                                {(this.state.info.head.label && this.state.info.tail.label) ?
+                                                {(this.state.info.head && this.state.info.tail) ?
                                                     body.tailLabel ? 
                                                         <a href={'/entity?term=' + body.tail}>{body.tailLabel}</a> 
                                                     : body.tail === "X" ? 
-                                                        <a href={'/entity?term=' + this.state.info.head.curie}>{this.state.info.head.label}</a>
+                                                        <a href={'/entity?term=' + this.state.info.head.curie}>{ this.state.info.head.label ? this.state.info.head.label : this.state.info.head.curie }</a>
                                                     : body.tail === "Y" ? 
-                                                        <a href={'/entity?term=' + this.state.info.tail.curie}>{this.state.info.tail.label}</a>
+                                                        <a href={'/entity?term=' + this.state.info.tail.curie}>{ this.state.info.tail.label ? this.state.info.tail.label: this.state.info.tail.curie }</a>
                                                     : body.tail
-                                                    : ""
+                                                    : "Hi"
                                                 }
                                             </td>
                                         </tr>
@@ -161,7 +159,7 @@ export class Explanation_ extends React.Component{
                                         {instantiation.map((variable) => 
                                             <>
                                             <Col>
-                                                {variable.variable} = <a href={'/entity?term=' + variable.curie}>{variable.label}</a>
+                                                {variable.variable} = <a href={'/entity?term=' + variable.curie}>{variable.label ? variable.label : variable.curie}</a>
                                             </Col>
                                             </>
                                         )}
@@ -249,9 +247,9 @@ function Cluster({cluster, info, showInstantiations}){
                                                     body.headLabel ? 
                                                         <a href={'/entity?term=' + body.head}>{body.headLabel}</a> 
                                                     : body.head === "X" ? 
-                                                        <b><a href={'/entity?term=' + info.head.curie}>{info.head.label}</a></b>
+                                                        <b><a href={'/entity?term=' + info.head.curie}>{info.head.label ? info.head.label : info.head.curie}</a></b>
                                                     : body.head === "Y" ? 
-                                                        <b><a href={'/entity?term=' + info.tail.curie}>{info.tail.label}</a> </b>
+                                                        <b><a href={'/entity?term=' + info.tail.curie}>{info.tail.label ? info.tail.label : info.tail.curie}</a> </b>
                                                     : body.head
                                                     : ""
                                                 }
@@ -260,13 +258,13 @@ function Cluster({cluster, info, showInstantiations}){
                                                 {body.relation}
                                             </td>
                                             <td className="w-25 border-top-0">
-                                                {(info.head.label && info.tail.label) ?
+                                                {(info.head && info.tail) ?
                                                     body.tailLabel ? 
                                                         <a href={'/entity?term=' + body.tail}>{body.tailLabel}</a> 
                                                     : body.tail === "X" ? 
-                                                        <b><a href={'/entity?term=' + info.head.curie}>{info.head.label}</a></b>
+                                                        <b><a href={'/entity?term=' + info.head.curie}>{info.head.label ? info.head.label : info.head.curie}</a></b>
                                                     : body.tail === "Y" ? 
-                                                        <b><a href={'/entity?term=' + info.tail.curie}>{info.tail.label}</a> </b> 
+                                                        <b><a href={'/entity?term=' + info.tail.curie}>{info.tail.label ? info.tail.label : info.tail.curie}</a> </b> 
                                                     : body.tail
                                                     : ""
                                                 }

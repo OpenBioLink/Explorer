@@ -63,7 +63,6 @@ export function callDatasetOperation(form, zip_files, callback){
 }
 
 export function callExplanationOperation(form, zip_files, callback){
-    console.log("FORMDATA");
     let data = new FormData(form);
 
     // cannot use fetch here, need to track upload progress

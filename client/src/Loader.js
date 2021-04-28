@@ -22,7 +22,6 @@ export class Loader_ extends React.Component{
 
     query_datasets(pk) {
       API.getAllDatasets((res) => {
-        console.log(res);
         this.setState({datasets: res});
         if(pk){
           this.setState({selected_dataset_id: res.find(x => x["ID"] === pk)["ID"]});
@@ -264,7 +263,7 @@ export class Loader_ extends React.Component{
                           :
                           <>
                             <p>Here you can import your private key</p>
-                            <Form onSubmit={(e)=> {e.preventDefault();console.log(e);this.setState({private_dataset: e.currentTarget.elements.private.value});}}>
+                            <Form onSubmit={(e)=> {e.preventDefault();this.setState({private_dataset: e.currentTarget.elements.private.value});}}>
                               <InputGroup className="mb-0">
                                 <FormControl
                                   name="private"
@@ -364,7 +363,7 @@ export class Loader_ extends React.Component{
                             :
                             <>
                               <p>Here you can import your private key</p>
-                              <Form onSubmit={(e)=> {e.preventDefault();console.log(e);this.setState({private_explanation: e.currentTarget.elements.private.value});}}>
+                              <Form onSubmit={(e)=> {e.preventDefault();this.setState({private_explanation: e.currentTarget.elements.private.value});}}>
                                 <InputGroup className="mb-0">
                                   <FormControl
                                     name="private"
@@ -472,7 +471,6 @@ export class Loader_ extends React.Component{
 
     function onSubmitLocalDataset(e){
       e.preventDefault();
-      console.log(e.target);
       if(e.target.elements.label_graph.files.length === 0){
         setAlertMessage("Please select a label graph file.")
         setShowAlert(true);
@@ -485,7 +483,6 @@ export class Loader_ extends React.Component{
       } else {
         setDisable(true);
         API.callDatasetOperation(e.target, ["label_graph"], (status, progress, pk, published) => {
-            console.log(status + " " + progress);
             if(status === "done"){
               //this.closeLocalDatasetModal(true);
               setStatus('done');
