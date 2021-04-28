@@ -3,9 +3,12 @@ import { useAccordionToggle } from "react-bootstrap/AccordionToggle";
 import PropTypes from "prop-types";
 import { withRouter } from "react-router";
 import './App.css';
-import {Container, Row, Col, ListGroup, Modal, Table, Accordion, Card, Button, AccordionContext} from 'react-bootstrap';
+import {Container, Row, Col, ListGroup, Modal, Table, Accordion, Card, Button, AccordionContext, OverlayTrigger, Tooltip} from 'react-bootstrap';
 import { IconContext } from "react-icons";
 import { RiArrowDropDownLine, RiArrowDropRightLine } from "react-icons/ri";
+import { HiVariable, HiOutlineVariable } from "react-icons/hi"
+import { AiOutlineFunction } from "react-icons/ai"
+import { FaArrowRight } from "react-icons/fa";
 import Cookies from 'universal-cookie';
  
 const cookies = new Cookies();
@@ -24,7 +27,9 @@ export class Explanation_ extends React.Component{
         this.state = {
             info: null,
             explanation: null,
+
             showInstantiations: false,
+            selectedRule: null,
             instantiations: null
         }
     }
@@ -43,12 +48,15 @@ export class Explanation_ extends React.Component{
         });
     }
 
-    showInstantiations(ruleID){
-        API.getInstantiations(cookies.get('datasetID'), cookies.get('explanationID'), ruleID, this.state.info.head.curie, this.state.info.tail.curie, (instantiations) => {
+    showInstantiations(rule){
+        this.setState({
+            selectedRule: rule,
+            showInstantiations: true
+        })
+        API.getInstantiations(cookies.get('datasetID'), cookies.get('explanationID'), rule["ID"], this.state.info.head.curie, this.state.info.tail.curie, (instantiations) => {
             console.log(instantiations);
             this.setState({
-                instantiations: instantiations,
-                showInstantiations: true
+                instantiations: instantiations
             });
         });
     }
@@ -57,121 +65,119 @@ export class Explanation_ extends React.Component{
         return (
             <div>
             {this.state.info ?
-                <Container className="my-2">
+                <>
+                <Container className="my-4">
                     <Row>
-                        <Col>
-                            <h2><a href={'/entity?term=' + this.state.info.head.curie}>{this.state.info.head.label ? this.state.info.head.label : this.state.info.tail.curie}</a></h2>
+                        <Col style={{display: "flex"}}>
+                            <h2 className="m-auto"><a href={'/entity?term=' + this.state.info.head.curie}>{this.state.info.head.label ? this.state.info.head.label : this.state.info.tail.curie}</a></h2>
                         </Col>
-                        <Col>
-                            <h2>{this.state.info.rel}</h2>
+                        <Col style={{display: "flex"}}>
+                            <h2 className="m-auto">{this.state.info.rel}</h2>
                         </Col>
-                        <Col>
-                            <h2><a href={'/entity?term=' + this.state.info.tail.curie}>{this.state.info.tail.label ? this.state.info.tail.label : this.state.info.tail.curie}</a></h2>
+                        <Col style={{display: "flex"}}>
+                            <h2 className="m-auto"><a href={'/entity?term=' + this.state.info.tail.curie}>{this.state.info.tail.label ? this.state.info.tail.label : this.state.info.tail.curie}</a></h2>
                         </Col>
-                        <Col>
-                            <h2>{this.state.info.confidence.toFixed(5)}</h2>
+                    </Row>
+                    <Row>
+                        <Col className="mt-3" style={{display: "flex"}}>
+                            <h4 className="m-auto">Confidence: {this.state.info.confidence.toFixed(5)}</h4>
                         </Col>
                     </Row>
                 </Container>
-            : "" }
-                <Accordion defaultActiveKey="0" className="w-75 m-auto">
-                {this.state.explanation && this.state.info ? 
-                this.state.explanation.map(cluster =>
-                        <Card>
-                            <CustomToggle eventKey={String(cluster["ID"])} confidence={cluster["Rules"][0]["Confidence"]} activeKey="0"/>
-                            <Accordion.Collapse eventKey={String(cluster["ID"])}>
-                                <Table className="w-auto m-auto"> 
-                                    {cluster["Rules"].map(rule =>
-                                        <tr className="mb-2">
-                                            <td>
-                                                <Table className="m-0">
-                                                        <tbody>
-                                                        {rule.Definition.bodies.map((body) =>
-                                                                    <tr>
-                                                                        <td className="w-25 border-top-0">
-                                                                            {(this.state.info.head && this.state.info.tail) ?
-                                                                                body.headLabel ? 
-                                                                                    <a href={'/entity?term=' + body.head}>{body.headLabel}</a> 
-                                                                                : body.head === "X" ? 
-                                                                                    <b><a href={'/entity?term=' + this.state.info.head.curie}>{this.state.info.head.label}</a></b>
-                                                                                : body.head === "Y" ? 
-                                                                                    <b><a href={'/entity?term=' + this.state.info.tail.curie}>{this.state.info.tail.label}</a> </b>
-                                                                                : body.head
-                                                                                : ""
-                                                                            }
-                                                                        </td>
-                                                                        <td className="w-50 border-top-0">
-                                                                            {body.relation}
-                                                                        </td>
-                                                                        <td className="w-25 border-top-0">
-                                                                            {(this.state.info.head.label && this.state.info.tail.label) ?
-                                                                                body.tailLabel ? 
-                                                                                    <a href={'/entity?term=' + body.tail}>{body.tailLabel}</a> 
-                                                                                : body.tail === "X" ? 
-                                                                                    <b><a href={'/entity?term=' + this.state.info.head.curie}>{this.state.info.head.label}</a></b>
-                                                                                : body.tail === "Y" ? 
-                                                                                    <b><a href={'/entity?term=' + this.state.info.tail.curie}>{this.state.info.tail.label}</a> </b> 
-                                                                                : body.tail
-                                                                                : ""
-                                                                            }
-                                                                        </td>
-                                                                    </tr>
-                                                        )}
-                                                        </tbody>
-                                                    </Table>
-                                            </td>
-                                            <td className="align-middle">
-                                                {rule["Confidence"].toFixed(5)}
-                                            </td>
-                                            <td className="align-middle">
-                                                {rule["CorrectlyPredicted"]}
-                                            </td>
-                                            <td className="align-middle">
-                                                {rule["Predicted"]}
-                                            </td>
-                                            <td className="align-middle">
-                                                <Button onClick={() => {this.showInstantiations(rule["ID"])}}>Instantiations</Button>
-                                            </td>
-                                        </tr>
-                                    )}
-                                    </Table>
-                            </Accordion.Collapse>
-                        </Card>
-                )
+                {this.state.explanation && this.state.info ?
+                    this.state.explanation.length > 1 ? 
+                        <Accordion defaultActiveKey="0" className="w-75 m-auto">
+                        {this.state.explanation.map(cluster =>
+                            <Card>
+                                <CustomToggle eventKey={String(cluster["ID"])} confidence={cluster["Rules"][0]["Confidence"]} activeKey="0"/>
+                                <Accordion.Collapse eventKey={String(cluster["ID"])}>
+                                    <Cluster cluster={cluster} info={this.state.info} showInstantiations={(rule)=>this.showInstantiations(rule)}/>
+                                </Accordion.Collapse>
+                            </Card>
+                        )}
+                        </Accordion>
+                    : <Cluster cluster={this.state.explanation[0]} info={this.state.info} showInstantiations={(rule)=>this.showInstantiations(rule)}/>
                 : "" }
-                </Accordion>
-                <Modal show={this.state.showInstantiations} onHide={() => {this.setState({showInstantiations: false})}}>
+                <Modal show={this.state.showInstantiations} size="lg" onHide={() => {this.setState({showInstantiations: false})}}>
                     <Modal.Header closeButton>
-                    <Modal.Title>Modal heading</Modal.Title>
+                    <Modal.Title>Instantiations</Modal.Title>
                     </Modal.Header>
                     <Modal.Body>
-                    <Table>
+                        <Table className="m-0 text-center mb-3">
                             <tbody>
-                                { this.state.instantiations ? 
-                                this.state.instantiations.map((instantiation) =>
-                                    <tr>
-                                        {Object.entries(instantiation).map(([variable, labeled_instantiation]) => 
-                                            <>
-                                            <td>
-                                                {variable} = {labeled_instantiation["value"]}
+                                <tr>
+                                    <td className="w-25 border-top-0">
+                                        <b><a href={'/entity?term=' + this.state.info.head.curie}>{this.state.info.head.label ? this.state.info.head.label : this.state.info.tail.curie}</a></b>
+                                    </td>
+                                    <td className="w-50 border-top-0">
+                                        {this.state.info.rel}
+                                    </td>
+                                    <td className="w-25 border-top-0">
+                                        <b><a href={'/entity?term=' + this.state.info.tail.curie}>{this.state.info.tail.label ? this.state.info.tail.label : this.state.info.tail.curie}</a></b>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td className="text-center border-top-0" colSpan="3">
+                                        <FaArrowRight/>
+                                    </td>
+                                </tr>
+                            {this.state.selectedRule?.Definition.bodies.map((body) =>
+                                        <tr>
+                                            <td className="w-25 border-top-0">
+                                                {(this.state.info.head && this.state.info.tail) ?
+                                                    body.headLabel ? 
+                                                        <a href={'/entity?term=' + body.head}>{body.headLabel}</a> 
+                                                    : body.head === "X" ? 
+                                                        <a href={'/entity?term=' + this.state.info.head.curie}>{this.state.info.head.label}</a>
+                                                    : body.head === "Y" ? 
+                                                        <a href={'/entity?term=' + this.state.info.tail.curie}>{this.state.info.tail.label}</a>
+                                                    : body.head
+                                                    : ""
+                                                }
                                             </td>
-                                            </>
-                                        )}
-                                    </tr>
-                                )
-                                : "" }
+                                            <td className="w-50 border-top-0">
+                                                {body.relation}
+                                            </td>
+                                            <td className="w-25 border-top-0">
+                                                {(this.state.info.head.label && this.state.info.tail.label) ?
+                                                    body.tailLabel ? 
+                                                        <a href={'/entity?term=' + body.tail}>{body.tailLabel}</a> 
+                                                    : body.tail === "X" ? 
+                                                        <a href={'/entity?term=' + this.state.info.head.curie}>{this.state.info.head.label}</a>
+                                                    : body.tail === "Y" ? 
+                                                        <a href={'/entity?term=' + this.state.info.tail.curie}>{this.state.info.tail.label}</a>
+                                                    : body.tail
+                                                    : ""
+                                                }
+                                            </td>
+                                        </tr>
+                            )}
                             </tbody>
                         </Table>
+                        <Container className="text-center">
+                                { this.state.instantiations ? 
+                                this.state.instantiations.map((instantiation) =>
+                                    <Row className="border-top py-2">
+                                        {instantiation.map((variable) => 
+                                            <>
+                                            <Col>
+                                                {variable.variable} = <a href={'/entity?term=' + variable.curie}>{variable.label}</a>
+                                            </Col>
+                                            </>
+                                        )}
+                                    </Row>
+                                )
+                                : "" }
+                        </Container>
                     </Modal.Body>
                     <Modal.Footer>
                     <Button variant="secondary" onClick={() => {this.setState({showInstantiations: false})}}>
                         Close
                     </Button>
-                    <Button variant="primary" onClick={() => {this.setState({showInstantiations: false})}}>
-                        Save Changes
-                    </Button>
                     </Modal.Footer>
                 </Modal>
+                </>
+            : "" }
         </div>
         );
     }
@@ -191,17 +197,17 @@ function CustomToggle({eventKey, confidence, activeKey}) {
         <Card.Header onClick={decoratedOnClick}>
             <Table className="mb-0">
                 <tr>
-                    <td className="text-left border-top-0">
+                    <td className="w-auto text-left border-top-0">
                         <IconContext.Provider value={{ size: "2em", className: "global-class-name" }}>
                             <div>
                                 {isCurrentEventKey ? <RiArrowDropDownLine/> : <RiArrowDropRightLine/>}
                             </div>
                         </IconContext.Provider>
                     </td>
-                    <td className="text-left border-top-0">
+                    <td className="w-75 align-middle text-left border-top-0">
                         <h5 className="mb-0">Cluster</h5>
                     </td>
-                    <td className="text-right border-top-0">
+                    <td className="w-25 align-middle text-right border-top-0">
                         <h5 className="mb-0">{confidence.toFixed(5)}</h5>
                     </td>
                 </tr>
@@ -209,3 +215,100 @@ function CustomToggle({eventKey, confidence, activeKey}) {
         </Card.Header>
     );
   }
+
+function Cluster({cluster, info, showInstantiations}){
+    return (
+        <Table className="w-auto m-auto">
+            <thead>
+                <tr>
+                    <th className="align-middle">
+                        Rule
+                    </th>
+                    <th className="align-middle">
+                        Confidence
+                    </th>
+                    <th className="align-middle">
+                        Correctly predicted
+                    </th>
+                    <th className="align-middle">
+                        Predicted
+                    </th>
+                    <th/>
+                </tr>
+            </thead>
+            <tbody> 
+            {cluster["Rules"].map(rule =>
+                <tr className="mb-2">
+                    <td>
+                        <Table className="m-0">
+                            <tbody>
+                            {rule.Definition.bodies.map((body) =>
+                                        <tr>
+                                            <td className="w-25 border-top-0">
+                                                {(info.head && info.tail) ?
+                                                    body.headLabel ? 
+                                                        <a href={'/entity?term=' + body.head}>{body.headLabel}</a> 
+                                                    : body.head === "X" ? 
+                                                        <b><a href={'/entity?term=' + info.head.curie}>{info.head.label}</a></b>
+                                                    : body.head === "Y" ? 
+                                                        <b><a href={'/entity?term=' + info.tail.curie}>{info.tail.label}</a> </b>
+                                                    : body.head
+                                                    : ""
+                                                }
+                                            </td>
+                                            <td className="w-50 border-top-0">
+                                                {body.relation}
+                                            </td>
+                                            <td className="w-25 border-top-0">
+                                                {(info.head.label && info.tail.label) ?
+                                                    body.tailLabel ? 
+                                                        <a href={'/entity?term=' + body.tail}>{body.tailLabel}</a> 
+                                                    : body.tail === "X" ? 
+                                                        <b><a href={'/entity?term=' + info.head.curie}>{info.head.label}</a></b>
+                                                    : body.tail === "Y" ? 
+                                                        <b><a href={'/entity?term=' + info.tail.curie}>{info.tail.label}</a> </b> 
+                                                    : body.tail
+                                                    : ""
+                                                }
+                                            </td>
+                                        </tr>
+                            )}
+                            </tbody>
+                        </Table>
+                    </td>
+                    <td className="align-middle">
+                        {rule["Confidence"].toFixed(5)}
+                    </td>
+                    <td className="align-middle">
+                        {rule["CorrectlyPredicted"]}
+                    </td>
+                    <td className="align-middle">
+                        {rule["Predicted"]}
+                    </td>
+                    <td className="align-middle">
+                        {rule.Definition["hasUnboundVariables"] ? 
+                        <OverlayTrigger
+                            key='top'
+                            placement='top'
+                            overlay={
+                            <Tooltip id={`tooltip-top`}>
+                                Show instantiations of variables.
+                            </Tooltip>
+                            }
+                        >
+                            <Button onClick={() => {showInstantiations(rule)}} className="p-1">
+                                <IconContext.Provider value={{ size: "1.25em", className: "global-class-name" }}>
+                                    <div>
+                                        <HiOutlineVariable className="m-1"/>
+                                    </div>
+                                </IconContext.Provider>
+                            </Button> 
+                        </OverlayTrigger>
+                        : ""}
+                    </td>
+                </tr>
+            )}
+            </tbody>
+        </Table>
+    )
+}

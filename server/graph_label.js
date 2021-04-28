@@ -5,10 +5,12 @@ const fs = require('fs');
 var FormData = require('form-data');
 const {tic, toc, variables}  = require('./util');
 
-const endpoint = "http://localhost:3030"
+//const endpoint = "http://localhost:3030"
+const endpoint = "http://localhost:9999/blazegraph"
 
 async function runSPARQL(dbID, query){
-    var url = `${endpoint}/${dbID}`
+    console.log(query)
+    var url = `${endpoint}/namespace/${dbID}/sparql`
     var response = await axios({
         method: 'post',
         headers: {"Content-type": "application/x-www-form-urlencoded"},
@@ -19,10 +21,11 @@ async function runSPARQL(dbID, query){
     return data;
 }
 
-function createNewDataset(dbID, filepath, rdftype, callback){
+function createNewDatasetFuseki(dbID, filepath, rdftype, callback){
     var adm_url = `${endpoint}/$/datasets`;
     var ds_url = `${endpoint}/${dbID}`;
     var ds_created = false;
+    console.log("Create");
     axios({
         method: 'post',
         headers: {"Content-type": "application/x-www-form-urlencoded"},
@@ -47,7 +50,7 @@ function createNewDataset(dbID, filepath, rdftype, callback){
             console.log(response.status + " Inserted data");
             callback(true);
         }).catch((err) => {
-            console.log(err);
+            console.log(err.toJSON());
             cleanup(`${adm_url}/${dbID}`);
             callback(false);
         })
@@ -62,7 +65,67 @@ function createNewDataset(dbID, filepath, rdftype, callback){
     });
 }
 
-function cleanup(url){
+function cleanupFuseki(url){
+    axios({
+        method: 'delete',
+        url: url
+    }).then(() => {
+        console.log("Error -> Removed Dataset");
+    }).catch((err) => {
+        console.log(err);
+    })
+}
+
+function createNewDatasetBlazegraph(dbID, filepath, rdftype, callback){
+
+    var properties = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+        <!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+        <properties>
+        <entry key="com.bigdata.rdf.sail.truthMaintenance">false</entry>
+        <entry key="com.bigdata.namespace.${dbID}.lex.com.bigdata.btree.BTree.branchingFactor">400</entry>
+        <entry key="com.bigdata.rdf.store.AbstractTripleStore.textIndex">false</entry>
+        <entry key="com.bigdata.rdf.store.AbstractTripleStore.justify">false</entry>
+        <entry key="com.bigdata.namespace.${dbID}.spo.com.bigdata.btree.BTree.branchingFactor">1024</entry>
+        <entry key="com.bigdata.rdf.store.AbstractTripleStore.statementIdentifiers">true</entry>
+        <entry key="com.bigdata.rdf.store.AbstractTripleStore.axiomsClass">com.bigdata.rdf.axioms.NoAxioms</entry>
+        <entry key="com.bigdata.rdf.sail.namespace">${dbID}</entry>
+        <entry key="com.bigdata.rdf.store.AbstractTripleStore.quads">false</entry>
+        <entry key="com.bigdata.rdf.store.AbstractTripleStore.geoSpatial">false</entry>
+        <entry key="com.bigdata.journal.Journal.groupCommit">false</entry>
+        <entry key="com.bigdata.rdf.sail.isolatableIndices">false</entry>
+    </properties>`
+
+    var adm_url = `${endpoint}/namespace`;
+    var ds_url = `${endpoint}/namespace/${dbID}/sparql`;
+    axios({
+        method: 'post',
+        headers: {"Content-type": "application/xml"},
+        url: adm_url,
+        data: properties
+    }).then((response) => {
+        console.log(response.status + " Inserted dataset");
+
+        axios({
+            method: 'post',
+            url: ds_url,
+            maxContentLength: Infinity,
+            maxBodyLength: Infinity,
+            headers: {"Content-type": "application/x-turtle-RDR"},
+            data: fs.createReadStream(filepath)
+        }).then((response) => {
+            console.log(response.status + " Inserted data");
+            callback(true);
+        }).catch((err) => {
+            console.log(err);
+            callback(false);
+        })
+    }).catch((err) => {
+        console.log(err.toJSON());
+        callback(false);
+    });
+}
+
+function cleanupBlazegraph(url){
     axios({
         method: 'delete',
         url: url
@@ -91,7 +154,35 @@ let graph_label = {
             for(var i = 0; i < entities.length; i++){
                 entities[i].Label = label_map[entities[i]["NAME"]];
             }
-            callback(entities);
+
+            
+            var query = `query=
+            SELECT ?subject ?type
+            WHERE {
+                ?subject a ?type 
+            }
+            `
+            runSPARQL(datasetID, query).then((data) => {
+                var type_map = new Proxy({}, {get(target, name){
+                    if(name === "toJSON" || name === "then"){
+                        return undefined;
+                    } else if(!target.hasOwnProperty(name)){
+                        target[name] = []
+                    }
+                    return target[name]
+                }});
+                var types = new Set();
+                for(var i = 0; i < data["results"]["bindings"].length; i++){
+                    var triple = data["results"]["bindings"][i];
+                    type_map[triple["subject"]["value"].replace(namespace, '')].push(triple["type"]["value"])
+                }
+                for(var i = 0; i < entities.length; i++){
+                    type_map[entities[i]["NAME"]].forEach(item => types.add(item))
+                    entities[i].Types = type_map[entities[i]["NAME"]];
+                }
+                callback(entities, Array.from(types).sort());
+            });
+
         });
     },
     addLabelsToPredictions(datasetID, namespace, predictions, callback){
@@ -159,28 +250,105 @@ let graph_label = {
     },
     getInfoByCurie(datasetID, namespace, curie, callback){
         var query = `query=
-            SELECT ?predicate ?object
+            SELECT ?label ?comment
             WHERE {
-                <${namespace}${curie}> ?predicate ?object 
+                <${namespace}${curie}> <http://www.w3.org/2000/01/rdf-schema#label> ?label .
+                OPTIONAL {<${namespace}${curie}> <http://www.w3.org/2000/01/rdf-schema#comment> ?comment .}
             }
             `
 
         runSPARQL(datasetID, query).then((data) => {
+            var edge = data["results"]["bindings"][0];
             var res = {
-                Label: null,
-                Description: null,
+                Label: edge["label"]["value"],
+                Description: edge["comment"]["value"],
                 Synonyms: [],
+                Labels: [],
                 Curie: curie
             }
+
+            var query = `query=
+            SELECT ?synonym
+            WHERE {
+                OPTIONAL {<${namespace}${curie}> <http://www.geneontology.org/formats/oboInOwl#hasExactSynonym> ?synonym .}
+            }`
+            runSPARQL(datasetID, query).then((data) => {
+                console.log(data);
+                if(Object.entries(data["results"]["bindings"][0]).length > 0){
+                    for(var i = 0; i < data["results"]["bindings"].length; i++){
+                        var edge = data["results"]["bindings"][i];
+                        res.Synonyms.push(edge["synonym"]["value"]);
+                    }
+                }
+
+                var query = `query=
+                    SELECT ?label
+                    WHERE {
+                        OPTIONAL {<${namespace}${curie}> a ?label .}
+                    }`
+                runSPARQL(datasetID, query).then((data) => {
+                    if(Object.entries(data["results"]["bindings"][0]).length > 0){
+                        for(var i = 0; i < data["results"]["bindings"].length; i++){
+                            var edge = data["results"]["bindings"][i];
+                            res.Labels.push(edge["label"]["value"]);
+                        }
+                    }
+                    callback(res);
+                });
+            });
+        });
+    },
+    getOutgoingEdges(datasetID, namespace, curie, callback){
+        var res = new Proxy({}, {get(target, name){
+            if(name === "toJSON" || name === "then"){
+                return undefined;
+            } else if(!target.hasOwnProperty(name)){
+                target[name] = []
+            }
+            return target[name]
+        }});
+
+        var query = `query=
+            PREFIX obl:  <http://ai-strategies.org/ns/>
+            SELECT ?predicate ?object ?label
+            WHERE {
+                <<<${namespace}${curie}> ?predicate ?object>> obl:split obl:test .
+                OPTIONAL{ ?object <http://www.w3.org/2000/01/rdf-schema#label> ?label .}
+            }
+            `
+        runSPARQL(datasetID, query).then((data) => {
+            if(Object.entries(data["results"]["bindings"][0]).length > 0){
+                for(var i = 0; i < data["results"]["bindings"].length; i++){
+                    var edge = data["results"]["bindings"][i];
+                    console.log(edge);
+                    res[edge["predicate"]["value"].replace(namespace, '')].push([edge["label"]?.value, edge["object"]["value"].replace(namespace, '')]);
+                }   
+            }           
+            callback(res);
+        });
+    },
+    getIncomingEdges(datasetID, namespace, curie, callback){
+        var res = new Proxy({}, {get(target, name){
+            if(name === "toJSON" || name === "then"){
+                return undefined;
+            } else if(!target.hasOwnProperty(name)){
+                target[name] = []
+            }
+            return target[name]
+        }});
+
+        var query = `query=
+            PREFIX obl:  <http://ai-strategies.org/ns/>
+            SELECT ?subject ?predicate ?label
+            WHERE {
+                <<?subject ?predicate <${namespace}${curie}>>> obl:split obl:test .
+                OPTIONAL{ ?subject <http://www.w3.org/2000/01/rdf-schema#label> ?label .}
+            }
+            `
+        runSPARQL(datasetID, query).then((data) => {
             for(var i = 0; i < data["results"]["bindings"].length; i++){
                 var edge = data["results"]["bindings"][i];
-                if(edge["predicate"]["value"] === "http://www.w3.org/2000/01/rdf-schema#label"){
-                    res.Label = edge["object"]["value"];
-                } else if(edge["predicate"]["value"] === "http://www.w3.org/2000/01/rdf-schema#comment"){
-                    res.Description = edge["object"]["value"];
-                } else if(edge["predicate"]["value"] === "http://www.geneontology.org/formats/oboInOwl#hasExactSynonym"){
-                    res.Synonyms.push(edge["object"]["value"]);
-                }
+                res[edge["predicate"]["value"].replace(namespace, '')].push([edge["label"]["value"], edge["subject"]["value"].replace(namespace, '')]);
             }
             callback(res);
         });
@@ -197,7 +365,7 @@ let graph_label = {
             } else if(entity === "Y") {
                 return "<" + namespace + tail + ">";
             } else {
-                used_variables.add("?" + entity);
+                used_variables.add(entity);
                 return "?" + entity + "_"
             }
         }
@@ -207,25 +375,40 @@ let graph_label = {
 
         var where = "";
         rule.bodies.forEach((element) => {
-            where = where + getEntity(element.head) + " " + getRelation(element.relation) + " " + getEntity(element.tail) + " . \n";
+            where = where + "<<" + getEntity(element.head) + " " + getRelation(element.relation) + " " + getEntity(element.tail) + ">> obl:split obl:train . \n";
         });
 
         used_variables.forEach((element) => {
-            where = where + element + "_ <http://www.w3.org/2000/01/rdf-schema#label> " + element + " . \n"
+            where = where + "?" + element + "_ <http://www.w3.org/2000/01/rdf-schema#label> " + "?" + element + " . \n"
         });
 
         var query = `query=
-            SELECT ${[...used_variables].join(" ")}
+            PREFIX obl:  <http://ai-strategies.org/ns/>
+            SELECT ${[...used_variables].map(x => "?" + x).join(" ")} ${[...used_variables].map(x => "?" + x + "_").join(" ")}
             WHERE {
                 ${where}
             }
         `
-        console.log(query);
         runSPARQL(datasetID, query).then((data) => {
-            callback(data["results"]["bindings"])
+            var res = [];
+            for(var i = 0; i < data["results"]["bindings"].length; i++){
+                var edge = data["results"]["bindings"][i];
+                var instantiation = [];
+                used_variables.forEach((element) => {
+                    var variable = {};
+                    variable.variable = element;
+                    variable.label = edge[element]["value"];
+                    variable.curie = edge[element + "_"]["value"].replace(namespace, '');
+                    instantiation.push(variable);
+                });
+                res.push(instantiation);
+            }
+            //callback(data["results"]["bindings"])
+            callback(res);
         });
     }
 }
 
-exports.createNewDataset = createNewDataset;
+exports.createNewDatasetFuseki = createNewDatasetFuseki;
+exports.createNewDatasetBlazegraph = createNewDatasetBlazegraph;
 exports.graph_label = graph_label;

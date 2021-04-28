@@ -5,6 +5,7 @@
 		}
 	],
 	"settings": {
-		"jupyter.jupyterServerType": "local"
+		"jupyter.jupyterServerType": "local",
+		"python.pythonPath": "C:\\Python36\\python.exe"
 	}
 }

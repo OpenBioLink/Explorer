@@ -189,6 +189,20 @@ export function getExplanations(datasetID, explanationID, taskID, entityID, call
     }, callback);
 }
 
+export function getOutgoingEdges(datasetID, curie, callback){
+    callRPC("getOutgoingEdges", {
+        "datasetID": datasetID, 
+        "curie": curie
+    }, callback);
+}
+
+export function getIncomingEdges(datasetID, curie, callback){
+    callRPC("getIncomingEdges", {
+        "datasetID": datasetID, 
+        "curie": curie
+    }, callback);
+}
+
 export function getInstantiations(datasetID, explanationID, ruleID, head, tail, callback){
     callRPC("getInstantiations", {
         "datasetID": datasetID, 

@@ -48,8 +48,8 @@ let rpcmethods = {
                 tic();
                 var namespace = index.getNamespaceFromDatasetID(body.datasetID)
                 var entities = db.getAllTestEntities(body.explanationID);
-                graph.addLabelsToEntities(body.datasetID, namespace, entities, (labeled_entities) => {
-                    resolve(labeled_entities || {});
+                graph.addLabelsToEntities(body.datasetID, namespace, entities, (labeled_entities, types) => {
+                    resolve({entities: labeled_entities, types: types} || {});
                     toc("getAllTestEntities");
                 });
             });
@@ -199,6 +199,38 @@ let rpcmethods = {
             });
         }
     },
+    getOutgoingEdges:{
+        description: ``,
+        params: ['datasetID', 'curie'],
+        returns: [''],
+        exec(body) {
+            //body.taskID, body.entityID
+            return new Promise((resolve) => {
+                tic();
+                var namespace = index.getNamespaceFromDatasetID(body.datasetID)
+                graph.getOutgoingEdges(body.datasetID, namespace, body.curie, (outgoing) => {
+                    toc("Get outgoing");
+                    resolve(outgoing || {});
+                });
+            });
+        }
+    },
+    getIncomingEdges:{
+        description: ``,
+        params: ['datasetID', 'curie'],
+        returns: [''],
+        exec(body) {
+            //body.taskID, body.entityID
+            return new Promise((resolve) => {
+                tic();
+                var namespace = index.getNamespaceFromDatasetID(body.datasetID)
+                graph.getIncomingEdges(body.datasetID, namespace, body.curie, (incoming) => {
+                    toc("Get incoming");
+                    resolve(incoming || {});
+                });
+            });
+        }
+    },
     getInstantiations:{
         description: ``,
         params: ['datasetID', 'explanationID', 'ruleID', 'head', 'tail'],
@@ -232,26 +264,35 @@ function splitRule(ruleStr, entities){
         relation: null,
         head: null,
         tail: null,
+        hasUnboundVariables: false,
         bodies: []
     }
 
     var [headStr, bodyStr] = ruleStr.split(" <= ");
     [def.head, def.relation, def.tail] = splitAtom(headStr);
 
-    if(entities && !(variables.includes(def.head))){
-        entities.add(def.head);
-    }
-    if(entities && !(variables.includes(def.tail))){
-        entities.add(def.tail);
+    if(entities) {
+        if(!(variables.includes(def.head))){
+            entities.add(def.head);
+        }
+        if(!(variables.includes(def.tail))){
+            entities.add(def.tail);
+        }
     }
 
     bodyStr.split(", ").forEach((element)=> {
         var [head, relation, tail] = splitAtom(element);
-        if(entities && !(variables.includes(head))){
-            entities.add(head);
-        }
-        if(entities && !(variables.includes(tail))){
-            entities.add(tail);
+        if(entities){
+            if(!(variables.includes(head))){
+                entities.add(head);
+            } else if(head !== "Y" && head !== "X"){
+                def.hasUnboundVariables = true;
+            }
+            if(!(variables.includes(tail))){
+                entities.add(tail);
+            } else if(tail !== "Y" && tail !== "X"){
+                def.hasUnboundVariables = true;
+            }
         }
         def["bodies"].push({
             relation: relation,

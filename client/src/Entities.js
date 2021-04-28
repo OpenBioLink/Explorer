@@ -14,10 +14,13 @@ const API = require('./API');
 export function Entities(){
   const history = useHistory();
   const [entities, setEntities] = useHistoryState("entities", null);
+  const [types, setTypes] = useHistoryState("types", null);
   const [asc, setAsc] = useHistoryState("asc", null);
+
   const [pageSize, setPageSize] = useState(50);
   const [active, setActive] = useHistoryState("active", 0);
   const [skip, setSkip] = useState(2);
+  const [selectedType, setSelectedType] = useState('All types');
   const [searchTerm, setSearchTerm] = useHistoryState("searchTerm", "");
 
   useEffect(() => {
@@ -27,7 +30,8 @@ export function Entities(){
   }, []);
 
 
-  function setEntityState(entities, asc){
+  function setEntityState(entities, types, asc){
+    setTypes(types);
     setEntities(entities);
     setAsc(asc);
   }
@@ -44,14 +48,13 @@ export function Entities(){
     }
 
   function query_entities(){
-    API.getAllTestEntities(cookies.get('datasetID'), cookies.get('explanationID'), (entities) => {
-      setEntityState(sortAsc(entities), true);
+    API.getAllTestEntities(cookies.get('datasetID'), cookies.get('explanationID'), (data) => {
+      setEntityState(sortAsc(data["entities"]), data["types"], true);
     });
   }
 
   return (
-    <div>
-      <pre>
+    <div style={{minHeight: "100vh"}}>
         <Navbar bg="dark" variant="dark">
           <Form inline>
             <Button variant="outline-info" className="mr-sm-2" onClick={() => sort()}>
@@ -60,13 +63,30 @@ export function Entities(){
                 <ImSortAlphaDesc/>
               }
             </Button>
+            <Dropdown className="mr-sm-2">
+              <Dropdown.Toggle as={CustomToggle} id="dropdown-custom-components">
+                {selectedType}
+              </Dropdown.Toggle>
+
+              <Dropdown.Menu as={CustomMenu}>
+                <Dropdown.Item eventKey="All types" onSelect={(e) => { setSelectedType('All types') }}>All types</Dropdown.Item>
+                {types ? types.map((type) => 
+                  <Dropdown.Item eventKey={type} onSelect={(e) => { setSelectedType(type) }}>{type}</Dropdown.Item>
+                ) : ""}
+              </Dropdown.Menu>
+            </Dropdown>
             <FormControl type="text" placeholder="Quicksearch" value={searchTerm} onChange = {(e) => editSearchTerm(e.target.value)} className="mr-sm-2" />
           </Form>
         </Navbar>
-        {entities ? renderPagination(entities.filter(row => (searchTerm === "" 
-                || row["NAME"].toLowerCase().includes(searchTerm.toLowerCase()) 
-                || (row["Label"] != null && row["Label"].toLowerCase().includes(searchTerm.toLowerCase()))))) : ""}
-      </pre>
+        {entities ? renderPagination(entities.filter(row => (
+                (
+                  searchTerm === "" 
+                  || row["NAME"].toLowerCase().includes(searchTerm.toLowerCase()) 
+                  || (row["Label"] != null && row["Label"].toLowerCase().includes(searchTerm.toLowerCase())
+                )) && (
+                  selectedType === "All types"
+                  || row["Types"].includes(selectedType)
+                )))) : ""}
     </div>
   );
 
@@ -113,7 +133,7 @@ export function Entities(){
   }
 
   function onEntitySelection(row){
-    history.push("/entity?id=" + row["ID"]);
+    history.push("/entity?term=" + row["NAME"]);
   }
 
   function editSearchTerm(term){
@@ -203,3 +223,46 @@ export function Entities(){
     return page * pageSize;
   }
 }
+
+const CustomToggle = React.forwardRef(({ children, onClick }, ref) => (
+  <Button
+    className="dropdown-toggle"
+    onClick={(e) => {
+      e.preventDefault();
+      onClick(e);
+    }}
+  >
+    {children}
+  </Button>
+));
+
+// forwardRef again here!
+// Dropdown needs access to the DOM of the Menu to measure it
+const CustomMenu = React.forwardRef(
+  ({ children, style, className, 'aria-labelledby': labeledBy }, ref) => {
+    const [value, setValue] = useState('');
+
+    return (
+      <div
+        ref={ref}
+        style={style}
+        className={className}
+        aria-labelledby={labeledBy}
+      >
+        <FormControl
+          autoFocus
+          className="mx-3 my-2 w-auto"
+          placeholder="Type to filter..."
+          onChange={(e) => setValue(e.target.value)}
+          value={value}
+        />
+        <ul className="list-unstyled" style={{maxHeight: "50vh", overflow:"auto"}}>
+          {React.Children.toArray(children).filter(
+            (child) =>
+              !value || child.props.children.toLowerCase().startsWith(value),
+          )}
+        </ul>
+      </div>
+    );
+  },
+);

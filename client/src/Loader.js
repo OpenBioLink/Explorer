@@ -151,7 +151,8 @@ export class Loader_ extends React.Component{
         window.sessionStorage.clear();
 
         API.getAllTestEntities(this.props.cookies.get('datasetID'), this.props.cookies.get('explanationID'), (entities) => {
-          window.sessionStorage.setItem('entities', JSON.stringify(sortAsc(entities)));
+          window.sessionStorage.setItem('entities', JSON.stringify(sortAsc(entities["entities"])));
+          window.sessionStorage.setItem('types', JSON.stringify(entities["types"]));
           window.sessionStorage.setItem('asc', 'true');
           this.setState({show_done_spinner: false});
           this.props.history.push("/entities");

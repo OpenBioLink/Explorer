@@ -1,6 +1,6 @@
 'use strict';
 
-const {createNewDataset} = require('./graph_label');
+const {createNewDatasetBlazegraph} = require('./graph_label');
 let index = require('./db_index');
 const {tic, toc}  = require('./util');
 const { v4: uuidv4 } = require('uuid');
@@ -34,7 +34,7 @@ let datasetmethods = {
                 var publish = fields.publish === "on" ? true : false;
                 var id = uuidv4();
 
-                createNewDataset(id, files.label_graph.path, fields.rdftype, (success) => {
+                createNewDatasetBlazegraph(id, files.label_graph.path, fields.rdftype, (success) => {
                     if(success){
                         if(publish){
                             index.publishNewDataset(id, dbName, dbVersion, dbDescription, namespace);
@@ -75,7 +75,7 @@ let datasetmethods = {
                 */
             });
         }
-    },
+    }
 };
 
 module.exports = datasetmethods;

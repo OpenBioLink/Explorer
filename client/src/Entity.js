@@ -1,8 +1,11 @@
-import React from 'react';
+import React, {useContext} from 'react';
 import PropTypes from "prop-types";
 import { withRouter } from "react-router";
+import { useAccordionToggle } from "react-bootstrap/AccordionToggle";
 import './App.css';
-import {Button, Pagination, Modal, Badge, Container, Row, Col} from 'react-bootstrap';
+import {Button, Pagination, Modal, Badge, Container, Row, Col, Table, ListGroup, Accordion, AccordionContext, Card} from 'react-bootstrap';
+import { IconContext } from "react-icons";
+import { RiArrowDropDownLine, RiArrowDropRightLine } from "react-icons/ri";
 import Cookies from 'universal-cookie';
  
 const cookies = new Cookies();
@@ -19,17 +22,24 @@ export class Entity_ extends React.Component{
     constructor(){
         super();
         this.state = {
+            curie: null,
             info: null,
             tailTasks: [],
-            headTasks: []
+            headTasks: [],
+            incomingEdges: null,
+            outgoingEdges: null
         }
     }
 
     componentDidMount(){
         console.log(this.props);
         var params = new URLSearchParams(this.props.location.search);
-        
-        
+        var curie = params.get("term");
+        this.setState({curie: curie});
+        API.getInfoByCurie(cookies.get('datasetID'), curie, (info) => this.setState({info: info}));
+        API.getTasksByCurie(cookies.get('explanationID'), curie, (tasks) => this.addTasks(tasks));
+
+        /*
         if(params.has("id")){
             var id = params.get("id");
             API.getInfoByEntityID(cookies.get('datasetID'), cookies.get('explanationID'), id, (info) => this.setState({info: info}));
@@ -38,8 +48,21 @@ export class Entity_ extends React.Component{
             var curie = params.get("term");
             API.getInfoByCurie(cookies.get('datasetID'), curie, (info) => this.setState({info: info}));
             API.getTasksByCurie(cookies.get('explanationID'), curie, (tasks) => this.addTasks(tasks));
+            API.getIncomingEdges(cookies.get('datasetID'), curie, (incoming) => this.setState({incomingEdges: incoming}));
         }
-        
+        */
+    }
+
+    loadIncomingEdges(){
+        if(!this.state.incomingEdges){
+            API.getIncomingEdges(cookies.get('datasetID'), this.state.curie, (incoming) => this.setState({incomingEdges: incoming}));
+        }
+    }
+
+    loadOutgoingEdges(){
+        if(!this.state.outgoingEdges){
+            API.getOutgoingEdges(cookies.get('datasetID'), this.state.curie, (outgoing) => this.setState({outgoingEdges: outgoing}));
+        }
     }
 
     addTasks(tasks) {
@@ -63,14 +86,30 @@ export class Entity_ extends React.Component{
     }
 
     render(){
+        console.log(this.state.outgoingEdges);
         return (
             
             <div>
                 <Modal.Dialog className="w-none w-50 mw-100">
                 <Modal.Header className="justify-content-center">
-                    <h2>
-                        {this.state.info?.Curie}: {this.state.info?.Label ? this.state.info?.Label : ""}
-                    </h2>
+                    <Table className="m-0" borderless>
+                        <tbody>
+                            <tr>
+                                <td className="p-0">
+                                <h2>
+                                {this.state.info? this.state.info.Labels.map((label)=>
+                                    <Badge className="m-1" variant="secondary">{label}</Badge>
+                                ) : "" }
+                                </h2>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td className="p-0">
+                                    <h2>{this.state.info?.Curie}: {this.state.info?.Label ? this.state.info?.Label : ""} </h2>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </Table>
                 </Modal.Header>
                 <Modal.Body>
                     <Container fluid className="text-left">
@@ -160,6 +199,72 @@ export class Entity_ extends React.Component{
                                 )}
                             </Col>
                         </Row>
+                        <Row>
+                            <Col>
+                                <h5>Known links</h5>
+                            </Col>
+                        </Row>
+                        <Row>
+                            <Col>
+                                <Accordion>
+                                    <Card> 
+                                        <CustomToggle eventKey="outgoing" label="Outgoing edges" load={() => {this.loadOutgoingEdges()}}/>
+                                        <Accordion.Collapse eventKey="outgoing">
+                                            <Table className="mb-2">
+                                                <tbody>
+                                                    {this.state.outgoingEdges && Object.entries(this.state.outgoingEdges).map(rel =>
+                                                        <>
+                                                            {rel[1].map(obj => 
+                                                            <tr>
+                                                                <td className="w-75 text-left">
+                                                                    {rel[0]}
+                                                                </td>
+                                                                <td className="w-25 text-center">
+                                                                    <a href={'/entity?term=' + obj[1]}>{obj[0] ? obj[0] : obj[1]}</a>
+                                                                </td>
+                                                            </tr>
+                                                            )}
+                                                        </>
+                                                    )}
+                                                </tbody>
+                                            </Table>
+                                        </Accordion.Collapse>
+                                    </Card>
+                                </Accordion>
+                            </Col>
+                        </Row>
+                        <Row>
+                            <Col>
+                                <Accordion className="mt-2">
+                                    <Card> 
+                                        <CustomToggle eventKey="incoming" label="Incoming edges" load={() => {this.loadIncomingEdges()}}/>
+                                        <Accordion.Collapse eventKey="incoming">
+                                            <Table className="mb-2">
+                                                <tbody>
+                                                    {this.state.incomingEdges ?
+                                                        this.state.incomingEdges.length > 0 ?
+                                                            Object.entries(this.state.incomingEdges).map(rel =>
+                                                            <>
+                                                                {rel[1].map(obj => 
+                                                                <tr>
+                                                                    <td className="w-25 text-center">
+                                                                        <a href={'/entity?term=' + obj[1]}>{obj[0] ? obj[0] : obj[1]}</a>
+                                                                    </td>
+                                                                    <td className="w-75 text-right">
+                                                                        {rel[0]}
+                                                                    </td>
+                                                                </tr>
+                                                                )}
+                                                            </>)
+                                                        : <p className="mt-3 text-center">No incoming edges</p>
+                                                    : "" }
+                                                </tbody>
+                                            </Table>
+                                        </Accordion.Collapse>
+                                    </Card>
+                                </Accordion>
+                            </Col>
+                        </Row>
                     </Container>
                 </Modal.Body>
                 </Modal.Dialog>
@@ -169,3 +274,31 @@ export class Entity_ extends React.Component{
 }
 
 export const Entity = withRouter(Entity_);
+
+
+function CustomToggle({eventKey, label, load, activeKey}) {
+    const currentEventKey = useContext(AccordionContext);
+
+    const decoratedOnClick = useAccordionToggle(eventKey, load);
+
+    const isCurrentEventKey = currentEventKey === eventKey;
+
+    return (
+        <Card.Header onClick={decoratedOnClick}>
+            <Table className="mb-0 w-auto">
+                <tr>
+                    <td className="text-left border-top-0 align-middle p-0">
+                        <IconContext.Provider value={{ size: "2em", className: "global-class-name" }}>
+                            <div>
+                                {isCurrentEventKey ? <RiArrowDropDownLine/> : <RiArrowDropRightLine/>}
+                            </div>
+                        </IconContext.Provider>
+                    </td>
+                    <td className="text-left border-top-0 align-middle p-0">
+                        {label}
+                    </td>
+                </tr>
+            </Table>
+        </Card.Header>
+    );
+  }
