@@ -2,7 +2,7 @@ import React, { useContext, createContext, useState, useEffect } from 'react';
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import PropTypes from "prop-types";
-import { withRouter } from "react-router";
+import { useHistory, withRouter, useLocation } from "react-router";
 import {Loader} from './Loader.js'
 import {Entities} from './Entities'
 import {Start} from './Start'
@@ -18,64 +18,74 @@ import {
 } from "react-router-dom";
 import {Button, Navbar, Nav, Form, FormControl} from 'react-bootstrap';
 import Cookies from 'universal-cookie';
+import { matchPath } from "react-router";
  
 const cookies = new Cookies()
 
-class App extends React.Component{
+export function App(){
 
-  render(){
-    return (
-      <div className="App">
-        <ProvideLoaderContext>
-          <Router>
-            <Header/>  
-            <Switch>               
-              <Route path='/loader'>
-                <Loader cookies={cookies}/>
-              </Route>   
-              <LoaderRoute path='/entities'>
-                <Entities/>
-              </LoaderRoute>
-              <LoaderRoute path='/entity'>
-                <Entity/>
-              </LoaderRoute>
-              <LoaderRoute path='/task'>
-                <Task/>
-              </LoaderRoute>
-              <LoaderRoute path='/explanation'>
-                <Explanation/>
-              </LoaderRoute>
-              <Route path='/feedback'>
-                <Feedback/>
-              </Route> 
-              <LoaderRoute path='/'>
-                <Start/>
-              </LoaderRoute>
-            </Switch>
-          </Router>
-        </ProvideLoaderContext>
-      </div>
-    );
-  }
+  return (
+    <div className="App">
+    <Router>
+          <Header path='/*/:dataset/:explanation'/>  
+          <Switch>               
+            <Route path='/loader'>
+              <Loader cookies={cookies}/>
+            </Route>   
+            <Route path='/entities/:dataset/:explanation'>
+              <Entities/>
+            </Route>
+            <Route path='/entity/:dataset/:explanation'>
+              <Entity/>
+            </Route>
+            <Route path='/task/:dataset/:explanation'>
+              <Task/>
+            </Route>
+            <Route path='/explanation/:dataset/:explanation'>
+              <Explanation/>
+            </Route>
+            <Route path='/feedback'>
+              <Feedback/>
+            </Route> 
+            <Route path='/'>
+              <Loader cookies={cookies}/>
+            </Route>
+          </Switch>
+      </Router>
+    </div>
+  );
 }
 
-class Header_ extends React.Component{
 
-  static propTypes = {
-    match: PropTypes.object.isRequired,
-    location: PropTypes.object.isRequired,
-    history: PropTypes.object.isRequired
-  };
 
-  constructor(){
-    super();
-    this.state={
-      dataset: "-",
-      explanation: "-"
+function Header(){
+
+  let location = useLocation();
+  const history = useHistory();
+
+  const [dataset, setDataset] = useState("");
+  const [explanation, setExplanation] = useState("");
+
+  useEffect(() => {
+    const match = matchPath(location.pathname, {
+      path: '/*/:dataset/:explanation',
+      exact: true,
+      strict: false
+    });
+    if(match){
+      setDataset(match.params.dataset);
+      setExplanation(match.params.explanation);
     }
-  }
+  }, [location]);
 
+  /*
   componentDidMount(){
+
+
+
+    console.log("HEADER");
+    console.log(this.props);
+
     var datasetid_ = cookies.get("datasetLabel");
     var explanationid_ = cookies.get("explanationLabel");
     
@@ -93,83 +103,34 @@ class Header_ extends React.Component{
       }
     });
   }
+  */
 
-  onLoadOther(){
-    this.props.history.push(`/loader`);
+  function onLoadOther(){
+    history.push(`/loader`);
   }
 
-  render(){
-    return(
-      <header className="App-header">
-        <Navbar bg="dark" variant="dark">
-            <Navbar.Brand href="/entities">
-              Explorer (alpha)
-            </Navbar.Brand>
-            <Nav className="mr-auto">
-              <Nav.Link href="/overview">Overview</Nav.Link>
-              <Nav.Link href="/entities">Entities</Nav.Link>
-              <Nav.Link href="/feedback">Feedback</Nav.Link>
-            </Nav>
-            <Navbar.Collapse className="justify-content-end">
-              <Navbar.Text className="mr-2">
-                Dataset: {this.state.dataset}
-              </Navbar.Text>
-              <Navbar.Text className="mr-2">
-                Explanation: {this.state.explanation}
-              </Navbar.Text>
-              <Button size="sm" variant="outline-success" onClick={() => this.onLoadOther()}>Load other</Button>
-            </Navbar.Collapse>
-          </Navbar>
-      </header>
-    );
-  }
-}
-const Header = withRouter(Header_);
-
-const loaderContext = createContext();
-
-function ProvideLoaderContext({ children }) {
-  const auth = useProvideLoaderContext();
-  return (
-    <loaderContext.Provider value={auth}>
-      {children}
-    </loaderContext.Provider>
-  );
-}
-
-function useLoaderContext() {
-  return useContext(loaderContext);
-}
-
-function useProvideLoaderContext() {
-
-  const getExplanationID = () => {
-    return cookies.get("explanationID");
-  };
-
-  return {
-    getExplanationID
-  };
-}
-
-function LoaderRoute({ children, ...rest }) {
-  let ctxt = useLoaderContext();
-  return (
-    <Route
-      {...rest}
-      render={({ location }) =>
-        ctxt.getExplanationID() ? (
-          children
-        ) : (
-          <Redirect
-            to={{
-              pathname: "/loader",
-              state: { from: location }
-            }}
-          />
-        )
-      }
-    />
+  return(
+    <header className="App-header">
+      <Navbar bg="dark" variant="dark">
+          <Navbar.Brand href="/entities">
+            Explorer (alpha)
+          </Navbar.Brand>
+          <Nav className="mr-auto">
+            <Nav.Link href="/overview">Overview</Nav.Link>
+            <Nav.Link href="/entities">Entities</Nav.Link>
+            <Nav.Link href="/feedback">Feedback</Nav.Link>
+          </Nav>
+          <Navbar.Collapse className="justify-content-end">
+            <Navbar.Text className="mr-2">
+              Dataset: {dataset}
+            </Navbar.Text>
+            <Navbar.Text className="mr-2">
+              Explanation: {explanation}
+            </Navbar.Text>
+            <Button size="sm" variant="outline-success" onClick={() => onLoadOther()}>Load other</Button>
+          </Navbar.Collapse>
+        </Navbar>
+    </header>
   );
 }
 

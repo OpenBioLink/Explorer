@@ -62,9 +62,7 @@ export class Loader_ extends React.Component{
         explanations: [],
         formPage: 0,
         selected_dataset_id: null,
-        private_dataset: null,
         selected_explanation_id: null,
-        private_explanation: null,
 
         searchTerm: "",
 
@@ -78,15 +76,10 @@ export class Loader_ extends React.Component{
 // Page handling
 
     onFormPageNext(){
-      if(this.state.selected_dataset_id === -2 && (this.state.private_dataset == null || this.state.private_dataset === "")) {
+      if((this.state.selected_dataset_id == null || this.state.selected_dataset_id === "")) {
         this.setState({
           show_alert: true,
-          alert_message: "Please select a public dataset or enter a private key"
-        });
-      } else if((this.state.selected_dataset_id == null || this.state.selected_dataset_id === "")) {
-        this.setState({
-          show_alert: true,
-          alert_message: "Please select a public dataset or enter a private key"
+          alert_message: "Please select a dataset"
         });
       } else {
         this.setState({
@@ -105,56 +98,22 @@ export class Loader_ extends React.Component{
     }
 
     onFormPageDone(){
-      if(this.state.selected_explanation_id === -2 && (this.state.private_explanation == null || this.state.private_explanation === "")) {
+      if((this.state.selected_explanation_id == null || this.state.selected_explanation_id === "")) {
         this.setState({
           show_alert: true,
-          alert_message: "Please select a public explanation or enter a private key"
-        });
-      } else if((this.state.selected_explanation_id == null || this.state.selected_explanation_id === "")) {
-        this.setState({
-          show_alert: true,
-          alert_message: "Please select a public explanation or enter a private key"
+          alert_message: "Please select a explanation"
         });
       } else {
         this.setState({show_done_spinner: true});
-        // none
-        if(this.state.selected_dataset_id === -1){
-          this.props.cookies.remove("datasetID");
-          this.props.cookies.remove("datasetLabel");
-        // private
-        } else if(this.state.selected_dataset_id === -2) {
-          this.props.cookies.set("datasetID", this.state.private_dataset);
-          this.props.cookies.set("datasetLabel", this.state.private_dataset);
-        } else {
-          const dataset = this.state.datasets.find(x => x["ID"] === this.state.selected_dataset_id);
-          var datasetLabel = dataset ? dataset["Name"] : "";
-          this.props.cookies.set("datasetID", this.state.selected_dataset_id);
-          this.props.cookies.set("datasetLabel", datasetLabel);
-        }
 
-        // none
-        if(this.state.selected_explanation_id === -1){
-          this.props.cookies.remove("explanationID");
-          this.props.cookies.remove("explanationLabel");
-        // private
-        } else if(this.state.selected_explanation_id === -2) {
-          this.props.cookies.set("explanationID", this.state.private_explanation);
-          this.props.cookies.set("explanationLabel", this.state.private_explanation);
-        } else {
-          const explanation = this.state.explanations.find(x => x["ID"] === this.state.selected_explanation_id);
-          var explanationLabel = explanation ? explanation["Label"] !== "" ? explanation["Label"] : from_timestamp(explanation["Date"]) : "";
-          this.props.cookies.set("explanationID", this.state.selected_explanation_id);
-          this.props.cookies.set("explanationLabel", explanationLabel);
-        }
         // removes session storage (entities, asc, active page...)
         window.sessionStorage.clear();
 
-        API.getAllTestEntities(this.props.cookies.get('datasetID'), this.props.cookies.get('explanationID'), (entities) => {
-          window.sessionStorage.setItem('entities', JSON.stringify(sortAsc(entities["entities"])));
-          window.sessionStorage.setItem('types', JSON.stringify(entities["types"]));
-          window.sessionStorage.setItem('asc', 'true');
+        API.getAllTestEntities(this.state.selected_dataset_id, this.state.selected_explanation_id, (entities) => {
+          window.sessionStorage.setItem(this.state.selected_dataset_id+'_entities', JSON.stringify(sortAsc(entities["entities"])));
+          window.sessionStorage.setItem(this.state.selected_dataset_id+'_types', JSON.stringify(entities["types"]));
           this.setState({show_done_spinner: false});
-          this.props.history.push("/entities");
+          this.props.history.push(`/entities/${this.state.selected_dataset_id}/${this.state.selected_explanation_id}`);
         });
       }
     }
@@ -202,8 +161,6 @@ export class Loader_ extends React.Component{
             <Modal.Dialog className="mx-auto mw-100 w-75 mb-2">
               <Modal.Header>
                 <Modal.Title>Select a dataset</Modal.Title>
-                <LocalDatasetModal onUpload={(pk, published) => {this.onUploadLocalDataset(pk, published)}}/>
-                
               </Modal.Header>
 
               <Modal.Body>
@@ -211,17 +168,6 @@ export class Loader_ extends React.Component{
                 <Row>
                   <Col sm={4}>
                     <ListGroup className="pr-1 text-left" style={{overflowY: "auto", height: "400px"}}>
-                      <ListGroup.Item action eventKey={-2} onClick={() => this.onDatasetSelection(-2)}>
-                          <Container>
-                            <Row>
-                              <Col>
-                                Private dataset
-                              </Col>
-                              <Col>
-                              </Col>
-                            </Row>
-                          </Container>
-                      </ListGroup.Item>
                       { this.state.datasets.filter(x => (this.state.searchTerm === "" || x["Name"].toLowerCase().includes(this.state.searchTerm.toLowerCase()))).map((row) =>
                         <ListGroup.Item action eventKey={row["ID"]} onClick={() => this.onDatasetSelection(row["ID"])}>
                           <Container>
@@ -241,43 +187,6 @@ export class Loader_ extends React.Component{
                   </Col>
                   <Col sm={8} className="my-auto">
                     <Tab.Content className="text-center">
-                      <Tab.Pane eventKey={-1}>
-                        The explorer can be used without a specified dataset, however nodes of the explanation file will appear as they appear in the dataset (without a label). Furthermore the visualization of the graph is not available.
-                      </Tab.Pane>
-                      <Tab.Pane eventKey={-2}>
-                        { this.state.private_dataset ? 
-                          <>
-                            <p>Your uploaded private dataset. Please copy and save your private key for later reuse.</p>
-                            <InputGroup className="mb-0">
-                              <FormControl
-                                readOnly
-                                value={this.state.private_dataset}
-                              />
-                              <InputGroup.Append>
-                                <Button variant="outline-secondary" className="d-flex" onClick={() => {navigator.clipboard.writeText(this.state.private_dataset)}}>
-                                  <FaRegCopy className="m-auto"/>
-                                </Button>
-                              </InputGroup.Append>
-                            </InputGroup>
-                          </>
-                          :
-                          <>
-                            <p>Here you can import your private key</p>
-                            <Form onSubmit={(e)=> {e.preventDefault();this.setState({private_dataset: e.currentTarget.elements.private.value});}}>
-                              <InputGroup className="mb-0">
-                                <FormControl
-                                  name="private"
-                                />
-                                <InputGroup.Append>
-                                  <Button type="submit" variant="outline-secondary" className="d-flex">
-                                    Load
-                                  </Button>
-                                </InputGroup.Append>
-                              </InputGroup>
-                            </Form>
-                          </>
-                        }
-                      </Tab.Pane>
                       { this.state.datasets.map((row) =>
                       <Tab.Pane eventKey={row["ID"]}>
                         {row["Description"]}
@@ -308,24 +217,12 @@ export class Loader_ extends React.Component{
             <Modal.Dialog scrollable={true} className="mx-auto mw-100 w-75 mb-2">
               <Modal.Header>
                 <Modal.Title>Select an explanation file</Modal.Title>
-                <LocalExplanationModal datasetid={this.state.selected_dataset_id} onUpload={(pk, published) => {this.onUploadLocalExplanation(pk, published)}}/>
               </Modal.Header>
               <Modal.Body>
                 <Tab.Container id="list-group-tabs-example" activeKey={this.state.selected_explanation_id}>
                   <Row>
                     <Col sm={4}>
                       <ListGroup className="pr-1 text-left" style={{overflowY: "auto", height: "400px"}}>
-                        <ListGroup.Item action eventKey={-2} onClick={() => this.onExplanationSelection(-2)}>
-                            <Container className="content-justify-left">
-                              <Row>
-                                <Col className="w-50">
-                                  Private explanation
-                                </Col>
-                                <Col className="w-50">
-                                </Col>
-                              </Row>
-                            </Container>
-                        </ListGroup.Item>
                         { this.state.explanations.filter(x => (this.state.searchTerm === "" || x["Label"].toLowerCase().includes(this.state.searchTerm.toLowerCase()))).map((row) =>
                           <ListGroup.Item action eventKey={row["ID"]} onClick={() => this.onExplanationSelection(row["ID"])}>
                             <Container>
@@ -344,40 +241,6 @@ export class Loader_ extends React.Component{
                     </Col>
                     <Col sm={8} className="my-auto">
                       <Tab.Content >
-                        <Tab.Pane eventKey={-2}>
-                          { this.state.private_explanation ? 
-                            <>
-                              <p>Your uploaded private explanation. Please copy and save your private key for later reuse.</p>
-                              <InputGroup className="mb-0">
-                                <FormControl
-                                  readOnly
-                                  value={this.state.private_explanation}
-                                />
-                                <InputGroup.Append>
-                                  <Button variant="outline-secondary" className="d-flex" onClick={() => {navigator.clipboard.writeText(this.state.private_explanation)}}>
-                                    <FaRegCopy className="m-auto"/>
-                                  </Button>
-                                </InputGroup.Append>
-                              </InputGroup>
-                            </>
-                            :
-                            <>
-                              <p>Here you can import your private key</p>
-                              <Form onSubmit={(e)=> {e.preventDefault();this.setState({private_explanation: e.currentTarget.elements.private.value});}}>
-                                <InputGroup className="mb-0">
-                                  <FormControl
-                                    name="private"
-                                  />
-                                  <InputGroup.Append>
-                                    <Button type="submit" variant="outline-secondary" className="d-flex">
-                                      Load
-                                    </Button>
-                                  </InputGroup.Append>
-                                </InputGroup>
-                              </Form>
-                            </>
-                          }
-                        </Tab.Pane>
                         { this.state.explanations.map((row) =>
                           <Tab.Pane className="text-left" style={{overflowY: "auto", height: "400px"}} eventKey={row["ID"]}>
                             <table>

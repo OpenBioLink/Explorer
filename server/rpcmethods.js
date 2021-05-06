@@ -50,9 +50,8 @@ let rpcmethods = {
         exec(body) {
             return new Promise((resolve) => {
                 tic();
-                var namespace = index.getNamespaceFromDatasetID(body.datasetID)
-                var entities = db.getAllTestEntities(body.explanationID);
-                graph.addLabelsToEntities(body.datasetID, namespace, entities, (labeled_entities, types) => {
+                var namespace = index.getNamespaceFromDatasetID(body.datasetID);
+                graph.getAllTestEntities(body.datasetID, namespace, (labeled_entities, types) => {
                     resolve({entities: labeled_entities, types: types} || {});
                     toc("getAllTestEntities");
                 });

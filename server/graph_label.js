@@ -13,6 +13,7 @@ async function runSPARQL(dbID, query){
     var url = `${endpoint}/namespace/${dbID}/sparql`
     var response = await axios({
         method: 'post',
+        setTimeout: 6000,
         headers: {"Content-type": "application/x-www-form-urlencoded"},
         url: url,
         data: query
@@ -137,52 +138,38 @@ function cleanupBlazegraph(url){
 }
 
 let graph_label = {
-    addLabelsToEntities(datasetID, namespace, entities, callback){
+    getAllTestEntities(datasetID, namespace, callback){
+
         var query = `query=
-            SELECT ?subject ?object
-            WHERE {
-                ?subject <http://www.w3.org/2000/01/rdf-schema#label> ?object 
-            }
+                PREFIX obl:  <http://ai-strategies.org/ns/>
+                SELECT ?value ?label (GROUP_CONCAT(?type;SEPARATOR=",") AS ?types)
+                WHERE { 
+                {
+                    SELECT distinct ?value ?label 
+                    WHERE {{ 
+                    <<?value ?p ?o>> obl:split obl:test .
+                    } UNION { 
+                    <<?s ?p ?value>> obl:split obl:test .
+                    }}
+                }
+                OPTIONAL{ ?value <http://www.w3.org/2000/01/rdf-schema#label> ?label .}
+                OPTIONAL{ ?value a ?type .}
+                }
+                GROUP BY ?value ?label
             `
-
         runSPARQL(datasetID, query).then((data) => {
-            var label_map = {};
-            for(var i = 0; i < data["results"]["bindings"].length; i++){
-                var triple = data["results"]["bindings"][i];
-                label_map[triple["subject"]["value"].replace(namespace, '')] = triple["object"]["value"]
-            }
-            for(var i = 0; i < entities.length; i++){
-                entities[i].Label = label_map[entities[i]["NAME"]];
-            }
-
-            
+            var entities = data["results"]["bindings"].map((x) => {return {NAME: x["value"]["value"].replace(namespace, ''), Label: x["label"]?.value, Types: x["types"]?.value.split(",")}})
             var query = `query=
-            SELECT ?subject ?type
-            WHERE {
-                ?subject a ?type 
-            }
+                SELECT distinct ?type
+                WHERE { 
+                ?s a ?type
+                }
+                ORDER BY ?type
             `
             runSPARQL(datasetID, query).then((data) => {
-                var type_map = new Proxy({}, {get(target, name){
-                    if(name === "toJSON" || name === "then"){
-                        return undefined;
-                    } else if(!target.hasOwnProperty(name)){
-                        target[name] = []
-                    }
-                    return target[name]
-                }});
-                var types = new Set();
-                for(var i = 0; i < data["results"]["bindings"].length; i++){
-                    var triple = data["results"]["bindings"][i];
-                    type_map[triple["subject"]["value"].replace(namespace, '')].push(triple["type"]["value"])
-                }
-                for(var i = 0; i < entities.length; i++){
-                    type_map[entities[i]["NAME"]].forEach(item => types.add(item))
-                    entities[i].Types = type_map[entities[i]["NAME"]];
-                }
-                callback(entities, Array.from(types).sort());
+                var types = data["results"]["bindings"].map((x) => x["type"].value);
+                callback(entities, types);
             });
-
         });
     },
     addLabelsToPredictions(datasetID, namespace, predictions, callback){

@@ -3,12 +3,9 @@ import PropTypes from "prop-types";
 import { withRouter } from "react-router";
 import { useAccordionToggle } from "react-bootstrap/AccordionToggle";
 import './App.css';
-import {Button, Pagination, Modal, Badge, Container, Row, Col, Table, ListGroup, Accordion, AccordionContext, Card} from 'react-bootstrap';
+import {Button, Pagination, Modal, Badge, Container, Row, Col, Table, ListGroup, Spinner, Accordion, AccordionContext, Card} from 'react-bootstrap';
 import { IconContext } from "react-icons";
 import { RiArrowDropDownLine, RiArrowDropRightLine } from "react-icons/ri";
-import Cookies from 'universal-cookie';
- 
-const cookies = new Cookies();
 const API = require('./API');
 
 export class Entity_ extends React.Component{
@@ -22,6 +19,8 @@ export class Entity_ extends React.Component{
     constructor(){
         super();
         this.state = {
+            datasetID: null,
+            explanationID: null,
             curie: null,
             info: null,
             tailTasks: [],
@@ -32,11 +31,19 @@ export class Entity_ extends React.Component{
     }
 
     componentDidMount(){
+        console.log(this.props);
         var params = new URLSearchParams(this.props.location.search);
+        var datasetID = this.props.match.params.dataset;
+        var explanationID = this.props.match.params.explanation;
         var curie = params.get("term");
-        this.setState({curie: curie});
-        API.getInfoByCurie(cookies.get('datasetID'), curie, (info) => this.setState({info: info}));
-        API.getTasksByCurie(cookies.get('explanationID'), curie, (tasks) => this.addTasks(tasks));
+        console.log(explanationID);
+        this.setState({
+            datasetID: datasetID,
+            explanationID: explanationID,
+            curie: curie
+        });
+        API.getInfoByCurie(datasetID, curie, (info) => this.setState({info: info}));
+        API.getTasksByCurie(explanationID, curie, (tasks) => this.addTasks(tasks));
 
         /*
         if(params.has("id")){
@@ -54,13 +61,13 @@ export class Entity_ extends React.Component{
 
     loadIncomingEdges(){
         if(!this.state.incomingEdges){
-            API.getIncomingEdges(cookies.get('datasetID'), this.state.curie, (incoming) => {this.setState({incomingEdges: incoming})});
+            API.getIncomingEdges(this.state.datasetID, this.state.curie, (incoming) => {this.setState({incomingEdges: incoming})});
         }
     }
 
     loadOutgoingEdges(){
         if(!this.state.outgoingEdges){
-            API.getOutgoingEdges(cookies.get('datasetID'), this.state.curie, (outgoing) => this.setState({outgoingEdges: outgoing}));
+            API.getOutgoingEdges(this.state.datasetID, this.state.curie, (outgoing) => this.setState({outgoingEdges: outgoing}));
         }
     }
 
@@ -81,7 +88,7 @@ export class Entity_ extends React.Component{
     }
 
     onRelationSelection(taskID){
-        this.props.history.push("/task?id=" + taskID);
+        this.props.history.push(`/task/${this.state.datasetID}/${this.state.explanationID}?taskID=${taskID}`);
     }
 
     render(){
@@ -220,13 +227,13 @@ export class Entity_ extends React.Component{
                                                                     {rel[0]}
                                                                 </td>
                                                                 <td className="w-50 text-center">
-                                                                    <a href={'/entity?term=' + obj[1]}>{obj[0] ? obj[0] : obj[1]}</a>
+                                                                    <a href={`/entity/${this.state.datasetID}/${this.state.explanationID}?term=${obj[1]}`}>{obj[0] ? obj[0] : obj[1]}</a>
                                                                 </td>
                                                             </tr>
                                                             )}
                                                         </>)
                                                     : <p className="mt-3 text-center">No outgoing edges</p>
-                                                    : "" }
+                                                    : <tr><td className="text-center"><Spinner animation="border" /></td></tr> }
                                                 </tbody>
                                             </Table>
                                         </Accordion.Collapse>
@@ -249,7 +256,7 @@ export class Entity_ extends React.Component{
                                                                 {rel[1].map(obj => 
                                                                 <tr>
                                                                     <td className="w-50 border-right text-center">
-                                                                        <a href={'/entity?term=' + obj[1]}>{obj[0] ? obj[0] : obj[1]}</a>
+                                                                        <a href={`/entity/${this.state.datasetID}/${this.state.explanationID}?term=${obj[1]}`}>{obj[0] ? obj[0] : obj[1]}</a>
                                                                     </td>
                                                                     <td className="w-50 text-right">
                                                                         {rel[0]}
@@ -258,7 +265,7 @@ export class Entity_ extends React.Component{
                                                                 )}
                                                             </>)
                                                         : <p className="mt-3 text-center">No incoming edges</p>
-                                                    : "" }
+                                                    : <tr><td className="text-center"><Spinner animation="border" /></td></tr> }
                                                 </tbody>
                                             </Table>
                                         </Accordion.Collapse>

@@ -3,15 +3,13 @@ import { useAccordionToggle } from "react-bootstrap/AccordionToggle";
 import PropTypes from "prop-types";
 import { withRouter } from "react-router";
 import './App.css';
-import {Container, Row, Col, ListGroup, Modal, Table, Accordion, Card, Button, AccordionContext, OverlayTrigger, Tooltip} from 'react-bootstrap';
+import {Container, Row, Col, ListGroup, Modal, Spinner, Table, Accordion, Card, Button, AccordionContext, OverlayTrigger, Tooltip} from 'react-bootstrap';
 import { IconContext } from "react-icons";
 import { RiArrowDropDownLine, RiArrowDropRightLine } from "react-icons/ri";
 import { HiVariable, HiOutlineVariable } from "react-icons/hi"
 import { AiOutlineFunction } from "react-icons/ai"
 import { FaArrowRight } from "react-icons/fa";
-import Cookies from 'universal-cookie';
- 
-const cookies = new Cookies();
+
 const API = require('./API');
 
 export class Explanation_ extends React.Component{
@@ -25,6 +23,9 @@ export class Explanation_ extends React.Component{
     constructor(){
         super();
         this.state = {
+            datasetID: null,
+            explanationID: null,
+
             info: null,
             explanation: null,
 
@@ -38,11 +39,18 @@ export class Explanation_ extends React.Component{
         var params = new URLSearchParams(this.props.location.search);
         var taskID = params.get("taskID");
         var entityID = params.get("entityID");
-        API.getPredictionInfo(cookies.get('datasetID'), cookies.get('explanationID'), taskID, entityID, (res) => {
+        var datasetID = this.props.match.params.dataset;
+        var explanationID = this.props.match.params.explanation;
+
+        this.setState({
+            datasetID: datasetID,
+            explanationID: explanationID
+        });
+
+        API.getPredictionInfo(datasetID, explanationID, taskID, entityID, (res) => {
             this.setState({info: res});
         });
-        API.getExplanations(cookies.get('datasetID'), cookies.get('explanationID'), taskID, entityID, (explanation) => {
-            console.log(explanation);
+        API.getExplanations(datasetID, explanationID, taskID, entityID, (explanation) => {
             this.setState({explanation: explanation});
         });
     }
@@ -52,7 +60,7 @@ export class Explanation_ extends React.Component{
             selectedRule: rule,
             showInstantiations: true
         })
-        API.getInstantiations(cookies.get('datasetID'), cookies.get('explanationID'), rule["ID"], this.state.info.head.curie, this.state.info.tail.curie, (instantiations) => {
+        API.getInstantiations(this.state.datasetID, this.state.explanationID, rule["ID"], this.state.info.head.curie, this.state.info.tail.curie, (instantiations) => {
             this.setState({
                 instantiations: instantiations
             });
@@ -67,13 +75,13 @@ export class Explanation_ extends React.Component{
                 <Container className="my-4">
                     <Row>
                         <Col style={{display: "flex"}}>
-                            <h2 className="m-auto"><a href={'/entity?term=' + this.state.info.head.curie}>{this.state.info.head.label ? this.state.info.head.label : this.state.info.tail.curie}</a></h2>
+                            <h2 className="m-auto"><a href={`/entity/${this.state.datasetID}/${this.state.explanationID}?term=${this.state.info.head.curie}`}>{this.state.info.head.label ? this.state.info.head.label : this.state.info.tail.curie}</a></h2>
                         </Col>
                         <Col style={{display: "flex"}}>
                             <h2 className="m-auto">{this.state.info.rel}</h2>
                         </Col>
                         <Col style={{display: "flex"}}>
-                            <h2 className="m-auto"><a href={'/entity?term=' + this.state.info.tail.curie}>{this.state.info.tail.label ? this.state.info.tail.label : this.state.info.tail.curie}</a></h2>
+                            <h2 className="m-auto"><a href={`/entity/${this.state.datasetID}/${this.state.explanationID}?term=${this.state.info.tail.curie}`}>{this.state.info.tail.label ? this.state.info.tail.label : this.state.info.tail.curie}</a></h2>
                         </Col>
                     </Row>
                     <Row>
@@ -96,7 +104,7 @@ export class Explanation_ extends React.Component{
                         </Accordion>
                     : <Cluster cluster={this.state.explanation[0]} info={this.state.info} showInstantiations={(rule)=>this.showInstantiations(rule)}/>
                 : "" }
-                <Modal show={this.state.showInstantiations} size="lg" onHide={() => {this.setState({showInstantiations: false})}}>
+                <Modal show={this.state.showInstantiations} size="lg" onHide={() => {this.setState({instantiations: null, showInstantiations: false})}}>
                     <Modal.Header closeButton>
                     <Modal.Title>Instantiations</Modal.Title>
                     </Modal.Header>
@@ -105,13 +113,13 @@ export class Explanation_ extends React.Component{
                             <tbody>
                                 <tr>
                                     <td className="w-25 border-top-0">
-                                        <b><a href={'/entity?term=' + this.state.info.head.curie}>{this.state.info.head.label ? this.state.info.head.label : this.state.info.tail.curie}</a></b>
+                                        <b><a href={`/entity/${this.state.datasetID}/${this.state.explanationID}?term=${this.state.info.head.curie}`}>{this.state.info.head.label ? this.state.info.head.label : this.state.info.tail.curie}</a></b>
                                     </td>
                                     <td className="w-50 border-top-0">
                                         {this.state.info.rel}
                                     </td>
                                     <td className="w-25 border-top-0">
-                                        <b><a href={'/entity?term=' + this.state.info.tail.curie}>{this.state.info.tail.label ? this.state.info.tail.label : this.state.info.tail.curie}</a></b>
+                                        <b><a href={`/entity/${this.state.datasetID}/${this.state.explanationID}?term=${this.state.info.tail.curie}`}>{this.state.info.tail.label ? this.state.info.tail.label : this.state.info.tail.curie}</a></b>
                                     </td>
                                 </tr>
                                 <tr>
@@ -124,11 +132,11 @@ export class Explanation_ extends React.Component{
                                             <td className="w-25 border-top-0">
                                                 {(this.state.info.head && this.state.info.tail) ?
                                                     body.headLabel ? 
-                                                        <a href={'/entity?term=' + body.head}>{body.headLabel}</a> 
+                                                        <a href={`/entity/${this.state.datasetID}/${this.state.explanationID}?term=${body.head}`}>{body.headLabel}</a> 
                                                     : body.head === "X" ? 
-                                                        <a href={'/entity?term=' + this.state.info.head.curie}>{this.state.info.head.label ? this.state.info.head.label : this.state.info.head.curie }</a>
+                                                        <a href={`/entity/${this.state.datasetID}/${this.state.explanationID}?term=${this.state.info.head.curie}`}>{this.state.info.head.label ? this.state.info.head.label : this.state.info.head.curie }</a>
                                                     : body.head === "Y" ? 
-                                                        <a href={'/entity?term=' + this.state.info.tail.curie}>{this.state.info.tail.label ? this.state.info.tail.label: this.state.info.tail.curie}</a>
+                                                        <a href={`/entity/${this.state.datasetID}/${this.state.explanationID}?term=${this.state.info.tail.curie}`}>{this.state.info.tail.label ? this.state.info.tail.label: this.state.info.tail.curie}</a>
                                                     : body.head
                                                     : "Hi"
                                                 }
@@ -139,11 +147,11 @@ export class Explanation_ extends React.Component{
                                             <td className="w-25 border-top-0">
                                                 {(this.state.info.head && this.state.info.tail) ?
                                                     body.tailLabel ? 
-                                                        <a href={'/entity?term=' + body.tail}>{body.tailLabel}</a> 
+                                                        <a href={`/entity/${this.state.datasetID}/${this.state.explanationID}?term=${body.tail}`}>{body.tailLabel}</a> 
                                                     : body.tail === "X" ? 
-                                                        <a href={'/entity?term=' + this.state.info.head.curie}>{ this.state.info.head.label ? this.state.info.head.label : this.state.info.head.curie }</a>
+                                                        <a href={`/entity/${this.state.datasetID}/${this.state.explanationID}?term=${this.state.info.head.curie}`}>{ this.state.info.head.label ? this.state.info.head.label : this.state.info.head.curie }</a>
                                                     : body.tail === "Y" ? 
-                                                        <a href={'/entity?term=' + this.state.info.tail.curie}>{ this.state.info.tail.label ? this.state.info.tail.label: this.state.info.tail.curie }</a>
+                                                        <a href={`/entity/${this.state.datasetID}/${this.state.explanationID}?term=${this.state.info.tail.curie}`}>{ this.state.info.tail.label ? this.state.info.tail.label: this.state.info.tail.curie }</a>
                                                     : body.tail
                                                     : "Hi"
                                                 }
@@ -159,17 +167,17 @@ export class Explanation_ extends React.Component{
                                         {instantiation.map((variable) => 
                                             <>
                                             <Col>
-                                                {variable.variable} = <a href={'/entity?term=' + variable.curie}>{variable.label ? variable.label : variable.curie}</a>
+                                                {variable.variable} = <a href={`/entity/${this.state.datasetID}/${this.state.explanationID}?term=${variable.curie}`}>{variable.label ? variable.label : variable.curie}</a>
                                             </Col>
                                             </>
                                         )}
                                     </Row>
                                 )
-                                : "" }
+                                : <Row><Col><Spinner animation="border" /></Col></Row> }
                         </Container>
                     </Modal.Body>
                     <Modal.Footer>
-                    <Button variant="secondary" onClick={() => {this.setState({showInstantiations: false})}}>
+                    <Button variant="secondary" onClick={() => {this.setState({instantiations: null, showInstantiations: false})}}>
                         Close
                     </Button>
                     </Modal.Footer>

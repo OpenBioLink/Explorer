@@ -3,10 +3,8 @@ import PropTypes from "prop-types";
 import { withRouter } from "react-router";
 import './App.css';
 import {Container, Row, Col, ListGroup, OverlayTrigger, Tooltip} from 'react-bootstrap';
-import Cookies from 'universal-cookie';
 import {AiFillCheckCircle} from 'react-icons/ai'
  
-const cookies = new Cookies();
 const API = require('./API');
 
 export class Task_ extends React.Component{
@@ -20,6 +18,8 @@ export class Task_ extends React.Component{
     constructor(){
         super();
         this.state = {
+            datasetID: null,
+            explanationID: null,
             entityInfo: null,
             task: null,
             predictions: null,
@@ -28,12 +28,20 @@ export class Task_ extends React.Component{
 
     componentDidMount(){
         var params = new URLSearchParams(this.props.location.search);
-        var id = params.get("id");
-        API.getTaskByID(cookies.get('explanationID'), id, (task) => {
-            API.getInfoByEntityID(cookies.get('datasetID'), cookies.get('explanationID'), task["EntityID"], (info) => {console.log(info);this.setState({entityInfo: info})});
+        var id = params.get("taskID");
+        var datasetID = this.props.match.params.dataset;
+        var explanationID = this.props.match.params.explanation;
+
+        this.setState({
+            datasetID: datasetID,
+            explanationID: explanationID
+        });
+
+        API.getTaskByID(explanationID, id, (task) => {
+            API.getInfoByEntityID(datasetID, explanationID, task["EntityID"], (info) => {console.log(info);this.setState({entityInfo: info})});
             this.setState({task: task});
         });
-        API.getPredictionsByTaskID(cookies.get('datasetID'), cookies.get('explanationID'), id, (predictions) => {
+        API.getPredictionsByTaskID(datasetID, explanationID, id, (predictions) => {
             this.setState({predictions: this.sortPredictions(predictions)});
         });
     }
@@ -55,7 +63,7 @@ export class Task_ extends React.Component{
     }
 
     onPredictionSelection(entityID){
-        this.props.history.push(`/explanation?taskID=${this.state.task.TaskID}&entityID=${entityID}`);
+        this.props.history.push(`/explanation/${this.state.datasetID}/${this.state.explanationID}?taskID=${this.state.task.TaskID}&entityID=${entityID}`);
     }
 
     render(){

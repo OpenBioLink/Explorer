@@ -6,6 +6,16 @@
 	],
 	"settings": {
 		"jupyter.jupyterServerType": "local",
-		"python.pythonPath": "C:\\Python36\\python.exe"
+		"python.pythonPath": "C:\\Python36\\python.exe",
+		"sqltools.connections": [
+
+			{
+				"previewLimit": 50,
+				"driver": "SQLite",
+				"database": "./server/db/index.db",
+				"name": "index"
+			}
+		],
+		"sqltools.useNodeRuntime": true
 	}
 }

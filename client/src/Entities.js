@@ -2,26 +2,28 @@ import React, { useState, useEffect } from 'react';
 import './App.css';
 import {Button, Pagination} from 'react-bootstrap';
 import {Navbar, Form, FormControl, Dropdown, DropdownButton, ListGroup, Container, Row, Col} from 'react-bootstrap';
-import { useHistory } from "react-router-dom";
+import { useHistory, useParams } from "react-router-dom";
 import {ImSortAlphaDesc, ImSortAlphaAsc} from "react-icons/im";
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { useHistoryState } from "./HistoryState";
-import Cookies from 'universal-cookie';
+import { useHistoryState, useSessionState } from "./HistoryState";
 import {tic, toc, sortAsc, sortDesc} from './util'
-const cookies = new Cookies();
 const API = require('./API');
 
 export function Entities(){
   const history = useHistory();
-  const [entities, setEntities] = useHistoryState("entities", null);
-  const [types, setTypes] = useHistoryState("types", null);
-  const [asc, setAsc] = useHistoryState("asc", null);
+
+  let { dataset, explanation } = useParams();
+
+  const [entities, setEntities] = useSessionState(dataset + "_entities", null);
+  const [types, setTypes] = useSessionState(dataset + "_types", null);
+
+  const [asc, setAsc] = useHistoryState("asc", true);
+  const [active, setActive] = useHistoryState("active", 0);
+  const [searchTerm, setSearchTerm] = useHistoryState("searchTerm", "");
+  const [selectedType, setSelectedType] = useHistoryState('selectedType', 'All types');
 
   const [pageSize, setPageSize] = useState(50);
-  const [active, setActive] = useHistoryState("active", 0);
   const [skip, setSkip] = useState(2);
-  const [selectedType, setSelectedType] = useState('All types');
-  const [searchTerm, setSearchTerm] = useHistoryState("searchTerm", "");
 
   useEffect(() => {
     if(entities == null){
@@ -30,24 +32,28 @@ export function Entities(){
   }, []);
 
 
-  function setEntityState(entities, types, asc){
-    setTypes(types);
+  function setEntityState(entities, asc){
     setEntities(entities);
     setAsc(asc);
   }
 
-  function sort(){
-      var entities_ = [...entities];
-      if(asc === true){
-        setEntityState(sortDesc(entities_), false);
-      } else {
-        setEntityState(sortAsc(entities_), true);
-      }
+  function sort(asc_, entities_){
+    if(asc_ === true){
+      setEntities(sortAsc(entities_));
+    } else {
+      setEntities(sortDesc(entities_));
+    }
+    setAsc(asc_);
+  }
+
+  function toggle_sort(){
+      sort(!asc, [...entities])
     }
 
   function query_entities(){
-    API.getAllTestEntities(cookies.get('datasetID'), cookies.get('explanationID'), (data) => {
-      setEntityState(sortAsc(data["entities"]), data["types"], true);
+    API.getAllTestEntities(dataset, explanation, (data) => {
+      sort(asc, data["entities"]);
+      setTypes(data["types"]);
     });
   }
 
@@ -55,7 +61,7 @@ export function Entities(){
     <div style={{minHeight: "100vh"}}>
         <Navbar bg="dark" variant="dark">
           <Form inline>
-            <Button variant="outline-info" className="mr-sm-2" onClick={() => sort()}>
+            <Button variant="outline-info" className="mr-sm-2" onClick={() => toggle_sort()}>
               {asc ? 
                 <ImSortAlphaAsc/> :
                 <ImSortAlphaDesc/>
@@ -131,7 +137,7 @@ export function Entities(){
   }
 
   function onEntitySelection(row){
-    history.push("/entity?term=" + row["NAME"]);
+    history.push(`/entity/${dataset}/${explanation}?term=${row["NAME"]}`);
   }
 
   function editSearchTerm(term){
