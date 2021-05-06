@@ -10,6 +10,7 @@ import {Task} from './Task'
 import {Explanation} from './Explanation'
 import { Entity } from './Entity';
 import { Feedback } from './Feedback';
+import { Overview } from './Overview';
 import {
   BrowserRouter as Router,
   Switch,
@@ -44,7 +45,10 @@ export function App(){
             <Route path='/explanation/:dataset/:explanation'>
               <Explanation/>
             </Route>
-            <Route path='/feedback'>
+            <Route path='/overview/:dataset/:explanation'>
+              <Overview/>
+            </Route> 
+            <Route path='/feedback/:dataset/:explanation'>
               <Feedback/>
             </Route> 
             <Route path='/'>
@@ -78,35 +82,13 @@ function Header(){
     }
   }, [location]);
 
-  /*
-  componentDidMount(){
-
-
-
-    console.log("HEADER");
-    console.log(this.props);
-
-    var datasetid_ = cookies.get("datasetLabel");
-    var explanationid_ = cookies.get("explanationLabel");
-    
-    if(datasetid_ !== undefined){
-      this.setState({dataset: datasetid_});
-    }
-    if(explanationid_ !== undefined){
-      this.setState({explanation: explanationid_});
-    }
-    cookies.addChangeListener((element) => {
-      if(element.name === "datasetLabel"){
-        this.setState({dataset: element.value});
-      } else if(element.name === "explanationLabel"){
-        this.setState({explanation: element.value});
-      }
-    });
-  }
-  */
-
   function onLoadOther(){
     history.push(`/loader`);
+  }
+
+  function onClickLink(e){
+    e.preventDefault();
+    history.push(e.target.attributes.href.value);
   }
 
   return(
@@ -115,17 +97,17 @@ function Header(){
           <Navbar.Brand href="/entities">
             Explorer (alpha)
           </Navbar.Brand>
-          <Nav className="mr-auto">
-            <Nav.Link href="/overview">Overview</Nav.Link>
-            <Nav.Link href="/entities">Entities</Nav.Link>
-            <Nav.Link href="/feedback">Feedback</Nav.Link>
+          <Nav className="mr-auto" defaultActiveKey={location.pathname}>
+            <Nav.Link href={`/overview/${dataset}/${explanation}`} disabled={!dataset || !explanation} onClick={(e) => onClickLink(e)}>Overview</Nav.Link>
+            <Nav.Link href={`/entities/${dataset}/${explanation}`} disabled={!dataset || !explanation} onClick={(e) => onClickLink(e)}>Entities</Nav.Link>
+            <Nav.Link href={`/feedback/${dataset}/${explanation}`} disabled={!dataset || !explanation} onClick={(e) => onClickLink(e)}>Feedback</Nav.Link>
           </Nav>
           <Navbar.Collapse className="justify-content-end">
             <Navbar.Text className="mr-2">
-              Dataset: {dataset}
+              Dataset: {dataset ? dataset : "None"}
             </Navbar.Text>
             <Navbar.Text className="mr-2">
-              Explanation: {explanation}
+              Explanation: {explanation ? explanation : "None"}
             </Navbar.Text>
             <Button size="sm" variant="outline-success" onClick={() => onLoadOther()}>Load other</Button>
           </Navbar.Collapse>
