@@ -60,6 +60,11 @@
   width: 75%;
 }
 
+.page-item.active{
+  background-color: green !important;
+  border-color: green !important;
+}
+
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg);

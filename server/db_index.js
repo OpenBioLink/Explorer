@@ -3,26 +3,26 @@
 let queries = require('./db');
 
 let db_index = {
-    getNamespaceFromDatasetID(datasetID){
+    getEndpointFromDatasetID(datasetID){
         var sql = `
         select 
-            Namespace
+            Endpoint, Namespace
         from dataset 
         where dataset.id = '${datasetID}';
         `;
         var dataset = queries.get('index', sql);
         if(dataset){
-            return dataset["Namespace"];
+            return [dataset["Endpoint"], dataset["Namespace"]];
         } else {
             var sql = `
             select 
-                Namespace
+                Endpoint, Namespace
             from Temp_Dataset 
             where Temp_Dataset.id = '${datasetID}';
             `;
             dataset = queries.get('index', sql);
             if(dataset){
-                return dataset["Namespace"];
+                return [dataset["Endpoint"], dataset["Namespace"]];
             } else {
                 console.log("Not found");
             }
@@ -36,13 +36,13 @@ let db_index = {
         var sql = `select * from explaination where explaination.datasetid = '${datasetID}';`;
         return queries.all('index', sql);
     },
-    publishNewDataset(id, name, version, description, namespace){
-        var sql = `INSERT into Dataset (ID, Name, Version, Description, Namespace) VALUES ('${id}', '${name}', '${version}', '${description}', '${namespace}')`;
+    publishNewDataset(id, name, version, description, endpoint, namespace){
+        var sql = `INSERT into Dataset (ID, Name, Version, Description, Endpoint, Namespace) VALUES ('${id}', '${name}', '${version}', '${description}', '${endpoint}', '${namespace}')`;
         var res = queries.run('index', sql);
         return res;
     },
-    addTempDataset(id, namespace, date){
-        var sql = `INSERT into Temp_Dataset (ID, Namespace, Date) VALUES ('${id}', '${namespace}', ${date})`;
+    addTempDataset(id, endpoint, namespace, date){
+        var sql = `INSERT into Temp_Dataset (ID, Endpoint, Namespace, Date) VALUES ('${id}', '${endpoint}', '${namespace}', ${date})`;
         var res = queries.run('index', sql);
         return res;
     },

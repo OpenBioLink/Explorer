@@ -61,7 +61,7 @@ export function Entities(){
     <div style={{minHeight: "100vh"}}>
         <Navbar bg="dark" variant="dark">
           <Form inline>
-            <Button variant="outline-info" className="mr-sm-2" onClick={() => toggle_sort()}>
+            <Button variant="outline-success" className="mr-sm-2" onClick={() => toggle_sort()}>
               {asc ? 
                 <ImSortAlphaAsc/> :
                 <ImSortAlphaDesc/>
@@ -229,6 +229,7 @@ export function Entities(){
 
 const CustomToggle = React.forwardRef(({ children, onClick }, ref) => (
   <Button
+    variant="outline-success"
     className="dropdown-toggle"
     onClick={(e) => {
       e.preventDefault();

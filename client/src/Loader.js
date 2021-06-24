@@ -161,6 +161,7 @@ export class Loader_ extends React.Component{
             <Modal.Dialog className="mx-auto mw-100 w-75 mb-2">
               <Modal.Header>
                 <Modal.Title>Select a dataset</Modal.Title>
+                <LocalDatasetModal onUpload={(pk, published) => {this.onUploadLocalDataset(pk, published)}}/>
               </Modal.Header>
 
               <Modal.Body>
@@ -334,6 +335,7 @@ export class Loader_ extends React.Component{
 
     function onSubmitLocalDataset(e){
       e.preventDefault();
+      
       if(e.target.elements.label_graph.files.length === 0){
         setAlertMessage("Please select a label graph file.")
         setShowAlert(true);
@@ -345,28 +347,17 @@ export class Loader_ extends React.Component{
         setShowAlert(true);
       } else {
         setDisable(true);
-        API.callDatasetOperation(e.target, ["label_graph"], (status, progress, pk, published) => {
-            if(status === "done"){
-              //this.closeLocalDatasetModal(true);
-              setStatus('done');
-              setDisable(false);
-              setPk(pk);
-              setNow(0);
-              setPublished(published);
-            } else if(status === "zip") {
-              setStatus('zip');
-              setNow(0);
-            } else {
-              if(progress < 100){
-                setStatus('upload');
-                setNow(progress);
-              } else {
-                setStatus('server');
-                setNow(0);
-              }
-              
-            }
-        }); 
+        if(e.target.elements.publish.value === 'on'){
+          const data = new FormData(e.target);
+          const json = Object.fromEntries(data.entries());
+          API.addNewDataset(json, (response) => {
+            setStatus('done');
+            setDisable(false);
+            setPk(response[pk]);
+            setNow(0);
+            setPublished(response[published]);
+          });
+        }
       }
     }
 
@@ -392,57 +383,21 @@ export class Loader_ extends React.Component{
     return(
       <>
         <Button variant="primary" onClick={() => setShow(true)}>
-          Load local dataset
+          Add dataset
         </Button>
         <Modal show={show} onHide={onClose} keyboard={!disable} backdrop={disable ? "static" : true}> 
         <Modal.Header closeButton style={disable ? {pointerEvents: "none"} : {}}>
-          <Modal.Title>Load local dataset</Modal.Title>
+          <Modal.Title>Add dataset</Modal.Title>
         </Modal.Header>
         <Modal.Body style={disable ? {pointerEvents: "none"} : {}}>
         <Form onSubmit={(e) => {onSubmitLocalDataset(e)}}>
-          <FormControl name="method" value="create" className="d-none"/>
-          <Form.Group hidden>
-            <Form.Label>Dataset</Form.Label>
-            <Form.File 
-              className="mb-2"
-              name="training_set"
-              label="Training set"
-              custom
-              />
-            <Form.File 
-              className="mb-2"
-              name="test_set"
-              label="Testing set (optional)"
-              custom
-              />
-            <Form.File
-              name="val_set"
-              label="Validation set (optional)"
-              custom
-              />
-            </Form.Group>
             <Form.Group>
-              <Form.Label>Label graph*</Form.Label>
+              <Form.Label>SPARQL Endpoint</Form.Label>
               <InputGroup className="mb-2">
-                <Form.File
-                  name="label_graph"
-                  label="Label graph"
-                  accept=".ttl, .txt, .xml, .n3, .jsonld, .nt, .trig, .rdf, .nq"
-                  custom
-                  />
-                
-                <InputGroup.Append>
-                  <select className="form-control ml-2" name="rdftype">
-                    <option value="text/turtle;charset=utf-8" selected>Turtle</option>
-                    <option value="text/n3;charset=utf-8">N3</option>
-                    <option value="text/plain">N-Triples</option>
-                    <option value="application/rdf+xml">RDF/XML</option>
-                    <option value="application/rdf+xml">OWL</option>
-                    <option value="application/n-quads">N-Quads</option>
-                    <option value="application/trig">TriG</option>
-                    <option value="application/ld+json">JSON-LD</option>
-                  </select>
-                </InputGroup.Append>
+                <FormControl
+                    name="endpoint"
+                    placeholder="http://example.org/sparql"
+                />
               </InputGroup>
               <InputGroup className="mb-3">
                 <InputGroup.Prepend>
@@ -516,7 +471,7 @@ export class Loader_ extends React.Component{
                   </Alert>
                 : status === "done" && published ?
                   <Alert variant="success" className="text-center mt-2 mb-0">
-                    Upload completed!<br/>You can now select your dataset from the list.
+                    Success!<br/>You can now select your dataset from the list.
                   </Alert>
                 : ""
               }

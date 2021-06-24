@@ -30,6 +30,31 @@ let rpcmethods = {
             });
         }
     },
+    addNewDataset:{
+        description: ``,
+        params: [],
+        returns: [''],
+        exec(body) {
+            return new Promise((resolve) => {
+                var endpoint = body.endpoint;
+                var namespace = body.namespace;
+                var dbName = body.dbName;
+                var dbVersion = body.dbVersion ? body.dbVersion : "";
+                var dbDescription = body.dbDescription ? body.dbDescription : "";
+
+                var publish = body.publish === "on" ? true : false;
+                var id = uuidv4();
+
+                index.publishNewDataset(id, dbName, dbVersion, dbDescription, endpoint, namespace);
+                
+                resolve({
+                    pk: id,
+                    published: publish,
+                    success: true
+                });
+            });
+        }
+    },
     getAllExplanationsByDatasetID:{
         description: ``,
         params: ['datasetID: The id of the dataset'],
@@ -50,8 +75,8 @@ let rpcmethods = {
         exec(body) {
             return new Promise((resolve) => {
                 tic();
-                var namespace = index.getNamespaceFromDatasetID(body.datasetID);
-                graph.getAllTestEntities(body.datasetID, namespace, (labeled_entities, types) => {
+                var [endpoint, namespace] = index.getEndpointFromDatasetID(body.datasetID);
+                graph.getAllTestEntities(endpoint, namespace, (labeled_entities, types) => {
                     resolve({entities: labeled_entities, types: types} || {});
                     toc("getAllTestEntities");
                 });
@@ -105,8 +130,8 @@ let rpcmethods = {
             return new Promise((resolve) => {
                 tic();
                 var predictions = db.getPredictionsByTaskID(body.explanationID, body.taskID);
-                var namespace = index.getNamespaceFromDatasetID(body.datasetID);
-                graph.addLabelsToPredictions(body.datasetID, namespace, predictions, (labeled_predictions) => {
+                var [endpoint, namespace] = index.getEndpointFromDatasetID(body.datasetID);
+                graph.addLabelsToPredictions(endpoint, namespace, predictions, (labeled_predictions) => {
                     toc("getPredictionsByTaskID");
                     resolve(labeled_predictions || {});
                 })
@@ -136,13 +161,13 @@ let rpcmethods = {
 
                 var task = db.getTaskByID(body.explanationID, body.taskID);
                 var prediction = db.getPredictionByID(body.explanationID, body.taskID, body.entityID);
-                var namespace = index.getNamespaceFromDatasetID(body.datasetID);
+                var [endpoint, namespace] = index.getEndpointFromDatasetID(body.datasetID);
                 
                 _res["rel"] = task["RelationName"]; 
                 _res["hit"] = prediction["Hit"];
                 _res["confidence"] = prediction["Confidence"];
 
-                graph.getInfoByCurie(body.datasetID, namespace, task["EntityName"], (taskEntityInfo) => {
+                graph.getInfoByCurie(endpoint, namespace, task["EntityName"], (taskEntityInfo) => {
                     if(task["IsHead"] == 1){
                         _res["head"]["label"] = taskEntityInfo["Label"] ? taskEntityInfo["Label"] : null
                         _res["head"]["curie"] = task["EntityName"]
@@ -150,7 +175,7 @@ let rpcmethods = {
                         _res["tail"]["label"] = taskEntityInfo["Label"] ? taskEntityInfo["Label"] : null
                         _res["tail"]["curie"] = task["EntityName"]
                     }
-                    graph.getInfoByCurie(body.datasetID, namespace, prediction["EntityName"], (predictionEntityInfo) => {
+                    graph.getInfoByCurie(endpoint, namespace, prediction["EntityName"], (predictionEntityInfo) => {
                         if(task["IsHead"] == 1){
                             _res["tail"]["label"] = predictionEntityInfo["Label"] ? predictionEntityInfo["Label"] : null
                             _res["tail"]["curie"] = prediction["EntityName"]
@@ -172,8 +197,8 @@ let rpcmethods = {
         exec(body) {
             return new Promise((resolve) => {
                 tic();
-                var namespace = index.getNamespaceFromDatasetID(body.datasetID);
-                graph.getInfoByCurie(body.datasetID, namespace, body.curie, (res) => {
+                var [endpoint, namespace] = index.getEndpointFromDatasetID(body.datasetID);
+                graph.getInfoByCurie(endpoint, namespace, body.curie, (res) => {
                     toc("getInfoByCurie");
                     resolve(res || {});
                 })
@@ -187,8 +212,8 @@ let rpcmethods = {
         exec(body) {
             return new Promise((resolve) => {
                 var curie = db.getCurieByEntityID(body.explanationID, body.entityID);
-                var namespace = index.getNamespaceFromDatasetID(body.datasetID)
-                graph.getInfoByCurie(body.datasetID, namespace, curie, (res) => {
+                var [endpoint, namespace] = index.getEndpointFromDatasetID(body.datasetID);
+                graph.getInfoByCurie(endpoint, namespace, curie, (res) => {
                     resolve(res || {});
                 });
             });
@@ -206,9 +231,9 @@ let rpcmethods = {
                 var [explanations, entities] = getJson(explanations);
                 toc("Rule retrieval and reshape");
                 tic();
-                var namespace = index.getNamespaceFromDatasetID(body.datasetID)
+                var [endpoint, namespace] = index.getEndpointFromDatasetID(body.datasetID);
                 
-                graph.addLabelsToExplanations(body.datasetID, namespace, explanations, variables, entities, (labeled_explanations) => {
+                graph.addLabelsToExplanations(endpoint, namespace, explanations, variables, entities, (labeled_explanations) => {
                     toc("Added labels");
                     resolve(labeled_explanations || {});
                 });
@@ -223,8 +248,8 @@ let rpcmethods = {
             //body.taskID, body.entityID
             return new Promise((resolve) => {
                 tic();
-                var namespace = index.getNamespaceFromDatasetID(body.datasetID)
-                graph.getOutgoingEdges(body.datasetID, namespace, body.curie, (outgoing) => {
+                var [endpoint, namespace] = index.getEndpointFromDatasetID(body.datasetID);
+                graph.getOutgoingEdges(endpoint, namespace, body.curie, (outgoing) => {
                     toc("Get outgoing");
                     resolve(outgoing || {});
                 });
@@ -239,8 +264,8 @@ let rpcmethods = {
             //body.taskID, body.entityID
             return new Promise((resolve) => {
                 tic();
-                var namespace = index.getNamespaceFromDatasetID(body.datasetID)
-                graph.getIncomingEdges(body.datasetID, namespace, body.curie, (incoming) => {
+                var [endpoint, namespace] = index.getEndpointFromDatasetID(body.datasetID);
+                graph.getIncomingEdges(endpoint, namespace, body.curie, (incoming) => {
                     toc("Get incoming");
                     resolve(incoming || {});
                 });
@@ -255,10 +280,10 @@ let rpcmethods = {
             //body.taskID, body.entityID
             return new Promise((resolve) => {
                 tic();
-                var namespace = index.getNamespaceFromDatasetID(body.datasetID);
+                var [endpoint, namespace] = index.getEndpointFromDatasetID(body.datasetID);
                 var rule = db.getRuleByID(body.explanationID, body.ruleID);
                 var def = splitRule(rule["DEF"]);
-                graph.getInstantiations(body.datasetID, namespace, body.head, body.tail, def, (instantiations) => {
+                graph.getInstantiations(endpoint, namespace, body.head, body.tail, def, (instantiations) => {
                     resolve(instantiations || {});
                 });
                 toc("Instantiation");

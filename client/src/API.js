@@ -1,7 +1,4 @@
 
-import JSZip from 'jszip'
-import pako from 'pako'
-
 function callRPC(func, body, callback){
     var jsonReq = {
         [func]: body
@@ -15,51 +12,6 @@ function callRPC(func, body, callback){
         .then((jsonResp) => {
             callback(jsonResp[func]);
         });
-}
-
-
-export function callDatasetOperation(form, zip_files, callback){
-    let data = new FormData(form);
-    let request = new XMLHttpRequest();
-
-    request.open('POST', '/dataset');
-    request.upload.addEventListener('progress', (e) => {
-        let perc = parseInt((e.loaded / e.total) * 100);
-        callback('progress', perc, null, false);
-    })
-    request.addEventListener('load', function(response){
-        var jsonResponse = JSON.parse(response.currentTarget.responseText)
-        callback('done', null, jsonResponse["pk"], jsonResponse["published"]);
-    });
-    request.send(data);
-
-    // Zipping is very slow
-    /*
-    zip_files.forEach(element => {
-        callback('zip', null, null, null);
-        var reader = new FileReader();
-        reader.onload = function(evt) {
-            const compressed = pako.deflate(reader.result);
-            var blob = new Blob([ compressed ], { type: 'application/octet-stream'});
-            console.log("sucess");
-            data.set(element, blob);
-            // cannot use fetch here, need to track upload progress
-            let request = new XMLHttpRequest();
-            request.open('POST', '/dataset');
-
-            request.upload.addEventListener('progress', (e) => {
-                let perc = parseInt((e.loaded / e.total) * 100);
-                callback('progress', perc, null, false);
-            })
-            request.addEventListener('load', function(response){
-                var jsonResponse = JSON.parse(response.currentTarget.responseText)
-                callback('done', null, jsonResponse["pk"], jsonResponse["published"]);
-            });
-            request.send(data);
-        }
-        reader.readAsArrayBuffer(form[element].files[0]);
-    });
-    */
 }
 
 export function callExplanationOperation(form, zip_files, callback){
@@ -107,6 +59,10 @@ export function callExplanationOperation(form, zip_files, callback){
     });
     */
     
+}
+
+export function addNewDataset(data, callback){
+    callRPC("addNewDataset", data, callback);
 }
 
 export function getAllDatasets(callback){
