@@ -89,3 +89,11 @@ export function sortDesc(entities){
       }
     });
   }
+
+export function ellipsis(string){
+  const limit = 50;
+  if (string.length > limit) {
+    return string.substring(0,limit) + " ...";
+  }
+  return string;
+}

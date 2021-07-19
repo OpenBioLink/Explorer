@@ -82,22 +82,25 @@ export function getAllTestEntities(datasetID, explanationID, callback){
     }, callback);
 }
 
-export function getTasksByCurie(explanationID, curie, callback){
+export function getTasksByCurie(datasetID, explanationID, curie, callback){
     callRPC("getTasksByCurie", {
+        "datasetID": datasetID, 
         "explanationID": explanationID, 
         "curie": curie
     }, callback);
 }
 
-export function getTasksByEntityID(explanationID, entityID, callback){
+export function getTasksByEntityID(datasetID, explanationID, entityID, callback){
     callRPC("getTasksByEntityID", {
+        "datasetID": datasetID, 
         "explanationID": explanationID, 
         "entityID": entityID
     }, callback);
 }
 
-export function getTaskByID(explanationID, entityID, callback){
+export function getTaskByID(datasetID, explanationID, entityID, callback){
     callRPC("getTaskByID", {
+        "datasetID": datasetID,
         "explanationID": explanationID, 
         "entityID": entityID
     }, callback);

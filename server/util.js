@@ -1,3 +1,4 @@
+
 // Performance measurement functions
 var tictime;
 function tic() { tictime = Date.now() }
@@ -6,8 +7,13 @@ function toc(msg) {
   console.log((msg || 'toc') + ": " + dt + "ms");
 }
 
+function logd(obj) {
+  console.log(JSON.stringify(obj, null, 4))
+}
+
 const variables = ["X", "Y", "A", "B", "C"];
 
 exports.tic = tic;
 exports.toc = toc;
+exports.logd = logd;
 exports.variables = variables;

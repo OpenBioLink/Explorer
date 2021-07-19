@@ -6,6 +6,7 @@ import './App.css';
 import {Button, Pagination, Modal, Badge, Container, Row, Col, Table, ListGroup, Spinner, Accordion, AccordionContext, Card} from 'react-bootstrap';
 import { IconContext } from "react-icons";
 import { RiArrowDropDownLine, RiArrowDropRightLine } from "react-icons/ri";
+import { BiLinkExternal } from "react-icons/bi";
 const API = require('./API');
 
 export class Entity_ extends React.Component{
@@ -43,7 +44,7 @@ export class Entity_ extends React.Component{
             curie: curie
         });
         API.getInfoByCurie(datasetID, curie, (info) => this.setState({info: info}));
-        API.getTasksByCurie(explanationID, curie, (tasks) => this.addTasks(tasks));
+        API.getTasksByCurie(datasetID, explanationID, curie, (tasks) => this.addTasks(tasks));
 
         /*
         if(params.has("id")){
@@ -91,11 +92,25 @@ export class Entity_ extends React.Component{
         this.props.history.push(`/task/${this.state.datasetID}/${this.state.explanationID}?taskID=${taskID}`);
     }
 
+    /*
+
+                        <Row>
+                            <Col>
+                                <h5>Description</h5>
+                            </Col>
+                        </Row>
+                        <Row>
+                            <Col>
+                                {this.state.info?.Description ? this.state.info?.Description : ""}
+                            </Col>
+                        </Row>
+    */
+
     render(){
         return (
             
             <div>
-                <Modal.Dialog className="w-none w-50 mw-100">
+                <Modal.Dialog className="w-none w-75 mw-100">
                 <Modal.Header className="justify-content-center">
                     <Table className="m-0" borderless>
                         <tbody>
@@ -118,11 +133,11 @@ export class Entity_ extends React.Component{
                 </Modal.Header>
                 <Modal.Body>
                     <Container fluid className="text-left">
-                        { this.state.info?.Synonyms ? 
+                        { (this.state.info != undefined && this.state.info.Synonyms.length > 0) ? 
                             [
                             <Row>
                                 <Col>
-                                    <h5>Synonyms</h5>
+                                    <h4 className="mt-2">Synonyms</h4>
                                 </Col>
                             </Row>,
                             <Row>
@@ -135,22 +150,49 @@ export class Entity_ extends React.Component{
                         }
                         <Row>
                             <Col>
-                                <h5>Description</h5>
+                                <h4 className="pb-1 mt-2 underlinedHeading">Description</h4>
                             </Col>
                         </Row>
                         <Row>
                             <Col>
-                                {this.state.info?.Description ? this.state.info?.Description : ""}
+                            {
+                                this.state.info ?
+                                <>
+                                    {this.state.info?.Description}
+                                </>
+                                : ""
+                            }
                             </Col>
                         </Row>
                         <Row>
                             <Col>
-                                <h5>Predictions</h5>
+                                <h4 className="pb-1 mt-2 underlinedHeading">Online Resource</h4>
                             </Col>
                         </Row>
                         <Row>
                             <Col>
-                                {this.state.tailTasks.length > 0 ? "Predict heads" : ""}
+                            {
+                                this.state.info ?
+                                <>
+                                    <a href={this.state.info?.FullURI} target="_blank">
+                                        {this.state.info?.FullURI}
+                                    </a>
+                                </>
+                                 : ""
+                            }
+                            </Col>
+                        </Row>
+                        <Row>
+                            <Col>
+                                <h4 className="pb-1 mt-2 underlinedHeading">Predictions</h4>
+                            </Col>
+                        </Row>
+                        <Row>
+                            <Col>
+                                {this.state.tailTasks.length > 0 ? <h5  className="underlinedHeading">Heads</h5> : ""}
+                            </Col>
+                            <Col>
+                                {this.state.headTasks.length > 0 ? <h5  className="underlinedHeading">Tails</h5> : ""}
                             </Col>
                         </Row>
                         <Row>
@@ -164,7 +206,7 @@ export class Entity_ extends React.Component{
                                                         ?
                                                     </td>
                                                     <td className="w-50">
-                                                        {row["RelationName"]}
+                                                        {row["RelationLabel"]}
                                                     </td>
                                                     <td  className="w-25">
                                                         {this.state.info?.Label ? this.state.info?.Label : this.state.info?.Curie}
@@ -175,13 +217,6 @@ export class Entity_ extends React.Component{
                                     </Button>
                                 )}
                             </Col>
-                        </Row>
-                        <Row>
-                            <Col>
-                            {this.state.headTasks.length > 0 ? "Predict tails" : ""}
-                            </Col>
-                        </Row>
-                        <Row>
                             <Col className="text-center">
                                 {this.state.headTasks.map(row =>
                                     <Button id={row["TaskID"]} className='Relation-btn w-100 mb-1' variant="dark" onClick={() => this.onRelationSelection(row["TaskID"])}>
@@ -192,7 +227,7 @@ export class Entity_ extends React.Component{
                                                         {this.state.info?.Label ? this.state.info?.Label : this.state.info?.Curie}
                                                     </td>
                                                     <td className="w-50">
-                                                        {row["RelationName"]}
+                                                        {row["RelationLabel"]}
                                                     </td>
                                                     <td  className="w-25">
                                                         ?
@@ -206,7 +241,7 @@ export class Entity_ extends React.Component{
                         </Row>
                         <Row>
                             <Col>
-                                <h5>Known links</h5>
+                                <h4 className="pb-1 mt-2 underlinedHeading">Known links</h4>
                             </Col>
                         </Row>
                         <Row>
@@ -224,10 +259,10 @@ export class Entity_ extends React.Component{
                                                             {rel[1].map(obj => 
                                                             <tr>
                                                                 <td className="w-50 text-left border-right">
-                                                                    {rel[0]}
+                                                                    {obj[0]}
                                                                 </td>
                                                                 <td className="w-50 text-center">
-                                                                    <a href={`/entity/${this.state.datasetID}/${this.state.explanationID}?term=${obj[1]}`}>{obj[0] ? obj[0] : obj[1]}</a>
+                                                                    <a href={`/entity/${this.state.datasetID}/${this.state.explanationID}?term=${obj[2]}`}>{obj[1] ? obj[1] : obj[2]}</a>
                                                                 </td>
                                                             </tr>
                                                             )}
@@ -256,10 +291,10 @@ export class Entity_ extends React.Component{
                                                                 {rel[1].map(obj => 
                                                                 <tr>
                                                                     <td className="w-50 border-right text-center">
-                                                                        <a href={`/entity/${this.state.datasetID}/${this.state.explanationID}?term=${obj[1]}`}>{obj[0] ? obj[0] : obj[1]}</a>
+                                                                        <a href={`/entity/${this.state.datasetID}/${this.state.explanationID}?term=${obj[2]}`}>{obj[1] ? obj[1] : obj[2]}</a>
                                                                     </td>
                                                                     <td className="w-50 text-right">
-                                                                        {rel[0]}
+                                                                        {obj[0]}
                                                                     </td>
                                                                 </tr>
                                                                 )}

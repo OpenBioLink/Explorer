@@ -37,7 +37,7 @@ export class Task_ extends React.Component{
             explanationID: explanationID
         });
 
-        API.getTaskByID(explanationID, id, (task) => {
+        API.getTaskByID(datasetID, explanationID, id, (task) => {
             API.getInfoByEntityID(datasetID, explanationID, task["EntityID"], (info) => {console.log(info);this.setState({entityInfo: info})});
             this.setState({task: task});
         });
@@ -76,7 +76,7 @@ export class Task_ extends React.Component{
                         <h2>{(this.state.task && this.state.entityInfo) ? this.state.task.IsHead === 1 ? this.state.entityInfo.Label : "?" : ""}</h2>
                     </Col>
                     <Col>
-                        <h2>{(this.state.task && this.state.entityInfo) ? this.state.task.RelationName : ""}</h2>
+                        <h2>{(this.state.task && this.state.entityInfo) ? this.state.task.RelationLabel : ""}</h2>
                     </Col>
                     <Col>
                         <h2>{(this.state.task && this.state.entityInfo) ? this.state.task.IsHead === 0 ? this.state.entityInfo.Label : "?" : ""}</h2>

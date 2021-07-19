@@ -4,6 +4,7 @@ let db = require('./db_explanation');
 let index = require('./db_index');
 let {graph_label: graph} = require('./graph_label');
 const {runSPARQL} = require('./graph_label');
+const { v4: uuidv4 } = require('uuid');
 
 const {tic, toc, variables}  = require('./util');
 
@@ -91,8 +92,10 @@ let rpcmethods = {
             return new Promise((resolve) => {
                 tic();
                 var tasks = db.getTasksByCurie(body.explanationID, body.curie);
-                toc("getTasksByCurie")
-                resolve(tasks || {});
+                var [endpoint, namespace] = index.getEndpointFromDatasetID(body.datasetID);
+                graph.addRelationlabelsToTasks(endpoint, namespace, tasks, (tasks) => {
+                    resolve(tasks || {});
+                });
             });
         }
     },
@@ -117,8 +120,12 @@ let rpcmethods = {
             return new Promise((resolve) => {
                 tic();
                 var task = db.getTaskByID(body.explanationID, body.entityID);
-                toc("getTaskByID");
-                resolve(task || {});
+                var [endpoint, namespace] = index.getEndpointFromDatasetID(body.datasetID);
+                graph.getRelationlabel(endpoint, namespace, task.RelationName, (RelationLabel) => {
+                    task.RelationLabel = RelationLabel.Label;
+                    toc("getTaskByID");
+                    resolve(task || {});
+                });
             });
         }
     },
@@ -151,6 +158,7 @@ let rpcmethods = {
                         curie: ""
                     },
                     rel: "",
+                    relLabel: "",
                     tail: {
                         label: "",
                         curie: ""
@@ -166,25 +174,27 @@ let rpcmethods = {
                 _res["rel"] = task["RelationName"]; 
                 _res["hit"] = prediction["Hit"];
                 _res["confidence"] = prediction["Confidence"];
-
-                graph.getInfoByCurie(endpoint, namespace, task["EntityName"], (taskEntityInfo) => {
-                    if(task["IsHead"] == 1){
-                        _res["head"]["label"] = taskEntityInfo["Label"] ? taskEntityInfo["Label"] : null
-                        _res["head"]["curie"] = task["EntityName"]
-                    } else {
-                        _res["tail"]["label"] = taskEntityInfo["Label"] ? taskEntityInfo["Label"] : null
-                        _res["tail"]["curie"] = task["EntityName"]
-                    }
-                    graph.getInfoByCurie(endpoint, namespace, prediction["EntityName"], (predictionEntityInfo) => {
+                graph.getRelationlabel(endpoint, namespace, task["RelationName"], (relationLabel) =>{
+                    _res["relLabel"] = relationLabel.Label;
+                    graph.getInfoByCurie(endpoint, namespace, task["EntityName"], (taskEntityInfo) => {
                         if(task["IsHead"] == 1){
-                            _res["tail"]["label"] = predictionEntityInfo["Label"] ? predictionEntityInfo["Label"] : null
-                            _res["tail"]["curie"] = prediction["EntityName"]
+                            _res["head"]["label"] = taskEntityInfo["Label"] ? taskEntityInfo["Label"] : null
+                            _res["head"]["curie"] = task["EntityName"]
                         } else {
-                            _res["head"]["label"] = predictionEntityInfo["Label"] ? predictionEntityInfo["Label"] : null
-                            _res["head"]["curie"] = prediction["EntityName"]
+                            _res["tail"]["label"] = taskEntityInfo["Label"] ? taskEntityInfo["Label"] : null
+                            _res["tail"]["curie"] = task["EntityName"]
                         }
-                        toc("getPredictionInfo")
-                        resolve(_res || {});
+                        graph.getInfoByCurie(endpoint, namespace, prediction["EntityName"], (predictionEntityInfo) => {
+                            if(task["IsHead"] == 1){
+                                _res["tail"]["label"] = predictionEntityInfo["Label"] ? predictionEntityInfo["Label"] : null
+                                _res["tail"]["curie"] = prediction["EntityName"]
+                            } else {
+                                _res["head"]["label"] = predictionEntityInfo["Label"] ? predictionEntityInfo["Label"] : null
+                                _res["head"]["curie"] = prediction["EntityName"]
+                            }
+                            toc("getPredictionInfo")
+                            resolve(_res || {});
+                        });
                     });
                 });
             });
@@ -228,12 +238,12 @@ let rpcmethods = {
             return new Promise((resolve) => {
                 tic();
                 var explanations = db.getExplanations(body.explanationID, body.taskID, body.entityID);
-                var [explanations, entities] = getJson(explanations);
+                var [explanations, entities, relations] = getJson(explanations);
                 toc("Rule retrieval and reshape");
                 tic();
                 var [endpoint, namespace] = index.getEndpointFromDatasetID(body.datasetID);
                 
-                graph.addLabelsToExplanations(endpoint, namespace, explanations, variables, entities, (labeled_explanations) => {
+                graph.addLabelsToExplanations(endpoint, namespace, explanations, variables, entities, relations, (labeled_explanations) => {
                     toc("Added labels");
                     resolve(labeled_explanations || {});
                 });
@@ -299,7 +309,7 @@ function splitAtom(atom){
     return [head, relation, tail];
 }
 
-function splitRule(ruleStr, entities){
+function splitRule(ruleStr, entities, relations){
 
     var def = {
         relation: null,
@@ -320,6 +330,9 @@ function splitRule(ruleStr, entities){
             entities.add(def.tail);
         }
     }
+    if (relations){
+        relations.add(def.relation);
+    }
 
     bodyStr.split(", ").forEach((element)=> {
         var [head, relation, tail] = splitAtom(element);
@@ -335,6 +348,9 @@ function splitRule(ruleStr, entities){
                 def.hasUnboundVariables = true;
             }
         }
+        if(relations){
+            relations.add(relation);
+        }
         def["bodies"].push({
             relation: relation,
             head: head,
@@ -346,9 +362,10 @@ function splitRule(ruleStr, entities){
 
 function getJson(explanations){
     var entities = new Set();
+    var relations = new Set();
     var groups = explanations.reduce((groups, item) => {
         
-        var definition = splitRule(item.RuleDefinition, entities)
+        var definition = splitRule(item.RuleDefinition, entities, relations)
 
         return {
             ...groups,
@@ -376,7 +393,7 @@ function getJson(explanations){
         }
             return 0;
     });
-    return [groups, entities];
+    return [groups, entities, relations];
 }
 
 module.exports = rpcmethods;

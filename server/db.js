@@ -9,6 +9,7 @@ function createIndex(){
     var sql = `
     CREATE TABLE "Dataset" (
         "ID"	TEXT NOT NULL,
+        "Endpoint" TEXT NOT NULL,
         "Name"	TEXT NOT NULL,
         "Version"	TEXT,
         "Description"	TEXT,

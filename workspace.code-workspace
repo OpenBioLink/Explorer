@@ -6,7 +6,6 @@
 	],
 	"settings": {
 		"jupyter.jupyterServerType": "local",
-		"python.pythonPath": "C:\\Python36\\python.exe",
 		"sqltools.connections": [
 
 			{

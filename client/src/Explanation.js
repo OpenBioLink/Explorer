@@ -10,6 +10,8 @@ import { HiVariable, HiOutlineVariable } from "react-icons/hi"
 import { AiOutlineFunction } from "react-icons/ai"
 import { FaArrowRight } from "react-icons/fa";
 
+import { ellipsis } from './util';
+
 const API = require('./API');
 
 export class Explanation_ extends React.Component{
@@ -74,19 +76,26 @@ export class Explanation_ extends React.Component{
                 <>
                 <Container className="my-4">
                     <Row>
-                        <Col style={{display: "flex"}}>
-                            <h2 className="m-auto"><a href={`/entity/${this.state.datasetID}/${this.state.explanationID}?term=${this.state.info.head.curie}`}>{this.state.info.head.label ? this.state.info.head.label : this.state.info.tail.curie}</a></h2>
-                        </Col>
-                        <Col style={{display: "flex"}}>
-                            <h2 className="m-auto">{this.state.info.rel}</h2>
-                        </Col>
-                        <Col style={{display: "flex"}}>
-                            <h2 className="m-auto"><a href={`/entity/${this.state.datasetID}/${this.state.explanationID}?term=${this.state.info.tail.curie}`}>{this.state.info.tail.label ? this.state.info.tail.label : this.state.info.tail.curie}</a></h2>
+                        <Col>
+                            <h2>
+                                <a href={`/entity/${this.state.datasetID}/${this.state.explanationID}?term=${this.state.info.head.curie}`}>{this.state.info.head.label ? this.state.info.head.label : this.state.info.tail.curie}</a>
+                                &nbsp;
+                                {this.state.info.relLabel}
+                                &nbsp;
+                                <a href={`/entity/${this.state.datasetID}/${this.state.explanationID}?term=${this.state.info.tail.curie}`}>{this.state.info.tail.label ? this.state.info.tail.label : this.state.info.tail.curie}</a>
+                            </h2>
                         </Col>
                     </Row>
                     <Row>
-                        <Col className="mt-3" style={{display: "flex"}}>
+                        <Col>
                             <h4 className="m-auto">Confidence: {this.state.info.confidence.toFixed(5)}</h4>
+                        </Col>
+                    </Row>
+                    <Row>
+                        <Col className="mt-4" >
+                            <h2>
+                                because
+                            </h2>
                         </Col>
                     </Row>
                 </Container>
@@ -249,35 +258,64 @@ function Cluster({cluster, info, showInstantiations}){
                         <Table className="m-0">
                             <tbody>
                             {rule.Definition.bodies.map((body) =>
+                            /*
                                         <tr>
                                             <td className="w-25 border-top-0">
                                                 {(info.head && info.tail) ?
                                                     body.headLabel ? 
-                                                        <a href={'/entity?term=' + body.head}>{body.headLabel}</a> 
+                                                        <a style={{wordBreak: "break-word"}} href={'/entity?term=' + body.head}>{body.headLabel}</a> 
                                                     : body.head === "X" ? 
-                                                        <b><a href={'/entity?term=' + info.head.curie}>{info.head.label ? info.head.label : info.head.curie}</a></b>
+                                                        <b><a style={{wordBreak: "break-word"}} href={'/entity?term=' + info.head.curie}>{info.head.label ? info.head.label : info.head.curie}</a></b>
                                                     : body.head === "Y" ? 
-                                                        <b><a href={'/entity?term=' + info.tail.curie}>{info.tail.label ? info.tail.label : info.tail.curie}</a> </b>
+                                                        <b><a  style={{wordBreak: "break-word"}} href={'/entity?term=' + info.tail.curie}>{info.tail.label ? info.tail.label : info.tail.curie}</a> </b>
                                                     : body.head
                                                     : ""
                                                 }
                                             </td>
                                             <td className="w-50 border-top-0">
-                                                {body.relation}
+                                                {body.relationLabel}
                                             </td>
                                             <td className="w-25 border-top-0">
                                                 {(info.head && info.tail) ?
                                                     body.tailLabel ? 
-                                                        <a href={'/entity?term=' + body.tail}>{body.tailLabel}</a> 
+                                                        <a style={{wordBreak: "break-word"}} href={'/entity?term=' + body.tail}>{body.tailLabel}</a> 
                                                     : body.tail === "X" ? 
-                                                        <b><a href={'/entity?term=' + info.head.curie}>{info.head.label ? info.head.label : info.head.curie}</a></b>
+                                                        <b><a style={{wordBreak: "break-word"}} href={'/entity?term=' + info.head.curie}>{info.head.label ? info.head.label : info.head.curie}</a></b>
                                                     : body.tail === "Y" ? 
-                                                        <b><a href={'/entity?term=' + info.tail.curie}>{info.tail.label ? info.tail.label : info.tail.curie}</a> </b> 
+                                                        <b><a style={{wordBreak: "break-word"}} href={'/entity?term=' + info.tail.curie}>{info.tail.label ? info.tail.label : info.tail.curie}</a> </b> 
                                                     : body.tail
                                                     : ""
                                                 }
                                             </td>
                                         </tr>
+                            */
+                                        <tr>
+                                        <td className="w-100 border-top-0">
+                                            {(info.head && info.tail) ?
+                                                body.headLabel ? 
+                                                    <a style={{wordBreak: "break-word"}} href={'/entity?term=' + body.head}>{ellipsis(body.headLabel)}</a> 
+                                                : body.head === "X" ? 
+                                                    <b><a style={{wordBreak: "break-word"}} href={'/entity?term=' + info.head.curie}>{ellipsis(info.head.label ? info.head.label : info.head.curie)}</a></b>
+                                                : body.head === "Y" ? 
+                                                    <b><a  style={{wordBreak: "break-word"}} href={'/entity?term=' + info.tail.curie}>{ellipsis(info.tail.label ? info.tail.label : info.tail.curie)}</a> </b>
+                                                : body.head
+                                                : ""
+                                            }
+                                            &nbsp;
+                                            {body.relationLabel}
+                                            &nbsp;
+                                            {(info.head && info.tail) ?
+                                                body.tailLabel ? 
+                                                    <a style={{wordBreak: "break-word"}} href={'/entity?term=' + body.tail}>{ellipsis(body.tailLabel)}</a> 
+                                                : body.tail === "X" ? 
+                                                    <b><a style={{wordBreak: "break-word"}} href={'/entity?term=' + info.head.curie}>{ellipsis(info.head.label ? info.head.label : info.head.curie)}</a></b>
+                                                : body.tail === "Y" ? 
+                                                    <b><a style={{wordBreak: "break-word"}} href={'/entity?term=' + info.tail.curie}>{ellipsis(info.tail.label ? info.tail.label : info.tail.curie)}</a> </b> 
+                                                : body.tail
+                                                : ""
+                                            }
+                                        </td>
+                                    </tr>
                             )}
                             </tbody>
                         </Table>

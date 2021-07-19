@@ -108,10 +108,9 @@ export function Entities(){
     //.filter(row => (this.state.searchTerm === "" || row[0].toLowerCase().includes(this.state.searchTerm.toLowerCase()) || row[2].toLowerCase().includes(this.state.searchTerm.toLowerCase())))
     
     return (
-      <Container fluid>
-        <Row>
-          <Col/>
-          <Col>
+      <Container>
+        <Row className="justify-content-md-center">
+          <Col xs="auto">
             <ListGroup>
               {values
               .slice(page2idx(active), page2idx(active + 1)).map(row =>
@@ -130,7 +129,6 @@ export function Entities(){
               )}
             </ListGroup>
           </Col>
-          <Col/>
         </Row>
       </Container>
     );

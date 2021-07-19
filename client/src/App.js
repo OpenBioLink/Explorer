@@ -51,9 +51,6 @@ export function App(){
             <Route path={['/feedback/:dataset/:explanation', '/feedback']}>
               <Feedback/>
             </Route>
-            <Route path={['/help/:dataset/:explanation', '/help']}>
-              <Feedback/>
-            </Route>
             <Route path='/'>
               <Loader cookies={cookies}/>
             </Route>
@@ -104,7 +101,6 @@ function Header(){
             <Nav.Link href={`/overview/${dataset}/${explanation}`} disabled={!dataset || !explanation} onClick={(e) => onClickLink(e)}>Overview</Nav.Link>
             <Nav.Link href={`/entities/${dataset}/${explanation}`} disabled={!dataset || !explanation} onClick={(e) => onClickLink(e)}>Entities</Nav.Link>
             <Nav.Link href={(dataset && explanation) ? `/feedback/${dataset}/${explanation}` : "/feedback"} onClick={(e) => onClickLink(e)}>Feedback</Nav.Link>
-            <Nav.Link href={(dataset && explanation) ? `/help/${dataset}/${explanation}` : "/help"}  onClick={(e) => onClickLink(e)}>Help</Nav.Link>
           </Nav>
           <Navbar.Collapse className="justify-content-end">
             {(dataset && explanation) ?

@@ -336,8 +336,8 @@ export class Loader_ extends React.Component{
     function onSubmitLocalDataset(e){
       e.preventDefault();
       
-      if(e.target.elements.label_graph.files.length === 0){
-        setAlertMessage("Please select a label graph file.")
+      if(e.target.elements.endpoint.value == null || e.target.elements.endpoint.value === ""){
+        setAlertMessage("Please select a SPARQL endpoint.")
         setShowAlert(true);
       } else if(e.target.elements.namespace.value == null || e.target.elements.namespace.value === "") {
         setAlertMessage("Please set the namespace used for the nodes in the knowledge graph.")
@@ -353,9 +353,10 @@ export class Loader_ extends React.Component{
           API.addNewDataset(json, (response) => {
             setStatus('done');
             setDisable(false);
-            setPk(response[pk]);
+            setPk(response["pk"]);
             setNow(0);
-            setPublished(response[published]);
+            setPublished(response["published"]);
+            console.log(response);
           });
         }
       }
@@ -444,17 +445,7 @@ export class Loader_ extends React.Component{
             }
             <Form.Group className="text-right border-top mb-0">
               {
-                status === "upload" ?
-                  <ProgressBar now={now} className="text-left mt-2" label={`uploading...`}/>
-                : status === "server" ? 
-                  <Alert variant="info" className="mt-2 mb-0">
-                    The Server is processing your upload, this may take a while
-                  </Alert>
-                : status === "zip" ? 
-                  <Alert variant="info" className="mt-2 mb-0">
-                      Zipping file, this may take a while
-                  </Alert>
-                : status === "done" && !published ?
+                status === "done" && !published ?
                   <Alert variant="success" className="text-center mt-2 mb-0">
                     <p>Upload completed! Please copy and save your private key for later reuse.</p>
                     <InputGroup className="mb-0">

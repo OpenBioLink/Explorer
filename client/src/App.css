@@ -1,3 +1,12 @@
+:root {
+  --black: #000;
+  --first-color:#A1D2CE;
+  --second-color: #78CAD2;
+  --third-color: #62A8AC;
+  --fourth-color: #5497A7;
+  --fifth-color: #50858B;
+}
+
 .App {
   text-align: center;
 }
@@ -63,6 +72,12 @@
 .page-item.active{
   background-color: green !important;
   border-color: green !important;
+}
+
+.underlinedHeading{
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: var(--black);
 }
 
 @keyframes App-logo-spin {

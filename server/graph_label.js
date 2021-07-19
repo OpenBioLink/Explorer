@@ -3,7 +3,7 @@
 const axios = require('axios');
 const fs = require('fs');
 var FormData = require('form-data');
-const {tic, toc, variables}  = require('./util');
+const {tic, toc, variables, logd}  = require('./util');
 
 //const endpoint = "http://localhost:3030"
 
@@ -78,14 +78,14 @@ let graph_label = {
             callback(predictions);
         });
     },
-    addLabelsToExplanations(endpoint, namespace, groups, variables, entities, callback){
+    addLabelsToExplanations(endpoint, namespace, groups, variables, entities, relations, callback){
         var query = `query=
             prefix ns: <${namespace}>
             SELECT ?subject ?object
             WHERE {
                 ?subject <http://www.w3.org/2000/01/rdf-schema#label> ?object
                 VALUES ?subject {
-                    ${[...entities].map((elem)=>{return "ns:" + elem.replace(/\//g,"\\/")}).join(" ")}
+                    ${[...entities, ...relations].map((elem)=>{return "ns:" + elem.replace(/\//g,"\\/")}).join(" ")}
                 }
             }
             `
@@ -95,6 +95,8 @@ let graph_label = {
                 var triple = data["results"]["bindings"][i];
                 label_map[triple["subject"]["value"].replace(namespace, '')] = triple["object"]["value"]
             }
+            console.log(label_map);
+
             groups.forEach((element) => {
                 element.Rules.forEach((rule) => {
                     if(!(variables.includes(rule.Definition.head))){
@@ -103,6 +105,8 @@ let graph_label = {
                     if(!(variables.includes(rule.Definition.tail))){
                         rule.Definition.tailLabel = label_map[rule.Definition.tail];
                     }
+                    rule.Definition.relationLabel = label_map[rule.Definition.relation];
+                    console.log(label_map[rule.Definition.relation]);
                     rule.Definition.bodies.forEach((body)=>{
                         if(!(variables.includes(body.head))){
                             body.headLabel = label_map[body.head];
@@ -110,6 +114,7 @@ let graph_label = {
                         if(!(variables.includes(body.tail))){
                             body.tailLabel = label_map[body.tail];
                         }
+                        body.relationLabel = label_map[body.relation];
                     })
                 })
             });
@@ -118,21 +123,24 @@ let graph_label = {
     },
     getInfoByCurie(endpoint, namespace, curie, callback){
         var query = `query=
-            SELECT ?label ?comment
+            SELECT ?label ?comment ?wwwresource
             WHERE {
                 <${namespace}${curie}> <http://www.w3.org/2000/01/rdf-schema#label> ?label .
                 OPTIONAL {<${namespace}${curie}> <http://www.w3.org/2000/01/rdf-schema#comment> ?comment .}
+                OPTIONAL {<${namespace}${curie}> <http://ai-strategies.org/ns/wwwresource> ?wwwresource .}
             }
             `
 
         runSPARQL(endpoint, query).then((data) => {
+
             var edge = data["results"]["bindings"][0];
             var res = {
                 Label: edge?.label?.value,
                 Description: edge?.comment?.value,
                 Synonyms: [],
                 Labels: [],
-                Curie: curie
+                Curie: curie,
+                FullURI: edge?.wwwresource?.value,
             }
 
             var query = `query=
@@ -165,6 +173,48 @@ let graph_label = {
             });
         });
     },
+    getRelationlabel(endpoint, namespace, relation, callback){
+        var query = `query=
+            SELECT ?label
+            WHERE {
+                <${namespace}${relation}> <http://www.w3.org/2000/01/rdf-schema#label> ?label .
+            }
+            `
+
+        runSPARQL(endpoint, query).then((data) => {
+            var edge = data["results"]["bindings"][0];
+            var res = {
+                Label: edge?.label?.value,
+            }
+            callback(res);
+        });
+    },
+    addRelationlabelsToTasks(endpoint, namespace, tasks, callback){
+        var query = `query=
+            prefix ns: <${namespace}>
+            SELECT ?subject ?label
+            WHERE {
+                ?subject <http://www.w3.org/2000/01/rdf-schema#label> ?label .
+                VALUES ?subject {
+                    ${[...tasks].map((elem)=>{return "ns:" + elem.RelationName.replace(/\//g,"\\/")}).join(" ")}
+                }
+            }
+            `
+        
+
+        runSPARQL(endpoint, query).then((data) => {
+            var label_map = {};
+            for(var i = 0; i < data["results"]["bindings"].length; i++){
+                var triple = data["results"]["bindings"][i];
+                label_map[triple["subject"]["value"].replace(namespace, '')] = triple["label"]["value"]
+            }
+
+            tasks.forEach((task) => {
+                task.RelationLabel = label_map[task.RelationName];
+            });
+            callback(tasks);
+        });
+    },
     getOutgoingEdges(endpoint, namespace, curie, callback){
         var res = new Proxy({}, {get(target, name){
             if(name === "toJSON" || name === "then"){
@@ -177,17 +227,18 @@ let graph_label = {
 
         var query = `query=
             PREFIX obl:  <http://ai-strategies.org/ns/>
-            SELECT ?predicate ?object ?label
+            SELECT ?predicate ?object ?label ?rellabel
             WHERE {
                 <<<${namespace}${curie}> ?predicate ?object>> obl:split obl:train .
                 OPTIONAL{ ?object <http://www.w3.org/2000/01/rdf-schema#label> ?label .}
+                OPTIONAL{ ?predicate <http://www.w3.org/2000/01/rdf-schema#label> ?rellabel .}
             }
             `
         runSPARQL(endpoint, query).then((data) => {
             if(data["results"]["bindings"].length > 0 && Object.entries(data["results"]["bindings"][0]).length > 0){
                 for(var i = 0; i < data["results"]["bindings"].length; i++){
                     var edge = data["results"]["bindings"][i];
-                    res[edge["predicate"]["value"].replace(namespace, '')].push([edge["label"]?.value, edge["object"]["value"].replace(namespace, '')]);
+                    res[edge["predicate"]["value"].replace(namespace, '')].push([edge["rellabel"]["value"], edge["label"]?.value, edge["object"]["value"].replace(namespace, '')]);
                 }   
             }           
             callback(res);
@@ -205,16 +256,17 @@ let graph_label = {
 
         var query = `query=
             PREFIX obl:  <http://ai-strategies.org/ns/>
-            SELECT ?subject ?predicate ?label
+            SELECT ?subject ?predicate ?label ?rellabel
             WHERE {
                 <<?subject ?predicate <${namespace}${curie}>>> obl:split obl:train .
                 OPTIONAL{ ?subject <http://www.w3.org/2000/01/rdf-schema#label> ?label .}
+                OPTIONAL{ ?predicate <http://www.w3.org/2000/01/rdf-schema#label> ?rellabel .}
             }
             `
         runSPARQL(endpoint, query).then((data) => {
             for(var i = 0; i < data["results"]["bindings"].length; i++){
                 var edge = data["results"]["bindings"][i];
-                res[edge["predicate"]["value"].replace(namespace, '')].push([edge["label"]["value"], edge["subject"]["value"].replace(namespace, '')]);
+                res[edge["predicate"]["value"].replace(namespace, '')].push([edge["rellabel"]["value"], edge["label"]["value"], edge["subject"]["value"].replace(namespace, '')]);
             }
             callback(res);
         });

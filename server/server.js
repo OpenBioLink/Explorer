@@ -5,6 +5,7 @@ let url = require('url');
 let rpcmethods = require('./rpcmethods');
 let datasetmethods = require('./datasetmethods');
 let explanationmethods = require('./explanationmethods');
+const axios = require('axios');
 let types = require('./types');
 const fs = require('fs');
 var formidable = require('formidable');
@@ -96,6 +97,13 @@ let routes = {
             });
         });
     },
+    '/proxy': function (url) {
+        return new Promise((resolve, reject) => {
+
+
+            
+        });
+    },
 
     // this is our docs endpoint
     // through this the clients should know
@@ -130,26 +138,34 @@ function requestListener(request, response) {
     let parseUrl = url.parse(reqUrl, true);
     let pathname = parseUrl.pathname;
 
-    if(pathname == "/dataset" || pathname == "/expl"){
-        //maxFileSize = 20GB
-        var form = new formidable.IncomingForm({maxFileSize:20000*1024*1024});
-        form.parse(request, function (err, fields, files) {
-            if(err){
-                console.log(`Request was expecting a form... Error: ${err.toString()}`);
-            }
-            if(!fields.method){
-                throw new ("Request was expecting a form containing the field method (upload, edit, delete)");
-            }
-            let compute = routes[pathname].call(null, fields, files);
+    if(pathname == "/proxy"){
+        var proxyurl = new URL(parseUrl.query["url"]);
 
-            compute.then(res => {
-                response.end(JSON.stringify(res))
-            }).catch(err => {
-                console.error(err);
-                response.statusCode = 500;
-                response.end('oops! server error!');
-            });
-        });
+        const options = {
+            hostname: proxyurl.host,
+            path: proxyurl.path
+          }
+
+        let buf = null;
+        const req = http.request(options, res => {
+            res.on('data', d => {
+                if (buf === null) {
+                    buf = d;
+                } else {
+                    buf = buf + d;
+                }
+            })
+            res.on('end', () => {
+                for (const [key, value] of Object.entries(res.headers)) {
+                    response.setHeader(key, value);
+                  }
+                response.end(buf);
+
+
+            })
+        })
+        req.end()
+
     } else {
         // we're doing everything json
         response.setHeader('Content-Type', 'application/json');

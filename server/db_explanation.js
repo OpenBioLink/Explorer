@@ -87,11 +87,14 @@ let db_explanations = {
     getExplanations(explanationID, taskID, entityID){
         var sql = `
         select 
-            Rule.CLUSTER_ID as ClusterID,
+            CASE
+                WHEN (SELECT IsHead from Task WHERE Task.ID = ${taskID}) = 0 THEN Rule.HEAD_CLUSTER_ID
+                ELSE Rule.TAIL_CLUSTER_ID 
+            END AS ClusterID,
             Rule.ID as RuleID, 
             Rule.CONFIDENCE as RuleConfidence, 
-            Rule.CorrectlyPredicted as RuleCorrectlyPredicted, 
-            Rule.Predicted as RulePredicted, 
+            Rule.CORRECTLY_PREDICTED as RuleCorrectlyPredicted, 
+            Rule.PREDICTED as RulePredicted, 
             Rule.DEF as RuleDefinition
         from Rule 
         inner join Rule_Entity on
