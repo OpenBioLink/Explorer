@@ -4,6 +4,8 @@ apache-jena-fuseki-4.0.0/
 
 labelgraph/workspace/
 
+.api_key
+
 # Logs
 logs
 *.log
