@@ -61,7 +61,7 @@ let graph_label = {
             WHERE {
                 ?subject <http://www.w3.org/2000/01/rdf-schema#label> ?object
                 VALUES ?subject {
-                    ${predictions.map((elem)=>{return "<" + namespace + elem["EntityName"].replace(/\//g,"\\/") + ">"}).join(" ")}
+                    ${predictions.map((elem)=>{return "<" + namespace + elem["EntityName"] + ">"}).join(" ")}
                 }
             }
             `;
@@ -83,7 +83,7 @@ let graph_label = {
             WHERE {
                 ?subject <http://www.w3.org/2000/01/rdf-schema#label> ?object
                 VALUES ?subject {
-                    ${[...entities, ...relations].map((elem)=>{return "<" + namespace + elem.replace(/\//g,"\\/") + ">"}).join(" ")}
+                    ${[...entities, ...relations].map((elem)=>{return "<" + namespace + elem + ">"}).join(" ")}
                 }
             }
             `
@@ -193,7 +193,7 @@ let graph_label = {
             WHERE {
                 ?subject <http://www.w3.org/2000/01/rdf-schema#label> ?label .
                 VALUES ?subject {
-                    ${[...tasks].map((elem)=>{return "<" + namespace + elem.RelationName.replace(/\//g,"\\/") + ">"}).join(" ")}
+                    ${[...tasks].map((elem)=>{return "<" + namespace + elem.RelationName + ">"}).join(" ")}
                 }
             }
             `
