@@ -57,12 +57,11 @@ let graph_label = {
     },
     addLabelsToPredictions(endpoint, namespace, predictions, callback){
         var query = `query=
-            prefix ns: <${namespace}>
             SELECT ?subject ?object
             WHERE {
                 ?subject <http://www.w3.org/2000/01/rdf-schema#label> ?object
                 VALUES ?subject {
-                    ${predictions.map((elem)=>{return "ns:" + elem["EntityName"].replace(/\//g,"\\/")}).join(" ")}
+                    ${predictions.map((elem)=>{return "<" + namespace + elem["EntityName"].replace(/\//g,"\\/") + ">"}).join(" ")}
                 }
             }
             `;
@@ -80,12 +79,11 @@ let graph_label = {
     },
     addLabelsToExplanations(endpoint, namespace, groups, variables, entities, relations, callback){
         var query = `query=
-            prefix ns: <${namespace}>
             SELECT ?subject ?object
             WHERE {
                 ?subject <http://www.w3.org/2000/01/rdf-schema#label> ?object
                 VALUES ?subject {
-                    ${[...entities, ...relations].map((elem)=>{return "ns:" + elem.replace(/\//g,"\\/")}).join(" ")}
+                    ${[...entities, ...relations].map((elem)=>{return "<" + namespace + elem.replace(/\//g,"\\/") + ">"}).join(" ")}
                 }
             }
             `
@@ -191,12 +189,11 @@ let graph_label = {
     },
     addRelationlabelsToTasks(endpoint, namespace, tasks, callback){
         var query = `query=
-            prefix ns: <${namespace}>
             SELECT ?subject ?label
             WHERE {
                 ?subject <http://www.w3.org/2000/01/rdf-schema#label> ?label .
                 VALUES ?subject {
-                    ${[...tasks].map((elem)=>{return "ns:" + elem.RelationName.replace(/\//g,"\\/")}).join(" ")}
+                    ${[...tasks].map((elem)=>{return "<" + namespace + elem.RelationName.replace(/\//g,"\\/") + ">"}).join(" ")}
                 }
             }
             `

@@ -89,7 +89,7 @@ export class Entity_ extends React.Component{
     }
 
     onRelationSelection(taskID){
-        this.props.history.push(`/task/${this.state.datasetID}/${this.state.explanationID}?taskID=${taskID}`);
+        this.props.history.push(`/${this.state.datasetID}/${this.state.explanationID}/task?taskID=${taskID}`);
     }
 
     /*
@@ -125,7 +125,7 @@ export class Entity_ extends React.Component{
                             </tr>
                             <tr>
                                 <td className="p-0">
-                                    <h2>{this.state.info?.Curie}: {this.state.info?.Label ? this.state.info?.Label : ""} </h2>
+                                    <h2>{this.state.info?.Curie} {this.state.info?.Label ? ": " + this.state.info?.Label : ""} </h2>
                                 </td>
                             </tr>
                         </tbody>
@@ -262,7 +262,7 @@ export class Entity_ extends React.Component{
                                                                     {obj[0]}
                                                                 </td>
                                                                 <td className="w-50 text-center">
-                                                                    <a href={`/entity/${this.state.datasetID}/${this.state.explanationID}?term=${obj[2]}`}>{obj[1] ? obj[1] : obj[2]}</a>
+                                                                    <a href={`/${this.state.datasetID}/${this.state.explanationID}/entity?term=${obj[2]}`}>{obj[1] ? obj[1] : obj[2]}</a>
                                                                 </td>
                                                             </tr>
                                                             )}
@@ -291,7 +291,7 @@ export class Entity_ extends React.Component{
                                                                 {rel[1].map(obj => 
                                                                 <tr>
                                                                     <td className="w-50 border-right text-center">
-                                                                        <a href={`/entity/${this.state.datasetID}/${this.state.explanationID}?term=${obj[2]}`}>{obj[1] ? obj[1] : obj[2]}</a>
+                                                                        <a href={`/${this.state.datasetID}/${this.state.explanationID}/entity?term=${obj[2]}`}>{obj[1] ? obj[1] : obj[2]}</a>
                                                                     </td>
                                                                     <td className="w-50 text-right">
                                                                         {obj[0]}

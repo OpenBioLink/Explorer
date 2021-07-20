@@ -38,7 +38,9 @@ export class Task_ extends React.Component{
         });
 
         API.getTaskByID(datasetID, explanationID, id, (task) => {
-            API.getInfoByEntityID(datasetID, explanationID, task["EntityID"], (info) => {console.log(info);this.setState({entityInfo: info})});
+            API.getInfoByEntityID(datasetID, explanationID, task["EntityID"], (info) => {
+                console.log(info);
+                this.setState({entityInfo: info})});
             this.setState({task: task});
         });
         API.getPredictionsByTaskID(datasetID, explanationID, id, (predictions) => {
@@ -63,7 +65,7 @@ export class Task_ extends React.Component{
     }
 
     onPredictionSelection(entityID){
-        this.props.history.push(`/explanation/${this.state.datasetID}/${this.state.explanationID}?taskID=${this.state.task.TaskID}&entityID=${entityID}`);
+        this.props.history.push(`/${this.state.datasetID}/${this.state.explanationID}/explanation?taskID=${this.state.task.TaskID}&entityID=${entityID}`);
     }
 
     render(){
@@ -73,13 +75,13 @@ export class Task_ extends React.Component{
                 <Container className="my-2">
                     <Row>
                     <Col>
-                        <h2>{(this.state.task && this.state.entityInfo) ? this.state.task.IsHead === 1 ? this.state.entityInfo.Label : "?" : ""}</h2>
+                        <h2>{(this.state.task && this.state.entityInfo) ? this.state.task.IsHead === 1 ? this.state.entityInfo.Label ? this.state.entityInfo.Label : this.state.entityInfo.Curie : "?" : ""}</h2>
                     </Col>
                     <Col>
                         <h2>{(this.state.task && this.state.entityInfo) ? this.state.task.RelationLabel : ""}</h2>
                     </Col>
                     <Col>
-                        <h2>{(this.state.task && this.state.entityInfo) ? this.state.task.IsHead === 0 ? this.state.entityInfo.Label : "?" : ""}</h2>
+                        <h2>{(this.state.task && this.state.entityInfo) ? this.state.task.IsHead === 0 ? this.state.entityInfo.Label ? this.state.entityInfo.Label : this.state.entityInfo.Curie : "?" : ""}</h2>
                     </Col>
                     </Row>
                 </Container>

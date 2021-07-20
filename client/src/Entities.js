@@ -135,7 +135,7 @@ export function Entities(){
   }
 
   function onEntitySelection(row){
-    history.push(`/entity/${dataset}/${explanation}?term=${row["NAME"]}`);
+    history.push(`/${dataset}/${explanation}/entity?term=${row["NAME"]}`);
   }
 
   function editSearchTerm(term){

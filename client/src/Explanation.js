@@ -78,11 +78,11 @@ export class Explanation_ extends React.Component{
                     <Row>
                         <Col>
                             <h2>
-                                <a href={`/entity/${this.state.datasetID}/${this.state.explanationID}?term=${this.state.info.head.curie}`}>{this.state.info.head.label ? this.state.info.head.label : this.state.info.tail.curie}</a>
+                                <a href={`/${this.state.datasetID}/${this.state.explanationID}/entity?term=${this.state.info.head.curie}`}>{this.state.info.head.label ? this.state.info.head.label : this.state.info.tail.curie}</a>
                                 &nbsp;
                                 {this.state.info.relLabel}
                                 &nbsp;
-                                <a href={`/entity/${this.state.datasetID}/${this.state.explanationID}?term=${this.state.info.tail.curie}`}>{this.state.info.tail.label ? this.state.info.tail.label : this.state.info.tail.curie}</a>
+                                <a href={`/${this.state.datasetID}/${this.state.explanationID}/entity?term=${this.state.info.tail.curie}`}>{this.state.info.tail.label ? this.state.info.tail.label : this.state.info.tail.curie}</a>
                             </h2>
                         </Col>
                     </Row>
@@ -106,12 +106,12 @@ export class Explanation_ extends React.Component{
                             <Card>
                                 <CustomToggle eventKey={String(cluster["ID"])} confidence={cluster["Rules"][0]["Confidence"]} activeKey="0"/>
                                 <Accordion.Collapse eventKey={String(cluster["ID"])}>
-                                    <Cluster cluster={cluster} info={this.state.info} showInstantiations={(rule)=>this.showInstantiations(rule)}/>
+                                    <Cluster datasetID={this.state.datasetID} explanationID={this.state.explanationID} cluster={cluster} info={this.state.info} showInstantiations={(rule)=>this.showInstantiations(rule)}/>
                                 </Accordion.Collapse>
                             </Card>
                         )}
                         </Accordion>
-                    : <Cluster cluster={this.state.explanation[0]} info={this.state.info} showInstantiations={(rule)=>this.showInstantiations(rule)}/>
+                    : <Cluster datasetID={this.state.datasetID} explanationID={this.state.explanationID} cluster={this.state.explanation[0]} info={this.state.info} showInstantiations={(rule)=>this.showInstantiations(rule)}/>
                 : "" }
                 <Modal show={this.state.showInstantiations} size="lg" onHide={() => {this.setState({instantiations: null, showInstantiations: false})}}>
                     <Modal.Header closeButton>
@@ -122,13 +122,13 @@ export class Explanation_ extends React.Component{
                             <tbody>
                                 <tr>
                                     <td className="w-25 border-top-0">
-                                        <b><a href={`/entity/${this.state.datasetID}/${this.state.explanationID}?term=${this.state.info.head.curie}`}>{this.state.info.head.label ? this.state.info.head.label : this.state.info.tail.curie}</a></b>
+                                        <b><a href={`/${this.state.datasetID}/${this.state.explanationID}/entity?term=${this.state.info.head.curie}`}>{this.state.info.head.label ? this.state.info.head.label : this.state.info.tail.curie}</a></b>
                                     </td>
                                     <td className="w-50 border-top-0">
                                         {this.state.info.rel}
                                     </td>
                                     <td className="w-25 border-top-0">
-                                        <b><a href={`/entity/${this.state.datasetID}/${this.state.explanationID}?term=${this.state.info.tail.curie}`}>{this.state.info.tail.label ? this.state.info.tail.label : this.state.info.tail.curie}</a></b>
+                                        <b><a href={`/${this.state.datasetID}/${this.state.explanationID}/entity?term=${this.state.info.tail.curie}`}>{this.state.info.tail.label ? this.state.info.tail.label : this.state.info.tail.curie}</a></b>
                                     </td>
                                 </tr>
                                 <tr>
@@ -141,11 +141,11 @@ export class Explanation_ extends React.Component{
                                             <td className="w-25 border-top-0">
                                                 {(this.state.info.head && this.state.info.tail) ?
                                                     body.headLabel ? 
-                                                        <a href={`/entity/${this.state.datasetID}/${this.state.explanationID}?term=${body.head}`}>{body.headLabel}</a> 
+                                                        <a href={`/${this.state.datasetID}/${this.state.explanationID}/entity?term=${body.head}`}>{body.headLabel}</a> 
                                                     : body.head === "X" ? 
-                                                        <a href={`/entity/${this.state.datasetID}/${this.state.explanationID}?term=${this.state.info.head.curie}`}>{this.state.info.head.label ? this.state.info.head.label : this.state.info.head.curie }</a>
+                                                        <a href={`/${this.state.datasetID}/${this.state.explanationID}/entity?term=${this.state.info.head.curie}`}>{this.state.info.head.label ? this.state.info.head.label : this.state.info.head.curie }</a>
                                                     : body.head === "Y" ? 
-                                                        <a href={`/entity/${this.state.datasetID}/${this.state.explanationID}?term=${this.state.info.tail.curie}`}>{this.state.info.tail.label ? this.state.info.tail.label: this.state.info.tail.curie}</a>
+                                                        <a href={`/${this.state.datasetID}/${this.state.explanationID}/entity?term=${this.state.info.tail.curie}`}>{this.state.info.tail.label ? this.state.info.tail.label: this.state.info.tail.curie}</a>
                                                     : body.head
                                                     : "Hi"
                                                 }
@@ -156,11 +156,11 @@ export class Explanation_ extends React.Component{
                                             <td className="w-25 border-top-0">
                                                 {(this.state.info.head && this.state.info.tail) ?
                                                     body.tailLabel ? 
-                                                        <a href={`/entity/${this.state.datasetID}/${this.state.explanationID}?term=${body.tail}`}>{body.tailLabel}</a> 
+                                                        <a href={`/${this.state.datasetID}/${this.state.explanationID}/entity?term=${body.tail}`}>{body.tailLabel}</a> 
                                                     : body.tail === "X" ? 
-                                                        <a href={`/entity/${this.state.datasetID}/${this.state.explanationID}?term=${this.state.info.head.curie}`}>{ this.state.info.head.label ? this.state.info.head.label : this.state.info.head.curie }</a>
+                                                        <a href={`/${this.state.datasetID}/${this.state.explanationID}/entity?term=${this.state.info.head.curie}`}>{ this.state.info.head.label ? this.state.info.head.label : this.state.info.head.curie }</a>
                                                     : body.tail === "Y" ? 
-                                                        <a href={`/entity/${this.state.datasetID}/${this.state.explanationID}?term=${this.state.info.tail.curie}`}>{ this.state.info.tail.label ? this.state.info.tail.label: this.state.info.tail.curie }</a>
+                                                        <a href={`/${this.state.datasetID}/${this.state.explanationID}/entity?term=${this.state.info.tail.curie}`}>{ this.state.info.tail.label ? this.state.info.tail.label: this.state.info.tail.curie }</a>
                                                     : body.tail
                                                     : "Hi"
                                                 }
@@ -176,7 +176,7 @@ export class Explanation_ extends React.Component{
                                         {instantiation.map((variable) => 
                                             <>
                                             <Col>
-                                                {variable.variable} = <a href={`/entity/${this.state.datasetID}/${this.state.explanationID}?term=${variable.curie}`}>{variable.label ? variable.label : variable.curie}</a>
+                                                {variable.variable} = <a href={`/${this.state.datasetID}/${this.state.explanationID}/entity?term=${variable.curie}`}>{variable.label ? variable.label : variable.curie}</a>
                                             </Col>
                                             </>
                                         )}
@@ -231,7 +231,7 @@ function CustomToggle({eventKey, confidence, activeKey}) {
     );
   }
 
-function Cluster({cluster, info, showInstantiations}){
+function Cluster({cluster, info, showInstantiations, datasetID, explanationID}){
     return (
         <Table className="w-auto m-auto">
             <thead>
@@ -293,11 +293,11 @@ function Cluster({cluster, info, showInstantiations}){
                                         <td className="w-100 border-top-0">
                                             {(info.head && info.tail) ?
                                                 body.headLabel ? 
-                                                    <a style={{wordBreak: "break-word"}} href={'/entity?term=' + body.head}>{ellipsis(body.headLabel)}</a> 
+                                                    <a style={{wordBreak: "break-word"}} href={`/${datasetID}/${explanationID}/entity?term=` + body.head}>{ellipsis(body.headLabel)}</a> 
                                                 : body.head === "X" ? 
-                                                    <b><a style={{wordBreak: "break-word"}} href={'/entity?term=' + info.head.curie}>{ellipsis(info.head.label ? info.head.label : info.head.curie)}</a></b>
+                                                    <b><a style={{wordBreak: "break-word"}} href={`/${datasetID}/${explanationID}/entity?term=` + info.head.curie}>{ellipsis(info.head.label ? info.head.label : info.head.curie)}</a></b>
                                                 : body.head === "Y" ? 
-                                                    <b><a  style={{wordBreak: "break-word"}} href={'/entity?term=' + info.tail.curie}>{ellipsis(info.tail.label ? info.tail.label : info.tail.curie)}</a> </b>
+                                                    <b><a  style={{wordBreak: "break-word"}} href={`/${datasetID}/${explanationID}/entity?term=` + info.tail.curie}>{ellipsis(info.tail.label ? info.tail.label : info.tail.curie)}</a> </b>
                                                 : body.head
                                                 : ""
                                             }
@@ -306,11 +306,11 @@ function Cluster({cluster, info, showInstantiations}){
                                             &nbsp;
                                             {(info.head && info.tail) ?
                                                 body.tailLabel ? 
-                                                    <a style={{wordBreak: "break-word"}} href={'/entity?term=' + body.tail}>{ellipsis(body.tailLabel)}</a> 
+                                                    <a style={{wordBreak: "break-word"}} href={`/${datasetID}/${explanationID}/entity?term=` + body.tail}>{ellipsis(body.tailLabel)}</a> 
                                                 : body.tail === "X" ? 
-                                                    <b><a style={{wordBreak: "break-word"}} href={'/entity?term=' + info.head.curie}>{ellipsis(info.head.label ? info.head.label : info.head.curie)}</a></b>
+                                                    <b><a style={{wordBreak: "break-word"}} href={`/${datasetID}/${explanationID}/entity?term=` + info.head.curie}>{ellipsis(info.head.label ? info.head.label : info.head.curie)}</a></b>
                                                 : body.tail === "Y" ? 
-                                                    <b><a style={{wordBreak: "break-word"}} href={'/entity?term=' + info.tail.curie}>{ellipsis(info.tail.label ? info.tail.label : info.tail.curie)}</a> </b> 
+                                                    <b><a style={{wordBreak: "break-word"}} href={`/${datasetID}/${explanationID}/entity?term=` + info.tail.curie}>{ellipsis(info.tail.label ? info.tail.label : info.tail.curie)}</a> </b> 
                                                 : body.tail
                                                 : ""
                                             }

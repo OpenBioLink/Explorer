@@ -28,27 +28,27 @@ export function App(){
   return (
     <div className="App">
     <Router>
-          <Header path='/*/:dataset/:explanation'/>  
+          <Header path='/:dataset/:explanation/*'/>  
           <Switch>               
             <Route path='/loader'>
               <Loader cookies={cookies}/>
             </Route>   
-            <Route path='/entities/:dataset/:explanation'>
+            <Route path='/:dataset/:explanation/entities'>
               <Entities/>
             </Route>
-            <Route path='/entity/:dataset/:explanation'>
+            <Route path='/:dataset/:explanation/entity'>
               <Entity/>
             </Route>
-            <Route path='/task/:dataset/:explanation'>
+            <Route path='/:dataset/:explanation/task'>
               <Task/>
             </Route>
-            <Route path='/explanation/:dataset/:explanation'>
+            <Route path='/:dataset/:explanation/explanation'>
               <Explanation/>
             </Route>
-            <Route path='/overview/:dataset/:explanation'>
+            <Route path='/:dataset/:explanation/overview'>
               <Overview/>
             </Route> 
-            <Route path={['/feedback/:dataset/:explanation', '/feedback']}>
+            <Route path={['/:dataset/:explanation/feedback', '/feedback']}>
               <Feedback/>
             </Route>
             <Route path='/'>
@@ -72,7 +72,7 @@ function Header(){
 
   useEffect(() => {
     const match = matchPath(location.pathname, {
-      path: '/*/:dataset/:explanation',
+      path: '/:dataset/:explanation/*',
       exact: true,
       strict: false
     });
@@ -94,13 +94,13 @@ function Header(){
   return(
     <header className="App-header">
       <Navbar bg="dark" variant="dark">
-          <Navbar.Brand href={(dataset && explanation) ? `/entities/${dataset}/${explanation}` : "/loader"} onClick={(e) => onClickLink(e)}>
+          <Navbar.Brand href={(dataset && explanation) ? `/${dataset}/${explanation}/entities` : "/loader"} onClick={(e) => onClickLink(e)}>
             Explorer (alpha)
           </Navbar.Brand>
           <Nav className="mr-auto" defaultActiveKey={location.pathname}>
-            <Nav.Link href={`/overview/${dataset}/${explanation}`} disabled={!dataset || !explanation} onClick={(e) => onClickLink(e)}>Overview</Nav.Link>
-            <Nav.Link href={`/entities/${dataset}/${explanation}`} disabled={!dataset || !explanation} onClick={(e) => onClickLink(e)}>Entities</Nav.Link>
-            <Nav.Link href={(dataset && explanation) ? `/feedback/${dataset}/${explanation}` : "/feedback"} onClick={(e) => onClickLink(e)}>Feedback</Nav.Link>
+            <Nav.Link href={`/${dataset}/${explanation}/overview`} disabled={!dataset || !explanation} onClick={(e) => onClickLink(e)}>Overview</Nav.Link>
+            <Nav.Link href={`/${dataset}/${explanation}/entities`} disabled={!dataset || !explanation} onClick={(e) => onClickLink(e)}>Entities</Nav.Link>
+            <Nav.Link href={(dataset && explanation) ? `/${dataset}/${explanation}/feedback` : "/feedback"} onClick={(e) => onClickLink(e)}>Feedback</Nav.Link>
           </Nav>
           <Navbar.Collapse className="justify-content-end">
             {(dataset && explanation) ?

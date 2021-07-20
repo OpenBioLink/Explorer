@@ -113,7 +113,7 @@ export class Loader_ extends React.Component{
           window.sessionStorage.setItem(this.state.selected_dataset_id+'_entities', JSON.stringify(sortAsc(entities["entities"])));
           window.sessionStorage.setItem(this.state.selected_dataset_id+'_types', JSON.stringify(entities["types"]));
           this.setState({show_done_spinner: false});
-          this.props.history.push(`/entities/${this.state.selected_dataset_id}/${this.state.selected_explanation_id}`);
+          this.props.history.push(`/${this.state.selected_dataset_id}/${this.state.selected_explanation_id}/entities`);
         });
       }
     }
