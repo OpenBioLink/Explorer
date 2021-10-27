@@ -3,13 +3,7 @@
 let http = require('http');
 let url = require('url');
 let rpcmethods = require('./rpcmethods');
-let datasetmethods = require('./datasetmethods');
-let explanationmethods = require('./explanationmethods');
-const axios = require('axios');
 let types = require('./types');
-const fs = require('fs');
-var formidable = require('formidable');
-const {createNewDataset} = require('./graph_label');
 
 let server = http.createServer(requestListener);
 const PORT = process.env.PORT || 3001;
@@ -19,46 +13,6 @@ const PORT = process.env.PORT || 3001;
 // probably could even be faster than using a routing library :-D
 
 let routes = {
-    '/dataset': function(fields, files){
-        return new Promise((resolve, reject) => {
-            let execPromise = null;
-            if (datasetmethods[fields.method] && typeof (datasetmethods[fields.method].exec) === 'function') {
-                execPromise = datasetmethods[fields.method].exec.call(null, fields, files);
-                if (!(execPromise instanceof Promise)) {
-                    throw new Error(`exec on ${key} did not return a promise`);
-                }
-            } else {
-                execPromise = Promise.resolve({
-                    error: 'method not defined'
-                })
-            }
-            execPromise.then(response => {
-                resolve(response);
-            }).catch(err => {
-                reject(err);
-            });
-        });
-    },
-    '/expl': function(fields, files){
-        return new Promise((resolve, reject) => {
-            let execPromise = null;
-            if (explanationmethods[fields.method] && typeof (explanationmethods[fields.method].exec) === 'function') {
-                execPromise = explanationmethods[fields.method].exec.call(null, fields, files);
-                if (!(execPromise instanceof Promise)) {
-                    throw new Error(`exec on ${key} did not return a promise`);
-                }
-            } else {
-                execPromise = Promise.resolve({
-                    error: 'method not defined'
-                })
-            }
-            execPromise.then((response) => {
-                resolve(response);
-            }).catch(err => {
-                reject(err);
-            });
-        });
-    },
     // this is the rpc endpoint
     // every operation request will come through here
     '/rpc': function (body) {
@@ -97,14 +51,6 @@ let routes = {
             });
         });
     },
-    '/proxy': function (url) {
-        return new Promise((resolve, reject) => {
-
-
-            
-        });
-    },
-
     // this is our docs endpoint
     // through this the clients should know
     // what methods and datatypes are available
@@ -138,82 +84,50 @@ function requestListener(request, response) {
     let parseUrl = url.parse(reqUrl, true);
     let pathname = parseUrl.pathname;
 
-    if(pathname == "/proxy"){
-        var proxyurl = new URL(parseUrl.query["url"]);
+    // we're doing everything json
+    response.setHeader('Content-Type', 'application/json');
 
-        const options = {
-            hostname: proxyurl.host,
-            path: proxyurl.path
-          }
+    // buffer for incoming data
+    let buf = null;
 
-        let buf = null;
-        const req = http.request(options, res => {
-            res.on('data', d => {
-                if (buf === null) {
-                    buf = d;
-                } else {
-                    buf = buf + d;
-                }
-            })
-            res.on('end', () => {
-                for (const [key, value] of Object.entries(res.headers)) {
-                    response.setHeader(key, value);
-                  }
-                response.end(buf);
+    // listen for incoming data
+    request.on('data', data => {
+        if (buf === null) {
+            buf = data;
+        } else {
+            buf = buf + data;
+        }
+    });
 
+    // on end proceed with compute
+    request.on('end', () => {
+        let body = buf !== null ? buf.toString() : null;
 
-            })
-        })
-        req.end()
+        if (routes[pathname]) {
+            let compute = routes[pathname].call(null, body);
 
-    } else {
-        // we're doing everything json
-        response.setHeader('Content-Type', 'application/json');
+            if (!(compute instanceof Promise)) {
+                // we're kinda expecting compute to be a promise
+                // so if it isn't, just avoid it
 
-        // buffer for incoming data
-        let buf = null;
-
-        // listen for incoming data
-        request.on('data', data => {
-            if (buf === null) {
-                buf = data;
+                response.statusCode = 500;
+                response.end('oops! server error!');
+                console.warn(`whatever I got from rpc wasn't a Promise!`);
             } else {
-                buf = buf + data;
-            }
-        });
-
-        // on end proceed with compute
-        request.on('end', () => {
-            let body = buf !== null ? buf.toString() : null;
-
-            if (routes[pathname]) {
-                let compute = routes[pathname].call(null, body);
-
-                if (!(compute instanceof Promise)) {
-                    // we're kinda expecting compute to be a promise
-                    // so if it isn't, just avoid it
-
+                compute.then(res => {
+                    response.end(JSON.stringify(res))
+                }).catch(err => {
+                    console.error(err);
                     response.statusCode = 500;
                     response.end('oops! server error!');
-                    console.warn(`whatever I got from rpc wasn't a Promise!`);
-                } else {
-                    compute.then(res => {
-                        response.end(JSON.stringify(res))
-                    }).catch(err => {
-                        console.error(err);
-                        response.statusCode = 500;
-                        response.end('oops! server error!');
-                    });
-                }
-
-            } else {
-                response.statusCode = 404;
-                response.end(`oops! ${pathname} not found here`)
+                });
             }
-        })
-    }
 
-    
+        } else {
+            response.statusCode = 404;
+            response.end(`oops! ${pathname} not found here`)
+        }
+    })
 }
 
 // now we can start up the server

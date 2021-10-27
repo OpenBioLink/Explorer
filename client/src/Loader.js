@@ -384,11 +384,11 @@ export class Loader_ extends React.Component{
     return(
       <>
         <Button variant="primary" onClick={() => setShow(true)}>
-          Add dataset
+          Load local RDF
         </Button>
         <Modal show={show} onHide={onClose} keyboard={!disable} backdrop={disable ? "static" : true}> 
         <Modal.Header closeButton style={disable ? {pointerEvents: "none"} : {}}>
-          <Modal.Title>Add dataset</Modal.Title>
+          <Modal.Title>Load local RDF</Modal.Title>
         </Modal.Header>
         <Modal.Body style={disable ? {pointerEvents: "none"} : {}}>
         <Form onSubmit={(e) => {onSubmitLocalDataset(e)}}>
@@ -410,89 +410,16 @@ export class Loader_ extends React.Component{
                 />
               </InputGroup>
             </Form.Group>
-            <Form.Group>
-              <Form.Label>Scope</Form.Label>
-              <InputGroup className="mb-3">
-                <select className="form-control" name="publish" onChange={(e) => setPublish(e.target.value === "on")}>
-                    <option value="off" selected>Private</option>
-                    <option value="on">Public</option>
-                  </select>
-              </InputGroup>
-            </Form.Group>
-            {publish ?
-              <>
-                <Form.Group controlId="dbName">
-                  <Form.Label>Dataset name*</Form.Label>
-                  <Form.Control 
-                    name="dbName"
-                    placeholder="Dataset name" />
-                </Form.Group>
-                <Form.Group controlId="dbVersion">
-                  <Form.Label>Version</Form.Label>
-                  <Form.Control
-                    name="dbVersion"
-                    placeholder="Version" />
-                </Form.Group>
-                <Form.Group controlId="dbDescription">
-                  <Form.Label>Description</Form.Label>
-                  <Form.Control 
-                    name="dbDescription"
-                    as="textarea" 
-                    rows={3} />
-                </Form.Group>
-              </>
-              :""
-            }
             <Form.Group className="text-right border-top mb-0">
-              {
-                status === "done" && !published ?
-                  <Alert variant="success" className="text-center mt-2 mb-0">
-                    <p>Upload completed! Please copy and save your private key for later reuse.</p>
-                    <InputGroup className="mb-0">
-                      <FormControl
-                        readOnly
-                        value={pk}
-                      />
-                      <InputGroup.Append>
-                        <Button variant="outline-secondary" className="d-flex" onClick={() => {navigator.clipboard.writeText(pk)}}>
-                          <FaRegCopy className="m-auto"/>
-                        </Button>
-                      </InputGroup.Append>
-                    </InputGroup>
-                  </Alert>
-                : status === "done" && published ?
-                  <Alert variant="success" className="text-center mt-2 mb-0">
-                    Success!<br/>You can now select your dataset from the list.
-                  </Alert>
-                : ""
-              }
               <Alert className="text-left mt-2 mb-0" variant="danger" show={showAlert} onClose={() => setShowAlert(false)} dismissible>
                 {alertMessage}
               </Alert>
               <Button variant="secondary" className="mt-3 mr-2" onClick={onClose}>
                 Close
               </Button>
-
-              {status !== null && status !== "done"? 
-                <Button variant="primary" className="mt-3" disabled>
-                  <Spinner
-                    className="mr-1"
-                    animation="border"
-                    size="sm"
-                    role="status"
-                    aria-hidden="true"
-                  />
-                  {publish? "Upload and publish dataset" : "Upload dataset"}
-                </Button>
-              : status === "done" ?
-                <Button variant="primary" className="mt-3" onClick={(e) => onContinue(e)}>
-                  {"Continue"}
-                </Button>
-              :
-                <Button type="submit" variant="primary" className="mt-3" >
-                  {publish? "Upload and publish dataset" : "Upload dataset"}
-                </Button>
-              }
+              <Button type="submit" variant="primary" className="mt-3" >
+                Load
+              </Button>
             </Form.Group>
           </Form>
 
@@ -521,28 +448,7 @@ export class Loader_ extends React.Component{
         setShowAlert(true);
       } else {
         setDisable(true);
-        API.callExplanationOperation(e.target, ["explanationfile"], (status, progress, pk, published) => {
-            console.log(status + " " + progress);
-            if(status === "done"){
-              setStatus('done');
-              setDisable(false);
-              setPk(pk);
-              setNow(0);
-              setPublished(published);
-            } else if(status === "zip") {
-              setStatus('zip');
-              setNow(0);
-            } else {
-              if(progress < 100){
-                setStatus('upload');
-                setNow(progress);
-              } else {
-                setStatus('server');
-                setNow(0);;
-              }
-              
-            }
-        });
+        // Load local
       }
     }
 
@@ -587,120 +493,16 @@ export class Loader_ extends React.Component{
               custom
               />
             </Form.Group>
-            <Form.Group>
-              <Form.Label>Scope</Form.Label>
-              <InputGroup className="mb-3">
-                <select className="form-control" name="publish" onChange={(e) => setPublish(e.target.value === "on")}>
-                    <option value="off" selected>Private</option>
-                    <option value="on">Public</option>
-                  </select>
-              </InputGroup>
-            </Form.Group>
-            {publish ?
-              <>
-                <Form.Group>
-                  <Form.Label>Label</Form.Label>
-                  <Form.Control 
-                    name="label"
-                    placeholder="Label" />
-                </Form.Group>
-                <Form.Group>
-                  <Form.Label>Method</Form.Label>
-                  <select className="form-control" name="aggmethod">
-                    <option value="nrno" selected>Non redundant Noisy-Or</option>
-                    <option value="no" >Noisy-Or</option>
-                    <option value="max" >Maximum</option>
-                  </select>
-                </Form.Group>
-                <Form.Group controlId="dbVersion">
-                  <Form.Label>Config file used for learning rules</Form.Label>
-                  <Form.File 
-                    name="ruleconfig"
-                    label="Config file"
-                    custom
-                    />
-                </Form.Group>
-                <Form.Group controlId="dbVersion">
-                  <Form.Label>Config file used for clustering rules</Form.Label>
-                  <Form.File 
-                    name="clusteringconfig"
-                    label="Config file"
-                    custom
-                    />
-                  <Form.Text className="text-muted">
-                    (Only required when using method "Non redundant Noisy-Or")
-                  </Form.Text>
-                </Form.Group>
-                <Form.Group controlId="dbDescription">
-                  <Form.Label>Comment</Form.Label>
-                  <Form.Control 
-                    name="comment"
-                    as="textarea" 
-                    rows={3} />
-                </Form.Group>
-              </>
-              :""
-            }
             <Form.Group className="text-right border-top mb-0">
-              {
-                status === "upload" ?
-                  <ProgressBar now={now} className="text-left mt-2" label={`uploading...`}/>
-                : status === "server" ? 
-                  <Alert variant="info" className="mt-2 mb-0">
-                    The Server is processing your upload, this may take a while
-                  </Alert>
-                : status === "zip" ? 
-                  <Alert variant="info" className="mt-2 mb-0">
-                      Zipping file, this may take a while
-                  </Alert>
-                : status === "done" && !published ?
-                  <Alert variant="success" className="text-center mt-2 mb-0">
-                    <p>Upload completed! Please copy and save your private key for later reuse.</p>
-                    <InputGroup className="mb-0">
-                      <FormControl
-                        readOnly
-                        value={pk}
-                      />
-                      <InputGroup.Append>
-                        <Button variant="outline-secondary" className="d-flex" onClick={() => {navigator.clipboard.writeText(pk)}}>
-                          <FaRegCopy className="m-auto"/>
-                        </Button>
-                      </InputGroup.Append>
-                    </InputGroup>
-                  </Alert>
-                : status === "done" && published ?
-                  <Alert variant="success" className="text-center mt-2 mb-0">
-                    Upload completed!<br/>You can now select your explanation from the list.
-                  </Alert>
-                : ""
-              }
               <Alert className="text-left mt-2 mb-0" variant="danger" show={showAlert} onClose={() => setShowAlert(false)} dismissible>
                 {alertMessage}
               </Alert>
               <Button variant="secondary" className="mt-3 mr-2" onClick={onClose}>
                 Close
               </Button>
-
-              {status !== null && status !== "done"? 
-                <Button variant="primary" className="mt-3" disabled>
-                  <Spinner
-                    className="mr-1"
-                    animation="border"
-                    size="sm"
-                    role="status"
-                    aria-hidden="true"
-                  />
-                  {publish? "Upload and publish explanation" : "Upload explanation"}
-                </Button>
-              : status === "done" ?
-                <Button variant="primary" className="mt-3" onClick={(e) => onContinue(e)}>
-                  {"Continue"}
-                </Button>
-              :
-                <Button type="submit" variant="primary" className="mt-3" >
-                  {publish? "Upload and publish explanation" : "Upload explanation"}
-                </Button>
-              }
+              <Button type="submit" variant="primary" className="mt-3" >
+                Load local explanation
+              </Button>
             </Form.Group>
           </Form>
 

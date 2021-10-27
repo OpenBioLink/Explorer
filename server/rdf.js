@@ -20,7 +20,7 @@ async function runSPARQL(endpoint, query){
     return data;
 }
 
-let graph_label = {
+let rdfMethods = {
     getAllTestEntities(endpoint, namespace, callback){
 
         var query = `query=
@@ -323,4 +323,4 @@ let graph_label = {
     }
 }
 
-exports.graph_label = graph_label;
+exports.rdfMethods = rdfMethods;

@@ -1,9 +1,8 @@
 'use strict';
 
-let db = require('./db_explanation');
-let index = require('./db_index');
-let {graph_label: graph} = require('./graph_label');
-const {runSPARQL} = require('./graph_label');
+let {indexMethods: index} = require('./index')
+let {dbMethods: db} = require('./db');
+let {rdfMethods: graph} = require('./rdf');
 const { v4: uuidv4 } = require('uuid');
 
 const {tic, toc, variables}  = require('./util');
@@ -28,31 +27,6 @@ let rpcmethods = {
                 var datasets = index.getAllDatasets();
                 toc("getAllDatasets");
                 resolve(datasets || {});
-            });
-        }
-    },
-    addNewDataset:{
-        description: ``,
-        params: [],
-        returns: [''],
-        exec(body) {
-            return new Promise((resolve) => {
-                var endpoint = body.endpoint;
-                var namespace = body.namespace;
-                var dbName = body.dbName;
-                var dbVersion = body.dbVersion ? body.dbVersion : "";
-                var dbDescription = body.dbDescription ? body.dbDescription : "";
-
-                var publish = body.publish === "on" ? true : false;
-                var id = uuidv4();
-
-                index.publishNewDataset(id, dbName, dbVersion, dbDescription, endpoint, namespace);
-                
-                resolve({
-                    pk: id,
-                    published: publish,
-                    success: true
-                });
             });
         }
     },

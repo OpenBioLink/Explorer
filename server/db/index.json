@@ -1,0 +1,23 @@
+{
+    "dataset": [
+        {
+        "ID": 0,
+        "Endpoint": "http://test.com",
+        "Name": "FB15k-237",
+        "Version":	"",
+        "Description":	"Very good dataset",
+        "Namespace": "http://g.ko.com/namespace#"
+        },
+        {
+            "ID": 1,
+            "Endpoint": "http://asdf.com",
+            "Name": "OpenBioLink",
+            "Version":	"2021",
+            "Description":	"Very good datasetse",
+            "Namespace": "http://obl.com/i/"
+        }
+    ],
+    "explanation":[
+    ]
+
+}
