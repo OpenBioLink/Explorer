@@ -7,7 +7,7 @@ import {ImSortAlphaDesc, ImSortAlphaAsc} from "react-icons/im";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { useHistoryState, useSessionState } from "./HistoryState";
 import {tic, toc, sortAsc, sortDesc} from './util'
-const API = require('./API');
+import API from 'api'
 
 export function Overview(){
 

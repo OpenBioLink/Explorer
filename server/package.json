@@ -11,14 +11,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "axios": "^0.21.4",
-    "better-sqlite3": "^7.1.4",
-    "form-data": "^4.0.0",
-    "formidable": "^1.2.2",
-    "http-proxy-middleware": "^2.0.0",
-    "jszip": "^3.7.1",
-    "node-dev": "^6.7.0",
-    "uuid": "^8.3.2",
-    "uuidv4": "^6.2.10"
+    "api": "file:../api",
+    "node-dev": "^6.7.0"
   }
 }

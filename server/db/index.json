@@ -1,15 +1,15 @@
 {
     "dataset": [
         {
-        "ID": 0,
-        "Endpoint": "http://test.com",
-        "Name": "FB15k-237",
-        "Version":	"",
-        "Description":	"Very good dataset",
-        "Namespace": "http://g.ko.com/namespace#"
+            "ID": "FB15k-237",
+            "Endpoint": "http://test.com",
+            "Name": "FB15k-237",
+            "Version":	"",
+            "Description":	"Very good dataset",
+            "Namespace": "http://g.ko.com/namespace#"
         },
         {
-            "ID": 1,
+            "ID": "OBL",
             "Endpoint": "http://asdf.com",
             "Name": "OpenBioLink",
             "Version":	"2021",
@@ -18,6 +18,16 @@
         }
     ],
     "explanation":[
+        {
+            "ID": "obl_max",
+            "DatasetID": "OBL",
+            "Label": "Maximum",
+            "Date": 1624529144,
+            "Comment": "Hi",
+            "Method": "max",
+            "RuleConfig": "",
+            "ClusteringConfig": ""
+        }
     ]
 
 }

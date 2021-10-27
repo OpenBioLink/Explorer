@@ -7,7 +7,7 @@ import {Button, Pagination, Modal, Badge, Container, Row, Col, Table, ListGroup,
 import { IconContext } from "react-icons";
 import { RiArrowDropDownLine, RiArrowDropRightLine } from "react-icons/ri";
 import { BiLinkExternal } from "react-icons/bi";
-const API = require('./API');
+import API from "api";
 
 export class Entity_ extends React.Component{
 
@@ -45,19 +45,6 @@ export class Entity_ extends React.Component{
         });
         API.getInfoByCurie(datasetID, curie, (info) => this.setState({info: info}));
         API.getTasksByCurie(datasetID, explanationID, curie, (tasks) => this.addTasks(tasks));
-
-        /*
-        if(params.has("id")){
-            var id = params.get("id");
-            API.getInfoByEntityID(cookies.get('datasetID'), cookies.get('explanationID'), id, (info) => this.setState({info: info}));
-            API.getTasksByEntityID(cookies.get('explanationID'), id, (tasks) => this.addTasks(tasks));
-        } else if(params.has("term")){
-            var curie = params.get("term");
-            API.getInfoByCurie(cookies.get('datasetID'), curie, (info) => this.setState({info: info}));
-            API.getTasksByCurie(cookies.get('explanationID'), curie, (tasks) => this.addTasks(tasks));
-            API.getIncomingEdges(cookies.get('datasetID'), curie, (incoming) => this.setState({incomingEdges: incoming}));
-        }
-        */
     }
 
     loadIncomingEdges(){

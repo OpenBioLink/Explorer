@@ -12,7 +12,7 @@ import { FaArrowRight } from "react-icons/fa";
 
 import { ellipsis } from './util';
 
-const API = require('./API');
+import API from 'api'
 
 export class Explanation_ extends React.Component{
 

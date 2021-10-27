@@ -3,10 +3,10 @@ import {Tab, Container, Row, Col, Form, Button, InputGroup, FormControl, Modal, 
 import './App.css';
 import PropTypes from "prop-types";
 import { withRouter } from "react-router";
-import { FaRegCopy } from 'react-icons/fa'
 import bsCustomFileInput from 'bs-custom-file-input';
 import {from_timestamp, from_method_short, sortAsc} from './util';
-const API = require('./API');
+import API from 'api';
+import initSqlJs from "sql.js";
 
 export class Loader_ extends React.Component{
 
@@ -17,49 +17,22 @@ export class Loader_ extends React.Component{
     };
 
     componentDidMount(){
-      this.query_datasets();
-    }
-
-    query_datasets(pk) {
-      API.getAllDatasets((res) => {
-        this.setState({datasets: res});
-        if(pk){
-          this.setState({selected_dataset_id: res.find(x => x["ID"] === pk)["ID"]});
-        } else {
-          this.setState({selected_dataset_id: res.length > 0 ? res[0]["ID"] : null});
-        }
+      API.getIndex((res) => {
+        window.sessionStorage.setItem('index', JSON.stringify(res));
+        this.setState({index: res});
+        this.setState({selected_dataset_id: res["dataset"].length > 0 ? res["dataset"][0]["ID"] : null});
+        this.setState({selected_explanation_id:  res["explanation"].length > 0 ? res["explanation"][0]["ID"] : null});
       });
-    }
-
-    query_explanations(datasetId, pk){
-      if(datasetId === -1){
-
-      } else if(datasetId === -2){
-
-      } else {
-        API.getAllExplanationsByDatasetID(datasetId, (res) => {
-          this.setState({
-            explanations: res,
-          })
-          if(res.length > 0){
-            if(pk){
-              this.setState({selected_explanation_id: res.find(x => x["ID"] === pk)["ID"]});
-            } else {
-              this.setState({selected_explanation_id:  res.length > 0 ? res[0]["ID"] : null});
-            }
-          } else {
-            this.setState({selected_explanation_id: null});
-          }
-        });
-      }
     }
 
     constructor(){
       super()
 
       this.state = {
-        datasets: [],
-        explanations: [],
+        index: {
+          "dataset": [],
+          "explanation": []
+        },
         formPage: 0,
         selected_dataset_id: null,
         selected_explanation_id: null,
@@ -69,7 +42,8 @@ export class Loader_ extends React.Component{
         show_alert: false,
         alert_message: "",
 
-        show_done_spinner: false
+        show_done_spinner: false,
+        show_loading_spinner: false
       };
     }
 
@@ -86,7 +60,6 @@ export class Loader_ extends React.Component{
           formPage: 1,
           searchTerm: "",
         });
-        this.query_explanations(this.state.selected_dataset_id);
       }
     }
 
@@ -118,39 +91,13 @@ export class Loader_ extends React.Component{
       }
     }
 
-// Modals
-
+    // Modals
     onDatasetSelection(dataset_id){
       this.setState({selected_dataset_id: dataset_id});
     }
 
-    onExplanationSelection(explanation_id){
+    async onExplanationSelection(explanation_id){
       this.setState({selected_explanation_id: explanation_id});
-    }
-
-    onUploadLocalDataset(pk, published){
-      if(published){
-        this.query_datasets(pk);
-        this.onDatasetSelection(pk);
-      } else {
-        this.setState({
-          private_dataset: pk
-        });
-        this.onDatasetSelection(-2);
-      }
-    }
-
-    onUploadLocalExplanation(pk, published){
-      if(published){
-        this.query_explanations(this.state.selected_dataset_id, pk);
-        this.onExplanationSelection(pk);
-      } else {
-        this.setState({
-          private_explanation: pk
-        });
-        this.onExplanationSelection(-2);
-      }
-      
     }
   
     render(){
@@ -161,7 +108,7 @@ export class Loader_ extends React.Component{
             <Modal.Dialog className="mx-auto mw-100 w-75 mb-2">
               <Modal.Header>
                 <Modal.Title>Select a dataset</Modal.Title>
-                <LocalDatasetModal onUpload={(pk, published) => {this.onUploadLocalDataset(pk, published)}}/>
+                <LocalDatasetModal onUpload={(endpoint) => {this.onDatasetSelection(endpoint)}}/>
               </Modal.Header>
 
               <Modal.Body>
@@ -169,7 +116,7 @@ export class Loader_ extends React.Component{
                 <Row>
                   <Col sm={4}>
                     <ListGroup className="pr-1 text-left" style={{overflowY: "auto", height: "400px"}}>
-                      { this.state.datasets.filter(x => (this.state.searchTerm === "" || x["Name"].toLowerCase().includes(this.state.searchTerm.toLowerCase()))).map((row) =>
+                      { this.state.index ? this.state.index["dataset"].filter(x => (this.state.searchTerm === "" || x["Name"].toLowerCase().includes(this.state.searchTerm.toLowerCase()))).map((row) =>
                         <ListGroup.Item action eventKey={row["ID"]} onClick={() => this.onDatasetSelection(row["ID"])}>
                           <Container>
                             <Row>
@@ -183,12 +130,12 @@ export class Loader_ extends React.Component{
                           </Container>
                       </ListGroup.Item>
 
-                      )}
+                      ) : ""}
                     </ListGroup>
                   </Col>
                   <Col sm={8} className="my-auto">
                     <Tab.Content className="text-center">
-                      { this.state.datasets.map((row) =>
+                      { this.state.index["dataset"].map((row) =>
                       <Tab.Pane eventKey={row["ID"]}>
                         {row["Description"]}
                       </Tab.Pane>
@@ -218,13 +165,14 @@ export class Loader_ extends React.Component{
             <Modal.Dialog scrollable={true} className="mx-auto mw-100 w-75 mb-2">
               <Modal.Header>
                 <Modal.Title>Select an explanation file</Modal.Title>
+                <LocalExplanationModal onUpload={(localfile) => {this.onExplanationSelection(localfile)}}/>
               </Modal.Header>
               <Modal.Body>
                 <Tab.Container id="list-group-tabs-example" activeKey={this.state.selected_explanation_id}>
                   <Row>
                     <Col sm={4}>
                       <ListGroup className="pr-1 text-left" style={{overflowY: "auto", height: "400px"}}>
-                        { this.state.explanations.filter(x => (this.state.searchTerm === "" || x["Label"].toLowerCase().includes(this.state.searchTerm.toLowerCase()))).map((row) =>
+                        { this.state.index["explanation"].filter(x => (this.state.searchTerm === "" || x["Label"].toLowerCase().includes(this.state.searchTerm.toLowerCase()))).map((row) =>
                           <ListGroup.Item action eventKey={row["ID"]} onClick={() => this.onExplanationSelection(row["ID"])}>
                             <Container>
                               <Row>
@@ -242,7 +190,7 @@ export class Loader_ extends React.Component{
                     </Col>
                     <Col sm={8} className="my-auto">
                       <Tab.Content >
-                        { this.state.explanations.map((row) =>
+                        { this.state.index["explanation"].map((row) =>
                           <Tab.Pane className="text-left" style={{overflowY: "auto", height: "400px"}} eventKey={row["ID"]}>
                             <table>
                               <tbody>
@@ -323,12 +271,6 @@ export class Loader_ extends React.Component{
   function LocalDatasetModal(props) {
 
     const [show, setShow] = useState(false);
-    const [publish, setPublish] = useState(false);
-    const [published, setPublished] = useState(false);
-    const [status, setStatus] = useState(null);
-    const [now, setNow] = useState(0);
-    const [pk, setPk] = useState("");
-
     const [disable, setDisable] = useState(false);
     const [showAlert, setShowAlert] = useState(false);
     const [alertMessage, setAlertMessage] = useState("");
@@ -339,26 +281,9 @@ export class Loader_ extends React.Component{
       if(e.target.elements.endpoint.value == null || e.target.elements.endpoint.value === ""){
         setAlertMessage("Please select a SPARQL endpoint.")
         setShowAlert(true);
-      } else if(e.target.elements.namespace.value == null || e.target.elements.namespace.value === "") {
-        setAlertMessage("Please set the namespace used for the nodes in the knowledge graph.")
-        setShowAlert(true);
-      } else if(e.target.elements.publish.value === 'on' && e.target.elements.dbName.value === ""){
-        setAlertMessage("Please enter a Name for the dataset.")
-        setShowAlert(true);
       } else {
-        setDisable(true);
-        if(e.target.elements.publish.value === 'on'){
-          const data = new FormData(e.target);
-          const json = Object.fromEntries(data.entries());
-          API.addNewDataset(json, (response) => {
-            setStatus('done');
-            setDisable(false);
-            setPk(response["pk"]);
-            setNow(0);
-            setPublished(response["published"]);
-            console.log(response);
-          });
-        }
+        onClose();
+        props.onUpload("local-" + encodeURI(e.target.elements.endpoint.value));
       }
     }
 
@@ -367,18 +292,7 @@ export class Loader_ extends React.Component{
     });
 
     function onClose(){
-      setPublish(false);
-      setPublished(false);
-      setStatus(null);
-      setNow(0);
-      setPk("");
       setShow(false);
-    }
-
-    function onContinue(e){
-      e.preventDefault();
-      props.onUpload(pk, published);
-      onClose();
     }
 
     return(
@@ -398,15 +312,6 @@ export class Loader_ extends React.Component{
                 <FormControl
                     name="endpoint"
                     placeholder="http://example.org/sparql"
-                />
-              </InputGroup>
-              <InputGroup className="mb-3">
-                <InputGroup.Prepend>
-                  <InputGroup.Text>Node Namespace</InputGroup.Text>
-                </InputGroup.Prepend>
-                <FormControl
-                  name="namespace"
-                  placeholder="http://example.org/"
                 />
               </InputGroup>
             </Form.Group>
@@ -431,24 +336,33 @@ export class Loader_ extends React.Component{
   function LocalExplanationModal(props) {
 
     const [show, setShow] = useState(false);
-    const [publish, setPublish] = useState(false);
-    const [published, setPublished] = useState(false);
-    const [status, setStatus] = useState(null);
-    const [now, setNow] = useState(0);
-    const [pk, setPk] = useState("");
-
     const [disable, setDisable] = useState(false);
     const [showAlert, setShowAlert] = useState(false);
     const [alertMessage, setAlertMessage] = useState("");
+    const [showLoadingSpinner, setShowLoadingSpinner] = useState(false);
 
-    function onSubmitLocalExplanation(e){
+    async function onSubmitLocalExplanation(e){
       e.preventDefault();
       if(e.target.elements.explanationfile.files.length === 0){
         setAlertMessage("Please select an explanation file");
         setShowAlert(true);
       } else {
-        setDisable(true);
-        // Load local
+        setShowLoadingSpinner(true);
+        const SQL = await initSqlJs({
+          // Required to load the wasm binary asynchronously. Of course, you can host it wherever you want
+          // You can omit locateFile completely when running in node
+          locateFile: file => `https://sql.js.org/dist/${file}`
+        });
+        const r = new FileReader();
+        r.onload = function() {
+          const Uints = new Uint8Array(r.result);
+          window.db = new SQL.Database(Uints);
+          setShowLoadingSpinner(false);
+          onClose();
+          props.onUpload("local");
+        }
+        r.readAsArrayBuffer(e.target.elements.explanationfile.files[0]);
+
       }
     }
 
@@ -457,18 +371,7 @@ export class Loader_ extends React.Component{
     });
 
     function onClose(){
-      setPublish(false);
-      setPublished(false);
-      setStatus(null);
-      setNow(0);
-      setPk("");
       setShow(false);
-    }
-
-    function onContinue(e){
-      e.preventDefault();
-      props.onUpload(pk, published);
-      onClose();
     }
 
     return(
@@ -482,10 +385,8 @@ export class Loader_ extends React.Component{
         </Modal.Header>
         <Modal.Body style={disable ? {pointerEvents: "none"} : {}}>
         <Form onSubmit={(e) => {onSubmitLocalExplanation(e)}}>
-          <FormControl name="method" value="create" className="d-none"/>
-          <FormControl name="datasetid" value={props.datasetid} className="d-none"/>
           <Form.Group>
-            <Form.Label>Explanation*</Form.Label>
+            <Form.Label>Explanation</Form.Label>
             <Form.File 
               name="explanationfile"
               label="Explanation file"
@@ -501,6 +402,15 @@ export class Loader_ extends React.Component{
                 Close
               </Button>
               <Button type="submit" variant="primary" className="mt-3" >
+                {showLoadingSpinner ? 
+                <Spinner
+                  className="mr-1"
+                  animation="border"
+                  size="sm"
+                  role="status"
+                  aria-hidden="true"
+                />
+              : ""}
                 Load local explanation
               </Button>
             </Form.Group>

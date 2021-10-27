@@ -18,7 +18,7 @@ export class Feedback_ extends React.Component{
 
             <div>
                 <div className="mt-5">
-                    We would be very happy to hear your feedback about this project. Below you can find several ways to contact us:
+                    We would be very happy to hear your feedback about this project. Below you can find several ways to contact {window.innerHeight} us: {window.Test}
                 </div>
                 <div className="mt-3">
                     <a href="https://github.com/OpenBioLink/Explorer/issues/new"><Button variant="success" className="w-25">Github <FaGithub/></Button></a>

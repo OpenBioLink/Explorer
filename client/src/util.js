@@ -97,3 +97,8 @@ export function ellipsis(string){
   }
   return string;
 }
+
+export function datasetID2Endpoint(index, datasetID){
+  if(datasetID.startsWith("local")) return datasetID;
+  return index["dataset"].find((_dataset) => _dataset["ID"] == datasetID)
+}

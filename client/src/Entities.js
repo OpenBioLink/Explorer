@@ -6,14 +6,15 @@ import { useHistory, useParams } from "react-router-dom";
 import {ImSortAlphaDesc, ImSortAlphaAsc} from "react-icons/im";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { useHistoryState, useSessionState } from "./HistoryState";
-import {tic, toc, sortAsc, sortDesc} from './util'
-const API = require('./API');
+import {tic, toc, sortAsc, sortDesc, datasetID2Endpoint} from './util'
+import API from 'api'
 
 export function Entities(){
   const history = useHistory();
 
   let { dataset, explanation } = useParams();
 
+  const [index, setIndex] = useSessionState("index", null);
   const [entities, setEntities] = useSessionState(dataset + "_entities", null);
   const [types, setTypes] = useSessionState(dataset + "_types", null);
 
@@ -51,7 +52,7 @@ export function Entities(){
     }
 
   function query_entities(){
-    API.getAllTestEntities(dataset, explanation, (data) => {
+    API.getAllTestEntities(datasetID2Endpoint(index, dataset), explanation, (data) => {
       sort(asc, data["entities"]);
       setTypes(data["types"]);
     });

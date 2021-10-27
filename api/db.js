@@ -1,41 +1,74 @@
 'use strict';
-
-const Database = require('better-sqlite3');
-const fs = require('fs');
-
-let queries = {
-    connectToDB(db_id){
-        if(fs.existsSync(`./db/${db_id}.db`)){
-            return new Database(`./db/${db_id}.db`, { verbose: console.log });
-        } else if(db_id == 'index'){
-            return createIndex();
+let queries = null;
+if (typeof window === 'undefined') {
+    const Database = require('better-sqlite3');
+    const fs = require('fs');
+    queries = {
+        connectToDB(db_id){
+            return new Promise((resolve, reject) => {
+                resolve(new Database(`./db/${db_id}.db`, { verbose: console.log }));
+            });
+        },
+        all(db_id, sql){
+            this.connectToDB(db_id).then((db) => {
+                var rows = db.prepare(sql).all();
+                db.close();
+                resolve(rows);
+            });
+            
+        },
+        get(db_id, sql){
+            this.connectToDB(db_id).then((db) => {
+                var rows = db.prepare(sql).get();
+                db.close();
+                resolve(rows);
+            });
+        },
+        run(db_id, sql){
+            this.connectToDB(db_id).then((db) => {
+                var rows = db.prepare(sql).run();
+                db.close();
+                resolve(rows);
+            });
         }
-    },
-    all(db_id, sql){
-        let db = this.connectToDB(db_id);
-        var rows = db.prepare(sql).all();
-        db.close();
-        return rows
-    },
-    get(db_id, sql){
-        let db = this.connectToDB(db_id);
-        var rows = db.prepare(sql).get();
-        db.close();
-        return rows
-    },
-    run(db_id, sql){
-        let db = this.connectToDB(db_id);
-        var rows = db.prepare(sql).run();
-        db.close();
-        return rows
     }
+} else {
+    queries = {
+        all(db_id, sql){
+            return new Promise((resolve, reject) => {
+                let rows = [];
+                var stmt = window.db.prepare(sql);
+                while (stmt.step()){
+                    rows.push(stmt.get())
+                }
+                stmt.free();
+                resolve(rows);
+            });
+            
+        },
+        get(db_id, sql){
+            return new Promise((resolve, reject) => {
+                var rows = window.db.prepare(sql).get();
+                stmt.free();
+                resolve(rows);
+            });
+        },
+        run(db_id, sql){
+            return new Promise((resolve, reject) => {
+                var rows = window.db.prepare(sql).run();
+                stmt.free();
+                resolve(rows);
+            });
+        }
+    }
+    
 }
 
 let dbMethods = {
     getAllTestEntities(explanationID){
         var sql = `
         select 
-            distinct Name, entity.Id 
+            distinct entity.Id, Name  
         from task 
         inner join entity on 
             entity.id = task.EntityID;
@@ -52,19 +85,6 @@ let dbMethods = {
         inner join relation on 
             relation.id = task.RelationID
         where entity.Name = '${curie}';
-        `
-        return queries.all(explanationID, sql);
-    },
-    getTasksByEntityID(explanationID, entityID){
-        var sql = `
-        select 
-            task.ID as TaskID, entity.Id as EntityID, entity.Name as EntityName, relation.Id as RelationID, relation.Name as RelationName, IsHead
-        from task 
-        inner join entity on 
-            entity.id = task.EntityID
-        inner join relation on 
-            relation.id = task.RelationID
-        where entity.ID = '${entityID}';
         `
         return queries.all(explanationID, sql);
     },
@@ -147,4 +167,4 @@ let dbMethods = {
     }
 }
 
-module.exports = dbMethods;
+exports.dbMethods = dbMethods;

@@ -5,7 +5,7 @@ import './App.css';
 import {Container, Row, Col, ListGroup, OverlayTrigger, Tooltip} from 'react-bootstrap';
 import {AiFillCheckCircle} from 'react-icons/ai'
  
-const API = require('./API');
+import API from 'api'
 
 export class Task_ extends React.Component{
 
