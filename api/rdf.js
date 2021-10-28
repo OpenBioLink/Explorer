@@ -2,10 +2,7 @@
 
 const axios = require('axios');
 
-const variables = ["X", "Y", "A", "B", "C"];
-
-
-//const endpoint = "http://localhost:3030"
+const {variables}  = require('./util');
 
 async function runSPARQL(endpoint, query){
     console.log(query);
@@ -52,11 +49,11 @@ let rdfMethods = {
             var typesProm = runSPARQL(endpoint, query);
 
 
-            Promise.all([entitiesProm, typesProm]).spread(function (entities_, types_) {
-                var entities = entities_["results"]["bindings"].map((x) => {
+            Promise.all([entitiesProm, typesProm]).then(function (data) {
+                var entities = data[0]["results"]["bindings"].map((x) => {
                     return {NAME: x["value"]["value"].replace(namespace, ''), Label: x["label"]?.value, Types: x["types"]?.value.split(",")}
                 });
-                var types = types_["results"]["bindings"].map((x) => x["type"].value);
+                var types = data[1]["results"]["bindings"].map((x) => x["type"].value);
                 resolve([entities, types])
             });
         });
@@ -102,7 +99,6 @@ let rdfMethods = {
                     var triple = data["results"]["bindings"][i];
                     label_map[triple["subject"]["value"].replace(namespace, '')] = triple["object"]["value"]
                 }
-                console.log(label_map);
 
                 groups.forEach((element) => {
                     element.Rules.forEach((rule) => {
@@ -113,7 +109,6 @@ let rdfMethods = {
                             rule.Definition.tailLabel = label_map[rule.Definition.tail];
                         }
                         rule.Definition.relationLabel = label_map[rule.Definition.relation];
-                        console.log(label_map[rule.Definition.relation]);
                         rule.Definition.bodies.forEach((body)=>{
                             if(!(variables.includes(body.head))){
                                 body.headLabel = label_map[body.head];
@@ -141,7 +136,6 @@ let rdfMethods = {
                 `
 
             runSPARQL(endpoint, query).then((data) => {
-
                 var edge = data["results"]["bindings"][0];
                 var res = {
                     Label: edge?.label?.value,

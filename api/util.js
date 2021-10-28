@@ -11,6 +11,9 @@ function logd(obj) {
   console.log(JSON.stringify(obj, null, 4))
 }
 
+const variables = ["X", "Y", "A", "B", "C"];
+
+exports.variables = variables;
 exports.tic = tic;
 exports.toc = toc;
 exports.logd = logd;

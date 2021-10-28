@@ -14,7 +14,6 @@ export function Entities(){
 
   let { dataset, explanation } = useParams();
 
-  const [index, setIndex] = useSessionState("index", null);
   const [entities, setEntities] = useSessionState(dataset + "_entities", null);
   const [types, setTypes] = useSessionState(dataset + "_types", null);
 
@@ -52,7 +51,7 @@ export function Entities(){
     }
 
   function query_entities(){
-    API.getAllTestEntities(datasetID2Endpoint(index, dataset), explanation, (data) => {
+    API.getAllTestEntities(dataset, explanation, (data) => {
       sort(asc, data["entities"]);
       setTypes(data["types"]);
     });

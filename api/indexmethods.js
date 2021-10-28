@@ -74,11 +74,11 @@ let indexmethods = {
         description: ``,
         params: [],
         returns: [''],
-        exec() {
+        exec(body) {
             return new Promise((resolve) => {
                 tic();
                 var index = getIndex();
-                var dataset = index["dataset"].find(dataset => dataset["ID"] == datasetID);
+                var dataset = index["dataset"].find(dataset => dataset["ID"] == body.datasetID);
                 // TODO not existant datasetID?
                 toc("getEndpointFromDatasetID");
                 resolve(dataset["Endpoint"] || {});

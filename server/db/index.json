@@ -10,11 +10,11 @@
         },
         {
             "ID": "OBL",
-            "Endpoint": "http://asdf.com",
+            "Endpoint": "http://localhost:9999/blazegraph/namespace/obl/sparql",
             "Name": "OpenBioLink",
             "Version":	"2021",
             "Description":	"Very good datasetse",
-            "Namespace": "http://obl.com/i/"
+            "Namespace": "http://identifiers.org/"
         }
     ],
     "explanation":[

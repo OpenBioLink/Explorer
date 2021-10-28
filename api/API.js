@@ -1,19 +1,36 @@
 let { indexmethods } = require('./indexmethods');
 let { rpcmethods } = require('./rpcmethods');
 
-function call(func, body, callback){
-    if(body.explanationID?.startsWith("local") || body.datasetID?.startsWith("local")){
-        body.endpoint = decodeURI(body.endpoint.replace("local-", ""))
-        callLocal(func, body).then((response) => {
-            callback(response);
-        });
-    } else {
-        callRemote(func, body).then((response) => {
-            callback(response);
-        });
-    }
+function resolveEndpoint(body){
+    return new Promise((resolve, reject) => {
+        if (body.datasetID == undefined){
+            resolve(body);
+        } else if (body.datasetID?.startsWith("local")){
+            body.endpoint = body.datasetID.replace("local-","")
+            resolve(body);
+        } else {
+            callRemote("getEndpointFromDatasetID", {"datasetID": body.datasetID}).then((response) => {
+                body.endpoint = response;
+                resolve(body);
+            });
+        }
+    });
 }
 
+// Function caller for client
+function call(func, body, callback){
+    resolveEndpoint(body).then((body) => {
+        if(body.explanationID?.startsWith("local") || body.datasetID?.startsWith("local")){
+            return callLocal(func, body);
+        } else {
+            return callRemote(func, body);
+        }
+    }).then((response) => {
+        callback(response);
+    });
+}
+
+// Gets called by call(...)
 function callRemote(func, body){
     return new Promise((resolve, reject) => {
         var jsonReq = {
@@ -32,18 +49,19 @@ function callRemote(func, body){
     });
 }
 
+// Gets called by call(...) or directly by server (via callRemote)
 function callLocal(func, body){
     return new Promise((resolve, reject) => {
         let execPromise = null;
         if (rpcmethods[func] && typeof (rpcmethods[func].exec) === 'function') {
             execPromise = rpcmethods[func].exec.call(null, body);
             if (!(execPromise instanceof Promise)) {
-                throw new Error(`exec on ${key} did not return a promise`);
+                throw new Error(`exec on ${func} did not return a promise`);
             }
         } else if (indexmethods[func] && typeof (indexmethods[func].exec) === 'function') {
             execPromise = indexmethods[func].exec.call(null, body);
             if (!(execPromise instanceof Promise)) {
-                throw new Error(`exec on ${key} did not return a promise`);
+                throw new Error(`exec on ${func} did not return a promise`);
             }
         } else {
             execPromise = Promise.resolve({
@@ -69,93 +87,93 @@ function getAllDatasets(callback){
     call("getAllDatasets", {}, callback);
 }
 
-function getAllExplanationsByDatasetID(endpoint, callback){
+function getAllExplanationsByDatasetID(datasetID, callback){
     call("getAllExplanationsByDatasetID", {
-        "endpoint": endpoint
+        "datasetID": datasetID
     }, callback);
 }
 
-function getAllTestEntities(endpoint, explanationID, callback){
+function getAllTestEntities(datasetID, explanationID, callback){
     call("getAllTestEntities", {
-        "endpoint": endpoint, 
+        "datasetID": datasetID, 
         "explanationID": explanationID
     }, callback);
 }
 
-function getTasksByCurie(endpoint, explanationID, curie, callback){
+function getTasksByCurie(datasetID, explanationID, curie, callback){
     call("getTasksByCurie", {
-        "endpoint": endpoint, 
+        "datasetID": datasetID, 
         "explanationID": explanationID, 
         "curie": curie
     }, callback);
 }
 
-function getTaskByID(endpoint, explanationID, entityID, callback){
+function getTaskByID(datasetID, explanationID, entityID, callback){
     call("getTaskByID", {
-        "endpoint": endpoint,
+        "datasetID": datasetID,
         "explanationID": explanationID, 
         "entityID": entityID
     }, callback);
 }
 
-function getPredictionsByTaskID(endpoint, explanationID, taskID, callback){
+function getPredictionsByTaskID(datasetID, explanationID, taskID, callback){
     call("getPredictionsByTaskID", {
-        "endpoint": endpoint, 
+        "datasetID": datasetID, 
         "explanationID": explanationID, 
         "taskID": taskID
     }, callback);
 }
 
-function getPredictionInfo(endpoint, explanationID, taskID, entityID, callback){
+function getPredictionInfo(datasetID, explanationID, taskID, entityID, callback){
     call("getPredictionInfo", {
-        "endpoint": endpoint, 
+        "datasetID": datasetID, 
         "explanationID": explanationID, 
         "taskID": taskID,
         "entityID": entityID
     }, callback);
 }
 
-function getInfoByCurie(endpoint, curie, callback){
+function getInfoByCurie(datasetID, curie, callback){
     call("getInfoByCurie", {
-        "endpoint": endpoint, 
+        "datasetID": datasetID, 
         "curie": curie
     }, callback);
 }
 
-function getInfoByEntityID(endpoint, explanationID, entityID, callback){
+function getInfoByEntityID(datasetID, explanationID, entityID, callback){
     call("getInfoByEntityID", {
-        "endpoint": endpoint, 
+        "datasetID": datasetID, 
         "explanationID": explanationID, 
         "entityID": entityID
     }, callback);
 }
 
-function getExplanations(endpoint, explanationID, taskID, entityID, callback){
+function getExplanations(datasetID, explanationID, taskID, entityID, callback){
     call("getExplanations", {
-        "endpoint": endpoint, 
+        "datasetID": datasetID, 
         "explanationID": explanationID, 
         "taskID": taskID, 
         "entityID": entityID
     }, callback);
 }
 
-function getOutgoingEdges(endpoint, curie, callback){
+function getOutgoingEdges(datasetID, curie, callback){
     call("getOutgoingEdges", {
-        "endpoint": endpoint, 
+        "datasetID": datasetID, 
         "curie": curie
     }, callback);
 }
 
-function getIncomingEdges(endpoint, curie, callback){
+function getIncomingEdges(datasetID, curie, callback){
     call("getIncomingEdges", {
-        "endpoint": endpoint, 
+        "datasetID": datasetID, 
         "curie": curie
     }, callback);
 }
 
-function getInstantiations(endpoint, explanationID, ruleID, head, tail, callback){
+function getInstantiations(datasetID, explanationID, ruleID, head, tail, callback){
     call("getInstantiations", {
-        "endpoint": endpoint, 
+        "datasetID": datasetID, 
         "explanationID": explanationID, 
         "ruleID": ruleID,
         "head": head,
@@ -166,7 +184,6 @@ function getInstantiations(endpoint, explanationID, ruleID, head, tail, callback
 API = {
     call,
     callLocal,
-    callRemote,
     getAllDatasets,
     getAllExplanationsByDatasetID,
     getAllTestEntities,

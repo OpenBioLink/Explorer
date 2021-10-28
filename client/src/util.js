@@ -99,6 +99,9 @@ export function ellipsis(string){
 }
 
 export function datasetID2Endpoint(index, datasetID){
-  if(datasetID.startsWith("local")) return datasetID;
-  return index["dataset"].find((_dataset) => _dataset["ID"] == datasetID)
+  if(datasetID.startsWith("local")){
+    return datasetID;
+  } else {
+    return index["dataset"].find((_dataset) => _dataset["ID"] == datasetID)["Endpoint"]
+  }
 }

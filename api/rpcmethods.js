@@ -5,7 +5,7 @@ let {rdfMethods: graph} = require('./rdf');
 
 const {tic, toc, variables}  = require('./util');
 
-const namespace = "http://ai-strategies.org/"
+const namespace = "http://identifiers.org/"
 
 let rpcmethods = {
     templ:{
@@ -24,9 +24,9 @@ let rpcmethods = {
         exec(body) {
             return new Promise((resolve) => {
                 tic();
-                if(body && body.endpoint){
-                    graph.getAllTestEntities(body.endpoint, namespace).spread((labeled_entities, types) => {
-                        resolve({entities: labeled_entities, types: types} || {});
+                if(body.endpoint){
+                    graph.getAllTestEntities(body.endpoint, namespace).then((data) => {
+                        resolve({entities: data[0], types: data[1]} || {});
                         toc("getAllTestEntities");
                     });
                 } else{
@@ -60,8 +60,10 @@ let rpcmethods = {
         exec(body) {
             return new Promise((resolve) => {
                 tic();
-                db.getTaskByID(body.explanationID, body.entityID).then((task) => {
-                    return graph.getRelationlabel(body.endpoint, namespace, task.RelationName)
+                var task = null;
+                db.getTaskByID(body.explanationID, body.entityID).then((task_) => {
+                    task = task_;
+                    return graph.getRelationlabel(body.endpoint, namespace, task.RelationName);
                 }).then((RelationLabel) => {
                     task.RelationLabel = RelationLabel.Label;
                     toc("getTaskByID");
@@ -110,7 +112,9 @@ let rpcmethods = {
 
                 var taskProm = db.getTaskByID(body.explanationID, body.taskID);
                 var predictionProm = db.getPredictionByID(body.explanationID, body.taskID, body.entityID);
-                Promise.all([taskProm, predictionProm]).spread(function (task, prediction) {
+                Promise.all([taskProm, predictionProm]).then((data) => {
+                    var task = data[0];
+                    var prediction = data[1];
                     _res["rel"] = task["RelationName"]; 
                     _res["hit"] = prediction["Hit"];
                     _res["confidence"] = prediction["Confidence"];
@@ -148,10 +152,10 @@ let rpcmethods = {
         exec(body) {
             return new Promise((resolve) => {
                 tic();
-                graph.getInfoByCurie(body.endpoint, namespace, body.curie, (res) => {
+                graph.getInfoByCurie(body.endpoint, namespace, body.curie).then((res) => {
                     toc("getInfoByCurie");
                     resolve(res || {});
-                })
+                });
             });
         }
     },
@@ -161,9 +165,10 @@ let rpcmethods = {
         returns: [''],
         exec(body) {
             return new Promise((resolve) => {
-                var curie = db.getCurieByEntityID(body.explanationID, body.entityID);
-                graph.getInfoByCurie(body.endpoint, namespace, curie, (res) => {
-                    resolve(res || {});
+                db.getCurieByEntityID(body.explanationID, body.entityID).then((curie) => {
+                    graph.getInfoByCurie(body.endpoint, namespace, curie["NAME"]).then((res) => {
+                        resolve(res || {});
+                    });
                 });
             });
         }

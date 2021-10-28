@@ -4,7 +4,7 @@ import './App.css';
 import PropTypes from "prop-types";
 import { withRouter } from "react-router";
 import bsCustomFileInput from 'bs-custom-file-input';
-import {from_timestamp, from_method_short, sortAsc} from './util';
+import {from_timestamp, from_method_short, sortAsc, datasetID2Endpoint} from './util';
 import API from 'api';
 import initSqlJs from "sql.js";
 
@@ -18,7 +18,6 @@ export class Loader_ extends React.Component{
 
     componentDidMount(){
       API.getIndex((res) => {
-        window.sessionStorage.setItem('index', JSON.stringify(res));
         this.setState({index: res});
         this.setState({selected_dataset_id: res["dataset"].length > 0 ? res["dataset"][0]["ID"] : null});
         this.setState({selected_explanation_id:  res["explanation"].length > 0 ? res["explanation"][0]["ID"] : null});
@@ -81,7 +80,6 @@ export class Loader_ extends React.Component{
 
         // removes session storage (entities, asc, active page...)
         window.sessionStorage.clear();
-
         API.getAllTestEntities(this.state.selected_dataset_id, this.state.selected_explanation_id, (entities) => {
           window.sessionStorage.setItem(this.state.selected_dataset_id+'_entities', JSON.stringify(sortAsc(entities["entities"])));
           window.sessionStorage.setItem(this.state.selected_dataset_id+'_types', JSON.stringify(entities["types"]));
@@ -112,7 +110,7 @@ export class Loader_ extends React.Component{
               </Modal.Header>
 
               <Modal.Body>
-              <Tab.Container id="list-group-tabs-example" activeKey={this.state.selected_dataset_id}>
+              <Tab.Container id="list-group-tabs-example" activeKey={this.state.selected_dataset_id?.startsWith("local-") ? "local" : this.state.selected_dataset_id}>
                 <Row>
                   <Col sm={4}>
                     <ListGroup className="pr-1 text-left" style={{overflowY: "auto", height: "400px"}}>
@@ -131,6 +129,19 @@ export class Loader_ extends React.Component{
                       </ListGroup.Item>
 
                       ) : ""}
+                      { this.state.selected_dataset_id?.startsWith("local-") ?
+                        <ListGroup.Item action eventKey="local">
+                          <Container>
+                            <Row>
+                              <Col>
+                                Custom
+                              </Col>
+                              <Col>
+                              </Col>
+                            </Row>
+                          </Container>
+                        </ListGroup.Item> : ""
+                      }
                     </ListGroup>
                   </Col>
                   <Col sm={8} className="my-auto">
@@ -140,6 +151,9 @@ export class Loader_ extends React.Component{
                         {row["Description"]}
                       </Tab.Pane>
                       )}
+                      <Tab.Pane eventKey="local">
+                        Custom dataset, SPARQL endpoint:<br/>{this.state.selected_dataset_id?.replace("local-", "")}
+                      </Tab.Pane>
                     </Tab.Content>
                   </Col>
                 </Row>

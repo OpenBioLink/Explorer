@@ -38,6 +38,7 @@ export class Task_ extends React.Component{
         });
 
         API.getTaskByID(datasetID, explanationID, id, (task) => {
+            console.log(task);
             API.getInfoByEntityID(datasetID, explanationID, task["EntityID"], (info) => {
                 console.log(info);
                 this.setState({entityInfo: info})});

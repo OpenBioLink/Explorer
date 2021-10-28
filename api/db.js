@@ -10,25 +10,30 @@ if (typeof window === 'undefined') {
             });
         },
         all(db_id, sql){
-            this.connectToDB(db_id).then((db) => {
-                var rows = db.prepare(sql).all();
-                db.close();
-                resolve(rows);
+            return new Promise((resolve, reject) => {
+                this.connectToDB(db_id).then((db) => {
+                    var rows = db.prepare(sql).all();
+                    db.close();
+                    resolve(rows);
+                });
             });
-            
         },
         get(db_id, sql){
-            this.connectToDB(db_id).then((db) => {
-                var rows = db.prepare(sql).get();
-                db.close();
-                resolve(rows);
+            return new Promise((resolve, reject) => {
+                this.connectToDB(db_id).then((db) => {
+                    var rows = db.prepare(sql).get();
+                    db.close();
+                    resolve(rows);
+                });
             });
         },
         run(db_id, sql){
-            this.connectToDB(db_id).then((db) => {
-                var rows = db.prepare(sql).run();
-                db.close();
-                resolve(rows);
+            return new Promise((resolve, reject) => {
+                this.connectToDB(db_id).then((db) => {
+                    var rows = db.prepare(sql).run();
+                    db.close();
+                    resolve(rows);
+                });
             });
         }
     }
@@ -36,6 +41,9 @@ if (typeof window === 'undefined') {
     queries = {
         all(db_id, sql){
             return new Promise((resolve, reject) => {
+                if (window.db == undefined){
+                    window.location.href = "/loader";
+                }
                 let rows = [];
                 var stmt = window.db.prepare(sql);
                 while (stmt.step()){
@@ -47,15 +55,23 @@ if (typeof window === 'undefined') {
             
         },
         get(db_id, sql){
+            if (window.db == undefined){
+                window.location.href = "/loader";
+            }
             return new Promise((resolve, reject) => {
-                var rows = window.db.prepare(sql).get();
+                var stmt = window.db.prepare(sql);
+                var rows = stmt.get();
                 stmt.free();
                 resolve(rows);
             });
         },
         run(db_id, sql){
+            if (window.db == undefined){
+                window.location.href = "/loader";
+            }
             return new Promise((resolve, reject) => {
-                var rows = window.db.prepare(sql).run();
+                var stmt = window.db.prepare(sql);
+                var rows = stmt.run();
                 stmt.free();
                 resolve(rows);
             });
