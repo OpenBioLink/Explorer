@@ -1,11 +1,19 @@
 {
     "dataset": [
         {
-            "ID": "FB15k-237",
-            "Endpoint": "http://test.com",
-            "Name": "FB15k-237",
+            "ID": "WN18RR",
+            "Endpoint": "http://localhost:9999/blazegraph/namespace/wn18rr/sparql",
+            "Name": "WN18RR",
             "Version":	"",
-            "Description":	"Very good dataset",
+            "Description":	"WN18RR is a link prediction dataset created from WN18, which is a subset of WordNet. WN18 consists of 18 relations and 40,943 entities. However, many text triples are obtained by inverting triples from the training set. Thus the WN18RR dataset is created to ensure that the evaluation dataset does not have inverse relation test leakage. In summary, WN18RR dataset contains 93,003 triples with 40,943 entities and 11 relation types. [https://paperswithcode.com/dataset/wn18rr]",
+            "Namespace": "http://g.ko.com/namespace#"
+        },
+		{
+            "ID": "YAGO310",
+            "Endpoint": "http://localhost:9999/blazegraph/namespace/yago310/sparql",
+            "Name": "YAGO3-10",
+            "Version":	"",
+            "Description":	"YAGO3-10 is benchmark dataset for knowledge base completion. It is a subset of YAGO3 (which itself is an extension of YAGO) that contains entities associated with at least ten different relations. In total, YAGO3-10 has 123,182 entities and 37 relations, and most of the triples describe attributes of persons such as citizenship, gender, and profession. [https://paperswithcode.com/dataset/yago3-10]",
             "Namespace": "http://g.ko.com/namespace#"
         },
         {
@@ -13,21 +21,71 @@
             "Endpoint": "http://localhost:9999/blazegraph/namespace/obl/sparql",
             "Name": "OpenBioLink",
             "Version":	"2021",
-            "Description":	"Very good datasetse",
+            "Description":	"The OpenBioLink2020 Dataset is a highly challenging biomedical benchmark dataset containing over 5 million positive and negative edges. The test set does not contain trivially predictable, inverse edges from the training set and does contain all different edge types, to provide a more realistic edge prediction scenario.",
             "Namespace": "http://identifiers.org/"
         }
     ],
     "explanation":[
-        {
-            "ID": "obl_max",
-            "DatasetID": "OBL",
-            "Label": "Maximum",
-            "Date": 1624529144,
-            "Comment": "Hi",
-            "Method": "max",
-            "RuleConfig": "",
-            "ClusteringConfig": ""
-        }
+		{
+			"ID": "obl_max",
+			"DatasetID": "OBL",
+			"Label": "MAX",
+			"Date": 1624529144,
+			"Comment": "These results were retrieved by applying the MaxPlus (AnyBURL default) aggregation method to the OpenBioLink dataset based on rules learned in 1000 seconds.",
+			"Method": "nrno",
+			"RuleConfig": "SNAPSHOTS_AT = 1000\nWORKER_THREADS = 22\nPOLICY = 2\nREWARD = 5\nEPSILON = 0.1\nTHRESHOLD_CONFIDENCE = 0.0001\nMAX_LENGTH_CYCLIC = 3\nMAX_LENGTH_ACYCLIC = 1",
+			"ClusteringConfig": ""
+		},
+		{
+			"ID": "wn18rr_max",
+			"DatasetID": "WN18RR",
+			"Label": "MAX",
+			"Date": 1624529144,
+			"Comment": "These results were retrieved by applying the MaxPlus (AnyBURL default) aggregation method to theWN18RR dataset based on rules learned in 1000 seconds.",
+			"Method": "max",
+			"RuleConfig": "SNAPSHOTS_AT = 1000\nWORKER_THREADS = 22\nPOLICY = 2\nREWARD = 5\nEPSILON = 0.1\nTHRESHOLD_CONFIDENCE = 0.0001\nMAX_LENGTH_CYCLIC = 3\nMAX_LENGTH_ACYCLIC = 1",
+			"ClusteringConfig": ""
+		},
+		{
+			"ID": "wn18rr_nrno",
+			"DatasetID": "WN18RR",
+			"Label": "NRNO",
+			"Date": 1624529144,
+			"Comment": "These results were retrieved by applying the Non-redundant Noisy-Or aggregation method with a random search to the WN18RR dataset based on rules learned in 1000 seconds.",
+			"Method": "nrno",
+			"RuleConfig": "SNAPSHOTS_AT = 1000\nWORKER_THREADS = 22\nPOLICY = 2\nREWARD = 5\nEPSILON = 0.1\nTHRESHOLD_CONFIDENCE = 0.0001\nMAX_LENGTH_CYCLIC = 3\nMAX_LENGTH_ACYCLIC = 1",
+			"ClusteringConfig": "STRATEGY = random\nITERATIONS = 10000\nRESOLUTION = 10\nSEED = 0"
+		},
+		{
+			"ID": "yago310_max",
+			"DatasetID": "YAGO310",
+			"Label": "MAX",
+			"Date": 1624529144,
+			"Comment": "These results were retrieved by applying the MaxPlus (AnyBURL default) aggregation method to the YAGO3-10 dataset based on rules learned in 1000 seconds.",
+			"Method": "max",
+			"RuleConfig": "SNAPSHOTS_AT = 1000\nWORKER_THREADS = 22\nPOLICY = 2\nREWARD = 5\nEPSILON = 0.1\nTHRESHOLD_CONFIDENCE = 0.0001\nMAX_LENGTH_CYCLIC = 3\nMAX_LENGTH_ACYCLIC = 1",
+			"ClusteringConfig": ""
+		},
+		{
+			"ID": "yago310_nrno",
+			"DatasetID": "YAGO310",
+			"Label": "NRNO",
+			"Date": 1624529144,
+			"Comment": "These results were retrieved by applying the Non-redundant Noisy-Or aggregation method with a random search to the YAGO3-10 dataset based on rules learned in 1000 seconds.",
+			"Method": "nrno",
+			"RuleConfig": "SNAPSHOTS_AT = 1000\nWORKER_THREADS = 22\nPOLICY = 2\nREWARD = 5\nEPSILON = 0.1\nTHRESHOLD_CONFIDENCE = 0.0001\nMAX_LENGTH_CYCLIC = 3\nMAX_LENGTH_ACYCLIC = 1",
+			"ClusteringConfig": "STRATEGY = random\nITERATIONS = 10000\nRESOLUTION = 10\nSEED = 0"
+		},
+		{
+			"ID": "obl_nrno",
+			"DatasetID": "OBL",
+			"Label": "NRNO",
+			"Date": 1624529144,
+			"Comment": "These results were retrieved by applying the Non-redundant Noisy-Or aggregation method with a random search to the OpenBioLink dataset based on rules learned in 1000 seconds.",
+			"Method": "nrno",
+			"RuleConfig": "SNAPSHOTS_AT = 1000\nWORKER_THREADS = 22\nPOLICY = 2\nREWARD = 5\nEPSILON = 0.1\nTHRESHOLD_CONFIDENCE = 0.0001\nMAX_LENGTH_CYCLIC = 3\nMAX_LENGTH_ACYCLIC = 1",
+			"ClusteringConfig": "STRATEGY = random\nITERATIONS = 10000\nRESOLUTION = 10\nSEED = 0"
+		}
     ]
 
 }

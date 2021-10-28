@@ -186,7 +186,10 @@ export class Loader_ extends React.Component{
                   <Row>
                     <Col sm={4}>
                       <ListGroup className="pr-1 text-left" style={{overflowY: "auto", height: "400px"}}>
-                        { this.state.index["explanation"].filter(x => (this.state.searchTerm === "" || x["Label"].toLowerCase().includes(this.state.searchTerm.toLowerCase()))).map((row) =>
+                        { this.state.index["explanation"]
+                          .filter(x => (x["DatasetID"] == this.state.selected_dataset_id))
+                          .filter(x => (this.state.searchTerm === "" || x["Label"].toLowerCase().includes(this.state.searchTerm.toLowerCase())))
+                          .map((row) =>
                           <ListGroup.Item action eventKey={row["ID"]} onClick={() => this.onExplanationSelection(row["ID"])}>
                             <Container>
                               <Row>
