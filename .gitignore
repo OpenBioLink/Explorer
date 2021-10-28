@@ -6,6 +6,9 @@ package-lock.json
 
 labelgraph/workspace/
 
+server/blazegraph/blazegraph.jnl
+server/blazegraph/rules.log
+
 .api_key
 
 # Logs

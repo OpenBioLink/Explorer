@@ -200,6 +200,19 @@ export class Loader_ extends React.Component{
                             </Container>
                         </ListGroup.Item>
                         )}
+                        { this.state.selected_explanation_id?.startsWith("local") ?
+                          <ListGroup.Item action eventKey="local">
+                            <Container>
+                              <Row>
+                                <Col className="w-50">
+                                  Local explanation file
+                                </Col>
+                                <Col className="w-50">
+                                </Col>
+                              </Row>
+                            </Container>
+                        </ListGroup.Item> : ""
+                        }
                       </ListGroup>
                     </Col>
                     <Col sm={8} className="my-auto">
@@ -236,6 +249,9 @@ export class Loader_ extends React.Component{
                             </table>
                           </Tab.Pane>
                         )}
+                         <Tab.Pane className="text-left" style={{overflowY: "auto", height: "400px"}} eventKey="local">
+                           Local explanation file
+                        </Tab.Pane>
                       </Tab.Content>
                     </Col>
                   </Row>
