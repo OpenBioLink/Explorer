@@ -18,13 +18,13 @@ export class Feedback_ extends React.Component{
 
             <div>
                 <div className="mt-5">
-                    We would be very happy to hear your feedback about this project. Below you can find several ways to contact {window.innerHeight} us: {window.Test}
+                    We would be very happy to hear your feedback about this project. Below you can find several ways to contact us:
                 </div>
                 <div className="mt-3">
-                    <a href="https://github.com/OpenBioLink/Explorer/issues/new"><Button variant="success" className="w-25">Github <FaGithub/></Button></a>
+                    <a href="https://github.com/OpenBioLink/Explorer/issues/new"><Button variant="dark" className="w-25">Github <FaGithub/></Button></a>
                 </div>
                 <div className="mt-2">
-                    <a href="javascript:linkTo_UnCryptMailto('nbjmup;tjnpo/puuAnfevojxjfo/bd/bu');"><Button  variant="success" className="w-25">Email <GrMail/></Button></a>
+                    <a href="javascript:linkTo_UnCryptMailto('nbjmup;tjnpo/puuAnfevojxjfo/bd/bu');"><Button  variant="dark" className="w-25">Email <GrMail/></Button></a>
                 </div>
             </div>
         );

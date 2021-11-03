@@ -95,7 +95,14 @@ function Header(){
     <header className="App-header">
       <Navbar bg="dark" variant="dark">
           <Navbar.Brand href={(dataset && explanation) ? `/${dataset}/${explanation}/entities` : "/loader"} onClick={(e) => onClickLink(e)}>
-            Explorer (alpha)
+          <img
+            alt=""
+            src="/favicon.svg"
+            width="30"
+            height="30"
+            className="d-inline-block align-top"
+          />{' '}
+            LinkExplorer
           </Navbar.Brand>
           <Nav className="mr-auto" defaultActiveKey={location.pathname}>
             <Nav.Link href={`/${dataset}/${explanation}/overview`} disabled={!dataset || !explanation} onClick={(e) => onClickLink(e)}>Overview</Nav.Link>
@@ -113,7 +120,7 @@ function Header(){
               </Navbar.Text>
             </>
             : "" }
-            <Button size="sm" variant="outline-success" onClick={() => onLoadOther()}>
+            <Button size="sm" variant="outline-light" onClick={() => onLoadOther()}>
               {(dataset && explanation) ? "Load other" : "Load"}
             </Button>
           </Navbar.Collapse>
