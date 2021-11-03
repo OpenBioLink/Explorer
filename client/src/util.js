@@ -31,8 +31,8 @@ export function toc(msg) {
 export function sortAsc(entities){
     // Sortieren nach Wert
     return entities.sort((a,b) => {
-      var nameA = a["Label"];
-      var nameB = b["Label"];
+      var nameA = a[1];
+      var nameB = b[1];
       
       var isNameA = !((nameA == null) || (nameA === ""))
       var isNameB = !((nameB == null) || (nameB === ""))
@@ -62,8 +62,8 @@ export function sortAsc(entities){
 
 export function sortDesc(entities){
     return entities.sort((a, b) =>{
-      var nameA = a["Label"]; // Groß-/Kleinschreibung ignorieren
-      var nameB = b["Label"]; // Groß-/Kleinschreibung ignorieren#
+      var nameA = a[1]; // Groß-/Kleinschreibung ignorieren
+      var nameB = b[1]; // Groß-/Kleinschreibung ignorieren#
 
       var isNameA = !((nameA == null) || (nameA === ""))
       var isNameB = !((nameB == null) || (nameB === ""))

@@ -57,19 +57,6 @@ let indexmethods = {
             });
         }
     },
-    getAllDatasets:{
-        description: ``,
-        params: [],
-        returns: [''],
-        exec() {
-            return new Promise((resolve) => {
-                tic();
-                let index = getIndex();
-                toc("getAllDatasets");
-                resolve(index["dataset"] || {});
-            });
-        }
-    },
     getEndpointFromDatasetID:{
         description: ``,
         params: [],
@@ -78,24 +65,10 @@ let indexmethods = {
             return new Promise((resolve) => {
                 tic();
                 var index = getIndex();
-                var dataset = index["dataset"].find(dataset => dataset["ID"] == body.datasetID);
+                var dataset = index["Dataset"].find(dataset => dataset["ID"] == body.datasetID);
                 // TODO not existant datasetID?
                 toc("getEndpointFromDatasetID");
                 resolve(dataset["Endpoint"] || {});
-            });
-        }
-    },
-    getAllExplanationsByDatasetID:{
-        description: ``,
-        params: ['datasetID: The id of the dataset'],
-        returns: [''],
-        exec(body) {
-            return new Promise((resolve) => {
-                tic();
-                let index = getIndex();
-                let explanations = index["explanation"].filter(explanation => explanation["DatasetID"] == body.datasetID);
-                toc("getAllExplanationsByDatasetID")
-                resolve(explanations || {});
             });
         }
     },

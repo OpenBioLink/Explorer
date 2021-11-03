@@ -85,11 +85,11 @@ export function Entities(){
         {entities ? renderPagination(entities.filter(row => (
                 (
                   searchTerm === "" 
-                  || row["NAME"].toLowerCase().includes(searchTerm.toLowerCase()) 
-                  || (row["Label"] != null && row["Label"].toLowerCase().includes(searchTerm.toLowerCase())
+                  || row[0].toLowerCase().includes(searchTerm.toLowerCase()) 
+                  || (row[1] != null && row[1].toLowerCase().includes(searchTerm.toLowerCase())
                 )) && (
                   selectedType === "All types"
-                  || row["Types"].includes(selectedType)
+                  || row[2].includes(selectedType)
                 )))) : ""}
     </div>
   );
@@ -114,14 +114,14 @@ export function Entities(){
             <ListGroup>
               {values
               .slice(page2idx(active), page2idx(active + 1)).map(row =>
-                <ListGroup.Item action as="button" eventKey={row["ID"]} onClick={() => onEntitySelection(row)}>
+                <ListGroup.Item action as="button" onClick={() => onEntitySelection(row)}>
                     <Container>
                       <Row>
                         <Col className="text-wrap">
-                          {row["NAME"]}
+                          {row[0]}
                         </Col>
                         <Col className="text-wrap">
-                          {row["Label"]}
+                          {row[1]}
                         </Col>
                       </Row>
                     </Container>
@@ -135,7 +135,7 @@ export function Entities(){
   }
 
   function onEntitySelection(row){
-    history.push(`/${dataset}/${explanation}/entity?term=${row["NAME"]}`);
+    history.push(`/${dataset}/${explanation}/entity?term=${row[0]}`);
   }
 
   function editSearchTerm(term){

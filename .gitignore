@@ -1,4 +1,10 @@
 *.db
+*.ttl
+**/cache
+*.zip
+*.jnl
+*.log
+
 apache-jena-fuseki-3.17.0/
 apache-jena-fuseki-4.0.0/
 

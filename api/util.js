@@ -13,6 +13,19 @@ function logd(obj) {
 
 const variables = ["X", "Y", "A", "B", "C"];
 
+const namespace = "https://ai-strategies.org/kgc/"
+
+function Code2URI(code){
+  return namespace + encodeURI(code)
+}
+
+function URI2Code(uri){
+  return decodeURI(uri.replace(namespace, ""))
+}
+
+exports.namespace = namespace;
+exports.Code2URI = Code2URI;
+exports.URI2Code = URI2Code;
 exports.variables = variables;
 exports.tic = tic;
 exports.toc = toc;

@@ -47,7 +47,7 @@ if (typeof window === 'undefined') {
                 let rows = [];
                 var stmt = window.db.prepare(sql);
                 while (stmt.step()){
-                    rows.push(stmt.get())
+                    rows.push(stmt.getAsObject())
                 }
                 stmt.free();
                 resolve(rows);
@@ -60,7 +60,8 @@ if (typeof window === 'undefined') {
             }
             return new Promise((resolve, reject) => {
                 var stmt = window.db.prepare(sql);
-                var rows = stmt.get();
+                stmt.step()
+                var rows = stmt.getAsObject();
                 stmt.free();
                 resolve(rows);
             });
@@ -80,8 +81,12 @@ if (typeof window === 'undefined') {
     
 }
 
+function getDbId(datasetID, explanationID){
+    return datasetID + "_" + explanationID
+}
+
 let dbMethods = {
-    getAllTestEntities(explanationID){
+    getAllTestEntities(datasetID, explanationID){
         var sql = `
         select 
             distinct entity.Id, Name  
@@ -89,9 +94,9 @@ let dbMethods = {
         inner join entity on 
             entity.id = task.EntityID;
         `;
-        return queries.all(explanationID, sql)
+        return queries.all(getDbId(datasetID, explanationID), sql)
     },
-    getTasksByCurie(explanationID, curie){
+    getTasksByCurie(datasetID, explanationID, curie){
         var sql = `
         select 
             task.ID as TaskID, entity.Id as EntityID, entity.Name as EntityName, relation.Id as RelationID, relation.Name as RelationName, IsHead
@@ -102,9 +107,9 @@ let dbMethods = {
             relation.id = task.RelationID
         where entity.Name = '${curie}';
         `
-        return queries.all(explanationID, sql);
+        return queries.all(getDbId(datasetID, explanationID), sql);
     },
-    getTaskByID(explanationID, entityID){
+    getTaskByID(datasetID, explanationID, entityID){
         var sql = `
         select 
             task.ID as TaskID, entity.Id as EntityID, entity.Name as EntityName, relation.Id as RelationID, relation.Name as RelationName, IsHead
@@ -115,9 +120,9 @@ let dbMethods = {
             relation.id = task.RelationID
         where task.ID = '${entityID}';
         `
-        return queries.get(explanationID, sql);
+        return queries.get(getDbId(datasetID, explanationID), sql);
     },
-    getPredictionsByTaskID(explanationID, taskID){
+    getPredictionsByTaskID(datasetID, explanationID, taskID){
         var sql = `
         select 
             entity.Id as EntityID, entity.Name as EntityName, prediction.confidence as Confidence, prediction.hit as Hit
@@ -126,9 +131,9 @@ let dbMethods = {
             entity.id = prediction.EntityID
         where prediction.TaskID = ${taskID};
         `;
-        return queries.all(explanationID, sql);
+        return queries.all(getDbId(datasetID, explanationID), sql);
     },
-    getPredictionByID(explanationID, taskID, entityID){
+    getPredictionByID(datasetID, explanationID, taskID, entityID){
         var sql = `
         select 
             entity.Id as EntityID, entity.Name as EntityName, prediction.confidence as Confidence, prediction.hit as Hit
@@ -138,18 +143,18 @@ let dbMethods = {
         where prediction.TaskID = ${taskID}
         and prediction.EntityID = ${entityID};
         `;
-        return queries.get(explanationID, sql);
+        return queries.get(getDbId(datasetID, explanationID), sql);
     },
-    getCurieByEntityID(explanationID, entityID){
+    getCurieByEntityID(datasetID, explanationID, entityID){
         var sql = `
         select 
             name
         from entity 
         where id = ${entityID};
         `;
-        return queries.get(explanationID, sql);
+        return queries.get(getDbId(datasetID, explanationID), sql);
     },
-    getExplanations(explanationID, taskID, entityID){
+    getExplanations(datasetID, explanationID, taskID, entityID){
         var sql = `
         select 
             CASE
@@ -169,9 +174,9 @@ let dbMethods = {
             and Rule_Entity.EntityID = ${entityID}
         order by RuleConfidence desc;
         `;
-        return queries.all(explanationID, sql);
+        return queries.all(getDbId(datasetID, explanationID), sql);
     },
-    getRuleByID(explanationID, ruleID){
+    getRuleByID(datasetID, explanationID, ruleID){
         var sql = `
         select 
             *
@@ -179,7 +184,7 @@ let dbMethods = {
         where 
             Rule.ID = ${ruleID}
         `;
-        return queries.get(explanationID, sql);
+        return queries.get(getDbId(datasetID, explanationID), sql);
     }
 }
 

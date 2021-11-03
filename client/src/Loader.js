@@ -19,8 +19,8 @@ export class Loader_ extends React.Component{
     componentDidMount(){
       API.getIndex((res) => {
         this.setState({index: res});
-        this.setState({selected_dataset_id: res["dataset"].length > 0 ? res["dataset"][0]["ID"] : null});
-        this.setState({selected_explanation_id:  res["explanation"].length > 0 ? res["explanation"][0]["ID"] : null});
+        this.setState({selected_dataset_id: res["Dataset"].length > 0 ? res["Dataset"][0]["ID"] : null});
+        this.setState({selected_explanation_id:  res["Dataset"][0]["Explanation"].length > 0 ? res["Dataset"][0]["Explanation"][0]["ID"] : null});
       });
     }
 
@@ -29,8 +29,7 @@ export class Loader_ extends React.Component{
 
       this.state = {
         index: {
-          "dataset": [],
-          "explanation": []
+          "Dataset": [],
         },
         formPage: 0,
         selected_dataset_id: null,
@@ -52,12 +51,13 @@ export class Loader_ extends React.Component{
       if((this.state.selected_dataset_id == null || this.state.selected_dataset_id === "")) {
         this.setState({
           show_alert: true,
-          alert_message: "Please select a dataset"
+          alert_message: "Please select a dataset",
         });
       } else {
         this.setState({
           formPage: 1,
           searchTerm: "",
+          selected_explanation_id: this.state.index["Dataset"].find(x => (x["ID"] == this.state.selected_dataset_id))["Explanation"][0]["ID"]
         });
       }
     }
@@ -65,7 +65,8 @@ export class Loader_ extends React.Component{
     onFormPagePrevious(){
       this.setState({
         formPage: 0,
-        searchTerm: ""
+        searchTerm: "",
+        selected_explanation_id: null,
       });
     }
 
@@ -81,6 +82,7 @@ export class Loader_ extends React.Component{
         // removes session storage (entities, asc, active page...)
         window.sessionStorage.clear();
         API.getAllTestEntities(this.state.selected_dataset_id, this.state.selected_explanation_id, (entities) => {
+          console.log(new Blob([JSON.stringify(sortAsc(entities["entities"]))]).size);
           window.sessionStorage.setItem(this.state.selected_dataset_id+'_entities', JSON.stringify(sortAsc(entities["entities"])));
           window.sessionStorage.setItem(this.state.selected_dataset_id+'_types', JSON.stringify(entities["types"]));
           this.setState({show_done_spinner: false});
@@ -114,7 +116,7 @@ export class Loader_ extends React.Component{
                 <Row>
                   <Col sm={4}>
                     <ListGroup className="pr-1 text-left" style={{overflowY: "auto", height: "400px"}}>
-                      { this.state.index ? this.state.index["dataset"].filter(x => (this.state.searchTerm === "" || x["Name"].toLowerCase().includes(this.state.searchTerm.toLowerCase()))).map((row) =>
+                      { this.state.index ? this.state.index["Dataset"].filter(x => (this.state.searchTerm === "" || x["Name"].toLowerCase().includes(this.state.searchTerm.toLowerCase()))).map((row) =>
                         <ListGroup.Item action eventKey={row["ID"]} onClick={() => this.onDatasetSelection(row["ID"])}>
                           <Container>
                             <Row>
@@ -146,7 +148,7 @@ export class Loader_ extends React.Component{
                   </Col>
                   <Col sm={8} className="my-auto">
                     <Tab.Content className="text-center">
-                      { this.state.index["dataset"].map((row) =>
+                      { this.state.index["Dataset"].map((row) =>
                       <Tab.Pane eventKey={row["ID"]}>
                         {row["Description"]}
                       </Tab.Pane>
@@ -186,8 +188,7 @@ export class Loader_ extends React.Component{
                   <Row>
                     <Col sm={4}>
                       <ListGroup className="pr-1 text-left" style={{overflowY: "auto", height: "400px"}}>
-                        { this.state.index["explanation"]
-                          .filter(x => (x["DatasetID"] == this.state.selected_dataset_id))
+                        { this.state.index["Dataset"].find((x) => x["ID"] == this.state.selected_dataset_id)["Explanation"]
                           .filter(x => (this.state.searchTerm === "" || x["Label"].toLowerCase().includes(this.state.searchTerm.toLowerCase())))
                           .map((row) =>
                           <ListGroup.Item action eventKey={row["ID"]} onClick={() => this.onExplanationSelection(row["ID"])}>
@@ -220,7 +221,7 @@ export class Loader_ extends React.Component{
                     </Col>
                     <Col sm={8} className="my-auto">
                       <Tab.Content >
-                        { this.state.index["explanation"].map((row) =>
+                        { this.state.index["Dataset"].find((x) => x["ID"] == this.state.selected_dataset_id)["Explanation"].map((row) =>
                           <Tab.Pane className="text-left" style={{overflowY: "auto", height: "400px"}} eventKey={row["ID"]}>
                             <table>
                               <tbody>

@@ -1,1 +1,0 @@
-java -server -Xmx4g -DjettyXml=%~p0\jetty.xml -jar blazegraph.jar

@@ -1,5 +1,0 @@
-curl -X POST -H 'Content-Type:application/x-turtle-RDR' --data-binary '@obl_with_labels.ttl' http://localhost:9999/blazegraph/namespace/obl/sparql
-
-curl -X POST --data-binary 'uri=file:///home/simon/Explorer/labelgraph/workspace/obl.ttlx' http://localhost:9999/blazegraph/namespace/obl/sparql
-
-ws --port 5000 --directory build --spa index.html --rewrite '/rpc -> http://localhost:3001/rpc' '/dataset -> http://localhost:3001/dataset' '/expl -> http://localhost:3001/expl'

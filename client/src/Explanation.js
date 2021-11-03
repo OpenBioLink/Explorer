@@ -78,7 +78,7 @@ export class Explanation_ extends React.Component{
                     <Row>
                         <Col>
                             <h2>
-                                <a href={`/${this.state.datasetID}/${this.state.explanationID}/entity?term=${this.state.info.head.curie}`}>{this.state.info.head.label ? this.state.info.head.label : this.state.info.tail.curie}</a>
+                                <a href={`/${this.state.datasetID}/${this.state.explanationID}/entity?term=${this.state.info.head.curie}`}>{this.state.info.head.label ? this.state.info.head.label : this.state.info.head.curie}</a>
                                 &nbsp;
                                 {this.state.info.relLabel}
                                 &nbsp;
@@ -125,7 +125,7 @@ export class Explanation_ extends React.Component{
                                         <b><a href={`/${this.state.datasetID}/${this.state.explanationID}/entity?term=${this.state.info.head.curie}`}>{this.state.info.head.label ? this.state.info.head.label : this.state.info.tail.curie}</a></b>
                                     </td>
                                     <td className="w-50 border-top-0">
-                                        {this.state.info.rel}
+                                        {this.state.info.relLabel}
                                     </td>
                                     <td className="w-25 border-top-0">
                                         <b><a href={`/${this.state.datasetID}/${this.state.explanationID}/entity?term=${this.state.info.tail.curie}`}>{this.state.info.tail.label ? this.state.info.tail.label : this.state.info.tail.curie}</a></b>
@@ -151,7 +151,7 @@ export class Explanation_ extends React.Component{
                                                 }
                                             </td>
                                             <td className="w-50 border-top-0">
-                                                {body.relation}
+                                                {body.relationLabel}
                                             </td>
                                             <td className="w-25 border-top-0">
                                                 {(this.state.info.head && this.state.info.tail) ?

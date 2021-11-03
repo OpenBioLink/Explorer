@@ -32,12 +32,10 @@ export class Entity_ extends React.Component{
     }
 
     componentDidMount(){
-        console.log(this.props);
         var params = new URLSearchParams(this.props.location.search);
         var datasetID = this.props.match.params.dataset;
         var explanationID = this.props.match.params.explanation;
         var curie = params.get("term");
-        console.log(explanationID);
         this.setState({
             datasetID: datasetID,
             explanationID: explanationID,
