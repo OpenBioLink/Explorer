@@ -6,7 +6,7 @@ import { useHistory, useParams } from "react-router-dom";
 import {ImSortAlphaDesc, ImSortAlphaAsc} from "react-icons/im";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { useHistoryState, useSessionState } from "./HistoryState";
-import {tic, toc, sortAsc, sortDesc, datasetID2Endpoint} from './util'
+import {tic, toc, sortAsc, sortDesc, setDB, getEntitiesDB, getTypesDB} from './util'
 import API from 'api'
 
 export function Entities(){
@@ -14,8 +14,8 @@ export function Entities(){
 
   let { dataset, explanation } = useParams();
 
-  const [entities, setEntities] = useSessionState(dataset + "_entities", null);
-  const [types, setTypes] = useSessionState(dataset + "_types", null);
+  const [entities, setEntities] = useState(null);
+  const [types, setTypes] = useState(null);
 
   const [asc, setAsc] = useHistoryState("asc", true);
   const [active, setActive] = useHistoryState("active", 0);
@@ -26,9 +26,16 @@ export function Entities(){
   const [skip, setSkip] = useState(2);
 
   useEffect(() => {
-    if(entities == null){
-      query_entities();
+    console.log(window.entitiesdb)
+    if(window.entitiesdb == null){
+      API.getAllTestEntities(dataset, explanation, (data) => {
+        setDB(data["entities"], data["types"]).then(() => {
+          setAsc(true);
+        });
+      });
     }
+    setEntities(getEntitiesDB())
+    setTypes(getTypesDB())
   }, []);
 
 
@@ -50,12 +57,6 @@ export function Entities(){
       sort(!asc, [...entities])
     }
 
-  function query_entities(){
-    API.getAllTestEntities(dataset, explanation, (data) => {
-      sort(asc, data["entities"]);
-      setTypes(data["types"]);
-    });
-  }
 
   return (
     <div style={{minHeight: "100vh"}}>
@@ -89,6 +90,7 @@ export function Entities(){
                   || (row[1] != null && row[1].toLowerCase().includes(searchTerm.toLowerCase())
                 )) && (
                   selectedType === "All types"
+                  || types.length <= 1
                   || row[2].includes(selectedType)
                 )))) : ""}
     </div>

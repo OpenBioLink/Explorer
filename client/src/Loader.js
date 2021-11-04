@@ -4,7 +4,7 @@ import './App.css';
 import PropTypes from "prop-types";
 import { withRouter } from "react-router";
 import bsCustomFileInput from 'bs-custom-file-input';
-import {from_timestamp, from_method_short, sortAsc, datasetID2Endpoint} from './util';
+import {from_timestamp, from_method_short, sortAsc, datasetID2Endpoint, setDB} from './util';
 import API from 'api';
 import initSqlJs from "sql.js";
 
@@ -82,11 +82,10 @@ export class Loader_ extends React.Component{
         // removes session storage (entities, asc, active page...)
         window.sessionStorage.clear();
         API.getAllTestEntities(this.state.selected_dataset_id, this.state.selected_explanation_id, (entities) => {
-          console.log(new Blob([JSON.stringify(sortAsc(entities["entities"]))]).size);
-          window.sessionStorage.setItem(this.state.selected_dataset_id+'_entities', JSON.stringify(sortAsc(entities["entities"])));
-          window.sessionStorage.setItem(this.state.selected_dataset_id+'_types', JSON.stringify(entities["types"]));
-          this.setState({show_done_spinner: false});
-          this.props.history.push(`/${this.state.selected_dataset_id}/${this.state.selected_explanation_id}/entities`);
+          setDB(entities["entities"], entities["types"]).then(() => {
+            this.setState({show_done_spinner: false});
+            this.props.history.push(`/${this.state.selected_dataset_id}/${this.state.selected_explanation_id}/entities`);
+          });
         });
       }
     }
@@ -120,10 +119,10 @@ export class Loader_ extends React.Component{
                         <ListGroup.Item action eventKey={row["ID"]} onClick={() => this.onDatasetSelection(row["ID"])}>
                           <Container>
                             <Row>
-                              <Col>
+                              <Col className="w-50">
                                 {row["Name"]}
                               </Col>
-                              <Col>
+                              <Col className="w-50">
                                 {row["Version"]}
                               </Col>
                             </Row>
@@ -135,10 +134,10 @@ export class Loader_ extends React.Component{
                         <ListGroup.Item action eventKey="local">
                           <Container>
                             <Row>
-                              <Col>
+                              <Col className="w-50">
                                 Custom
                               </Col>
-                              <Col>
+                              <Col className="w-50">
                               </Col>
                             </Row>
                           </Container>

@@ -88,7 +88,11 @@ function Header(){
 
   function onClickLink(e){
     e.preventDefault();
-    history.push(e.target.attributes.href.value);
+    if(e.target.nodeName != "A"){
+      history.push(e.target.parentNode.attributes.href.value);
+    } else {
+      history.push(e.target.attributes.href.value);
+    }
   }
 
   return(
@@ -98,11 +102,13 @@ function Header(){
           <img
             alt=""
             src="/favicon.svg"
-            width="30"
-            height="30"
+            width="40"
+            height="40"
             className="d-inline-block align-top"
           />{' '}
+          <span className="d-inline-block align-middle">
             LinkExplorer
+          </span>
           </Navbar.Brand>
           <Nav className="mr-auto" defaultActiveKey={location.pathname}>
             <Nav.Link href={`/${dataset}/${explanation}/overview`} disabled={!dataset || !explanation} onClick={(e) => onClickLink(e)}>Overview</Nav.Link>

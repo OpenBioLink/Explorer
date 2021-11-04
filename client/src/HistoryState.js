@@ -21,6 +21,7 @@ export function useHistoryState(key, initialValue) {
 }
 
 export function useSessionState(key, initialValue) {
+
   const [rawState, rawSetState] = useState(() => {
     const value = JSON.parse(window.sessionStorage.getItem(key));
     return value ?? initialValue;

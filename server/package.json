@@ -12,6 +12,7 @@
   "license": "ISC",
   "dependencies": {
     "api": "file:../api",
-    "node-dev": "^6.7.0"
+    "node-dev": "^6.7.0",
+    "xmlhttprequest": "^1.8.0"
   }
 }

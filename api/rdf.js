@@ -2,18 +2,25 @@
 
 const axios = require('axios');
 
-const {variables, URI2Code, Code2URI, namespace}  = require('./util');
+const {variables, URI2Code, Code2URI, namespace, tic, toc}  = require('./util');
 
-async function runSPARQL(endpoint, query){
-    console.log(query);
-    var response = await axios({
-        method: 'post',
-        headers: {"Content-type": "application/x-www-form-urlencoded"},
-        url: endpoint,
-        data: query
+function runSPARQL(endpoint, query){
+    return new Promise((resolve) => {
+        tic()
+        axios.post(
+            endpoint, 
+            encodeURI(query),
+            {headers: {"Content-type": "application/x-www-form-urlencoded"}}
+        ).then(function (response) {
+            toc("Test");
+            tic()
+            resolve(response.data);
+            toc("Test2");
+        })
+        .catch(function (error) {
+            console.log(error);
+        });
     });
-    var data = await response.data;
-    return data;
 }
 
 let rdfMethods = {
@@ -50,9 +57,17 @@ let rdfMethods = {
 
 
             Promise.all([entitiesProm, typesProm]).then(function (data) {
-                var entities = data[0]["results"]["bindings"].map((x) => {
-                    return [URI2Code(x["value"]["value"]), x["label"]?.value, x["types"]?.value.split(",")]
-                });
+                var entities = null;
+                // More than one type
+                if(data[1]["results"]["bindings"].length > 1){
+                    var entities = data[0]["results"]["bindings"].map((x) => {
+                        return [URI2Code(x["value"]["value"]), x["label"]?.value, x["types"]?.value.split(",")]
+                    });
+                } else {
+                    var entities = data[0]["results"]["bindings"].map((x) => {
+                        return [URI2Code(x["value"]["value"]), x["label"]?.value]
+                    });
+                }
                 var types = data[1]["results"]["bindings"].map((x) => x["type"].value);
                 resolve([entities, types])
             });
@@ -127,25 +142,35 @@ let rdfMethods = {
     getInfoByCurie(endpoint, curie){
         return new Promise((resolve, reject) => {
             var query = `query=
-                SELECT ?label ?comment ?wwwresource
+                SELECT ?label ?comment ?wwwresource (GROUP_CONCAT(?type;SEPARATOR=",") AS ?types)
                 WHERE {
                     <${Code2URI(curie)}> <http://www.w3.org/2000/01/rdf-schema#label> ?label .
                     OPTIONAL {<${Code2URI(curie)}> <http://www.w3.org/2000/01/rdf-schema#comment> ?comment .}
                     OPTIONAL {<${Code2URI(curie)}> <https://ai-strategies.org/kgc/wwwresource> ?wwwresource .}
+                    OPTIONAL {<${Code2URI(curie)}> a ?type .}
                 }
+                GROUP BY ?label ?comment ?wwwresource
                 `
 
             runSPARQL(endpoint, query).then((data) => {
+                tic()
                 var edge = data["results"]["bindings"][0];
+                console.log(edge);
                 var res = {
                     Label: edge?.label?.value,
                     Description: edge?.comment?.value,
                     Synonyms: [],
-                    Labels: [],
+                    Labels: edge?.types?.value.split(","),
                     Curie: curie,
                     FullURI: edge?.wwwresource?.value,
                 }
+                toc("Blubb");
+                resolve(res);
 
+                
+
+                /*
+                Synonyms were removed
                 var query = `query=
                 SELECT ?synonym
                 WHERE {
@@ -158,22 +183,7 @@ let rdfMethods = {
                             res.Synonyms.push(edge["synonym"]["value"]);
                         }
                     }
-
-                    var query = `query=
-                        SELECT ?label
-                        WHERE {
-                            OPTIONAL {<${Code2URI(curie)}> a ?label .}
-                        }`
-                    runSPARQL(endpoint, query).then((data) => {
-                        if(Object.entries(data["results"]["bindings"][0]).length > 0){
-                            for(var i = 0; i < data["results"]["bindings"].length; i++){
-                                var edge = data["results"]["bindings"][i];
-                                res.Labels.push(edge["label"]["value"]);
-                            }
-                        }
-                        resolve(res);
-                    });
-                });
+                */
             });
         });
     },
