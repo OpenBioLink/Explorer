@@ -57,17 +57,9 @@ let rdfMethods = {
 
 
             Promise.all([entitiesProm, typesProm]).then(function (data) {
-                var entities = null;
-                // More than one type
-                if(data[1]["results"]["bindings"].length > 1){
-                    var entities = data[0]["results"]["bindings"].map((x) => {
-                        return [URI2Code(x["value"]["value"]), x["label"]?.value, x["types"]?.value.split(",")]
-                    });
-                } else {
-                    var entities = data[0]["results"]["bindings"].map((x) => {
-                        return [URI2Code(x["value"]["value"]), x["label"]?.value]
-                    });
-                }
+                var entities = data[0]["results"]["bindings"].map((x) => {
+                    return [URI2Code(x["value"]["value"]), x["label"]?.value, x["types"]?.value.split(",")]
+                });
                 var types = data[1]["results"]["bindings"].map((x) => x["type"].value);
                 resolve([entities, types])
             });

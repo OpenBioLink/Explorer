@@ -4,9 +4,10 @@ import './App.css';
 import PropTypes from "prop-types";
 import { withRouter } from "react-router";
 import bsCustomFileInput from 'bs-custom-file-input';
-import {from_timestamp, from_method_short, sortAsc, datasetID2Endpoint, setDB} from './util';
+import {from_timestamp, from_method_short, sortAsc, datasetID2Endpoint} from './util';
 import API from 'api';
 import initSqlJs from "sql.js";
+import {db, setDB} from "./IndexedDB/IndexedDB"
 
 export class Loader_ extends React.Component{
 
@@ -80,12 +81,18 @@ export class Loader_ extends React.Component{
         this.setState({show_done_spinner: true});
 
         // removes session storage (entities, asc, active page...)
-        window.sessionStorage.clear();
         API.getAllTestEntities(this.state.selected_dataset_id, this.state.selected_explanation_id, (entities) => {
           setDB(entities["entities"], entities["types"]).then(() => {
             this.setState({show_done_spinner: false});
             this.props.history.push(`/${this.state.selected_dataset_id}/${this.state.selected_explanation_id}/entities`);
+          })
+          // db.entities.add({entities: JSON.stringify(sortAsc(entities["entities"]))});
+          /*
+          setDB(entities["entities"], entities["types"]).then(() => {
+            this.setState({show_done_spinner: false});
+            this.props.history.push(`/${this.state.selected_dataset_id}/${this.state.selected_explanation_id}/entities`);
           });
+          */
         });
       }
     }

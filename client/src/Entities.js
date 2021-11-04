@@ -5,9 +5,10 @@ import {Navbar, Form, FormControl, Dropdown, DropdownButton, ListGroup, Containe
 import { useHistory, useParams } from "react-router-dom";
 import {ImSortAlphaDesc, ImSortAlphaAsc} from "react-icons/im";
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { useHistoryState, useSessionState } from "./HistoryState";
-import {tic, toc, sortAsc, sortDesc, setDB, getEntitiesDB, getTypesDB} from './util'
+import { useHistoryState } from "./HistoryState";
+import {db, setDB} from "./IndexedDB/IndexedDB"
 import API from 'api'
+import { RiContactsBookLine } from 'react-icons/ri';
 
 export function Entities(){
   const history = useHistory();
@@ -26,36 +27,48 @@ export function Entities(){
   const [skip, setSkip] = useState(2);
 
   useEffect(() => {
-    console.log(window.entitiesdb)
-    if(window.entitiesdb == null){
+    db.types.toArray().then((arr) => {
+      setTypes(arr);
+    });
+    if(false){
       API.getAllTestEntities(dataset, explanation, (data) => {
         setDB(data["entities"], data["types"]).then(() => {
           setAsc(true);
         });
       });
     }
-    setEntities(getEntitiesDB())
-    setTypes(getTypesDB())
   }, []);
 
+  useEffect(() => {
+    update()
+  }, [asc, searchTerm, selectedType]);
 
-  function setEntityState(entities, asc){
-    setEntities(entities);
-    setAsc(asc);
-  }
-
-  function sort(asc_, entities_){
-    if(asc_ === true){
-      setEntities(sortAsc(entities_));
-    } else {
-      setEntities(sortDesc(entities_));
-    }
-    setAsc(asc_);
-  }
-
+  
   function toggle_sort(){
-      sort(!asc, [...entities])
+    setAsc(!asc)
+  }
+
+  function update(){
+    let filter = db.entities.filter(entity => (
+      (
+        searchTerm === "" 
+        || entity.id.toLowerCase().includes(searchTerm.toLowerCase()) 
+        || (entity.label != null && entity.label.toLowerCase().includes(searchTerm.toLowerCase())
+      )) && (
+        selectedType === "All types"
+        || entity.types.includes(selectedType)
+      )))
+    
+    let sort = null;
+    if(asc){
+      sort = filter.sortBy("label")
+    } else {
+      sort = filter.reverse().sortBy("label")
     }
+    sort.then((sorted) => {
+      setEntities(sorted)
+    })
+  }
 
 
   return (
@@ -76,27 +89,18 @@ export function Entities(){
               <Dropdown.Menu as={CustomMenu}>
                 <Dropdown.Item eventKey="All types" onSelect={(e) => { setSelectedType('All types') }}>All types</Dropdown.Item>
                 {types ? types.map((type) => 
-                  <Dropdown.Item eventKey={type} onSelect={(e) => { setSelectedType(type) }}>{type}</Dropdown.Item>
+                  <Dropdown.Item eventKey={type.label} onSelect={(e) => { setSelectedType(type.label) }}>{type.label}</Dropdown.Item>
                 ) : ""}
               </Dropdown.Menu>
             </Dropdown>
             <FormControl type="text" placeholder="Quicksearch" value={searchTerm} onChange = {(e) => editSearchTerm(e.target.value)} className="mr-sm-2" />
           </Form>
         </Navbar>
-        {entities ? renderPagination(entities.filter(row => (
-                (
-                  searchTerm === "" 
-                  || row[0].toLowerCase().includes(searchTerm.toLowerCase()) 
-                  || (row[1] != null && row[1].toLowerCase().includes(searchTerm.toLowerCase())
-                )) && (
-                  selectedType === "All types"
-                  || types.length <= 1
-                  || row[2].includes(selectedType)
-                )))) : ""}
+        {entities ? renderPagination() : ""}
     </div>
   );
 
-  function renderPagination(entities){
+  function renderPagination(){
     return(
       <>
         <Pagination className="Entities-pagination justify-content-center my-2">{getItems(Math.floor(entities.length / pageSize))}</Pagination>
@@ -120,10 +124,10 @@ export function Entities(){
                     <Container>
                       <Row>
                         <Col className="text-wrap">
-                          {row[0]}
+                          {row["id"]}
                         </Col>
                         <Col className="text-wrap">
-                          {row[1]}
+                          {row["label"]}
                         </Col>
                       </Row>
                     </Container>
@@ -137,7 +141,7 @@ export function Entities(){
   }
 
   function onEntitySelection(row){
-    history.push(`/${dataset}/${explanation}/entity?term=${row[0]}`);
+    history.push(`/${dataset}/${explanation}/entity?term=${row["id"]}`);
   }
 
   function editSearchTerm(term){
