@@ -1,6 +1,10 @@
 let { indexmethods } = require('./indexmethods');
 let { rpcmethods } = require('./rpcmethods');
 
+function thisIsServer(){
+    return (typeof window === 'undefined')
+}
+
 function resolveEndpoint(body){
     return new Promise((resolve, reject) => {
         if (body.datasetID == undefined){
@@ -11,6 +15,9 @@ function resolveEndpoint(body){
         } else {
             callRemote("getEndpointFromDatasetID", {"datasetID": body.datasetID}).then((response) => {
                 body.endpoint = response;
+                if(thisIsServer()){
+                    body.endpoint = body.endpoint.replace("explore.ai-strategies.org", "localhost");
+                }
                 resolve(body);
             });
         }
