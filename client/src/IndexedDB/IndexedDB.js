@@ -1,15 +1,17 @@
 import Dexie from 'dexie';
 
 const db = new Dexie('Linkexplorer');
-db.version(1).stores({
+db.version(3).stores({
     entities: '++id',
-    types: '++id'
+    types: '++id',
+    cache_key: 'key'
 });
 
-function setDB(entities, types){
+function setDB(entities, types, dataset, explanation){
     return new Promise((resolve) => {
         db.entities.clear();
         db.types.clear();
+        db.cache_key.clear();
         let entities_ = []
         entities.forEach((element, index) => {
             entities_.push({id: element[0], label: element[1], types: element[2]})
@@ -20,10 +22,22 @@ function setDB(entities, types){
         });
         db.entities.bulkAdd(entities_).then(() => {
             db.types.bulkAdd(types_).then(() => {
+                db.cache_key.add({key: dataset + "_" + explanation})
                 resolve();
             });
         });
     });
 }
 
-export {db, setDB}
+function isDBCached(dataset, explanation){
+    return new Promise((resolve) => {
+        if (db.cache_key == undefined){
+            resolve(false);
+        }
+        db.cache_key.toCollection().first().then((row) => {
+            resolve(row.key == dataset + "_" + explanation);
+        })
+    });
+}
+
+export {db, setDB, isDBCached}

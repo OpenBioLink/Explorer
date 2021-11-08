@@ -6,7 +6,7 @@ import { useHistory, useParams } from "react-router-dom";
 import {ImSortAlphaDesc, ImSortAlphaAsc} from "react-icons/im";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { useHistoryState } from "./HistoryState";
-import {db, setDB} from "./IndexedDB/IndexedDB"
+import {db, setDB, isDBCached} from "./IndexedDB/IndexedDB"
 import API from 'api'
 import { RiContactsBookLine } from 'react-icons/ri';
 
@@ -30,13 +30,19 @@ export function Entities(){
     db.types.toArray().then((arr) => {
       setTypes(arr);
     });
-    if(false){
-      API.getAllTestEntities(dataset, explanation, (data) => {
-        setDB(data["entities"], data["types"]).then(() => {
-          setAsc(true);
+    isDBCached(dataset, explanation).then((itIs) => {
+      if(!itIs){
+        console.log(dataset + "_" + explanation + " not cached loading")
+        API.getAllTestEntities(dataset, explanation, (entities) => {
+          setDB(entities["entities"], entities["types"], dataset, explanation).then(() => {
+            setAsc(true);
+            update();
+          })
         });
-      });
-    }
+      } else {
+        console.log(dataset + "_" + explanation + " cached")
+      }
+    });
   }, []);
 
   useEffect(() => {

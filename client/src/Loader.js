@@ -7,7 +7,7 @@ import bsCustomFileInput from 'bs-custom-file-input';
 import {from_timestamp, from_method_short, sortAsc, datasetID2Endpoint} from './util';
 import API from 'api';
 import initSqlJs from "sql.js";
-import {db, setDB} from "./IndexedDB/IndexedDB"
+import {db, setDB, isDBCached} from "./IndexedDB/IndexedDB"
 
 export class Loader_ extends React.Component{
 
@@ -80,20 +80,20 @@ export class Loader_ extends React.Component{
       } else {
         this.setState({show_done_spinner: true});
 
-        // removes session storage (entities, asc, active page...)
-        API.getAllTestEntities(this.state.selected_dataset_id, this.state.selected_explanation_id, (entities) => {
-          setDB(entities["entities"], entities["types"]).then(() => {
-            this.setState({show_done_spinner: false});
-            this.props.history.push(`/${this.state.selected_dataset_id}/${this.state.selected_explanation_id}/entities`);
-          })
-          // db.entities.add({entities: JSON.stringify(sortAsc(entities["entities"]))});
-          /*
-          setDB(entities["entities"], entities["types"]).then(() => {
-            this.setState({show_done_spinner: false});
-            this.props.history.push(`/${this.state.selected_dataset_id}/${this.state.selected_explanation_id}/entities`);
-          });
-          */
+        isDBCached(this.state.selected_dataset_id, this.state.selected_explanation_id).then((itIs) => {
+          if(!itIs){
+            console.log(this.state.selected_dataset_id + "_" + this.state.selected_explanation_id + " not cached loading")
+            API.getAllTestEntities(this.state.selected_dataset_id, this.state.selected_explanation_id, (entities) => {
+              setDB(entities["entities"], entities["types"], this.state.selected_dataset_id, this.state.selected_explanation_id).then(() => {
+                this.setState({show_done_spinner: false});
+                this.props.history.push(`/${this.state.selected_dataset_id}/${this.state.selected_explanation_id}/entities`);
+              })
+            });
+          } else {
+            console.log(this.state.selected_dataset_id + "_" + this.state.selected_explanation_id + " cached")
+          }
         });
+         
       }
     }
 
