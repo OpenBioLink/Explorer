@@ -92,6 +92,8 @@ export class Loader_ extends React.Component{
               })
             });
           } else {
+            this.setState({show_done_spinner: false});
+            this.props.history.push(`/${this.state.selected_dataset_id}/${this.state.selected_explanation_id}/entities`);
             console.log(this.state.selected_dataset_id + "_" + this.state.selected_explanation_id + " cached")
           }
         });

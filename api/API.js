@@ -15,9 +15,6 @@ function resolveEndpoint(body){
         } else {
             callRemote("getEndpointFromDatasetID", {"datasetID": body.datasetID}).then((response) => {
                 body.endpoint = response;
-                if(thisIsServer()){
-                    body.endpoint = body.endpoint.replace("explore.ai-strategies.org", "localhost");
-                }
                 resolve(body);
             });
         }
@@ -59,6 +56,11 @@ function callRemote(func, body){
 // Gets called by call(...) or directly by server (via callRemote)
 function callLocal(func, body){
     return new Promise((resolve, reject) => {
+        // TBD check if it makes a difference if call own URL instead of localhost
+        if(thisIsServer() && body.endpoint){
+            body.endpoint = body.endpoint.replace("explore.ai-strategies.org", "localhost");
+        }
+
         let execPromise = null;
         if (rpcmethods[func] && typeof (rpcmethods[func].exec) === 'function') {
             execPromise = rpcmethods[func].exec.call(null, body);
