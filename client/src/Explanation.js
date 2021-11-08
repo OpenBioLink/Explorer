@@ -70,6 +70,7 @@ export class Explanation_ extends React.Component{
     }
 
     render(){
+        console.log(this.state.info)
         return (
             <div>
             {this.state.info ?
@@ -80,7 +81,7 @@ export class Explanation_ extends React.Component{
                             <h2>
                                 <a href={`/${this.state.datasetID}/${this.state.explanationID}/entity?term=${this.state.info.head.curie}`}>{this.state.info.head.label ? this.state.info.head.label : this.state.info.head.curie}</a>
                                 &nbsp;
-                                {this.state.info.relLabel}
+                                {this.state.info.relLabel? this.state.info.relLabel : this.state.info.rel }
                                 &nbsp;
                                 <a href={`/${this.state.datasetID}/${this.state.explanationID}/entity?term=${this.state.info.tail.curie}`}>{this.state.info.tail.label ? this.state.info.tail.label : this.state.info.tail.curie}</a>
                             </h2>
@@ -125,7 +126,7 @@ export class Explanation_ extends React.Component{
                                         <b><a href={`/${this.state.datasetID}/${this.state.explanationID}/entity?term=${this.state.info.head.curie}`}>{this.state.info.head.label ? this.state.info.head.label : this.state.info.tail.curie}</a></b>
                                     </td>
                                     <td className="w-50 border-top-0">
-                                        {this.state.info.relLabel}
+                                        {this.state.info.relLabel? this.state.info.relLabel : this.state.info.rel}
                                     </td>
                                     <td className="w-25 border-top-0">
                                         <b><a href={`/${this.state.datasetID}/${this.state.explanationID}/entity?term=${this.state.info.tail.curie}`}>{this.state.info.tail.label ? this.state.info.tail.label : this.state.info.tail.curie}</a></b>

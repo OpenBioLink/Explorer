@@ -42,6 +42,7 @@ if (typeof window === 'undefined') {
         all(db_id, sql){
             return new Promise((resolve, reject) => {
                 if (window.db == undefined){
+                    console.log("DB undefined");
                     window.location.href = "/loader";
                 }
                 let rows = [];

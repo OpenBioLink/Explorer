@@ -55,10 +55,12 @@ export class Loader_ extends React.Component{
           alert_message: "Please select a dataset",
         });
       } else {
+        let default_explanation_id = this.state.index["Dataset"].find(x => (x["ID"] == this.state.selected_dataset_id))["Explanation"]
+        default_explanation_id = default_explanation_id.length > 0 ? default_explanation_id[0]["ID"]: null
         this.setState({
           formPage: 1,
           searchTerm: "",
-          selected_explanation_id: this.state.index["Dataset"].find(x => (x["ID"] == this.state.selected_dataset_id))["Explanation"][0]["ID"]
+          selected_explanation_id: default_explanation_id
         });
       }
     }
@@ -81,7 +83,7 @@ export class Loader_ extends React.Component{
         this.setState({show_done_spinner: true});
 
         isDBCached(this.state.selected_dataset_id, this.state.selected_explanation_id).then((itIs) => {
-          if(!itIs){
+          if(!itIs || this.state.selected_explanation_id == "local"){
             console.log(this.state.selected_dataset_id + "_" + this.state.selected_explanation_id + " not cached loading")
             API.getAllTestEntities(this.state.selected_dataset_id, this.state.selected_explanation_id, (entities) => {
               setDB(entities["entities"], entities["types"], this.state.selected_dataset_id, this.state.selected_explanation_id).then(() => {
@@ -114,7 +116,7 @@ export class Loader_ extends React.Component{
             <Modal.Dialog className="mx-auto mw-100 w-75 mb-2">
               <Modal.Header>
                 <Modal.Title>Select a dataset</Modal.Title>
-                <LocalDatasetModal onUpload={(endpoint) => {this.onDatasetSelection(endpoint)}}/>
+                <LocalDatasetModal onUpload={(endpoint) => {this.onDatasetSelection(endpoint);}}/>
               </Modal.Header>
 
               <Modal.Body>
@@ -338,11 +340,11 @@ export class Loader_ extends React.Component{
     return(
       <>
         <Button variant="primary" onClick={() => setShow(true)}>
-          Load local RDF
+          Load custom endpoint
         </Button>
         <Modal show={show} onHide={onClose} keyboard={!disable} backdrop={disable ? "static" : true}> 
         <Modal.Header closeButton style={disable ? {pointerEvents: "none"} : {}}>
-          <Modal.Title>Load local RDF</Modal.Title>
+          <Modal.Title>Load custom endpoint</Modal.Title>
         </Modal.Header>
         <Modal.Body style={disable ? {pointerEvents: "none"} : {}}>
         <Form onSubmit={(e) => {onSubmitLocalDataset(e)}}>

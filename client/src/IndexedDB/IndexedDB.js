@@ -1,7 +1,7 @@
 import Dexie from 'dexie';
 
 const db = new Dexie('Linkexplorer');
-db.version(3).stores({
+db.version(1).stores({
     entities: '++id',
     types: '++id',
     cache_key: 'key'
@@ -33,10 +33,15 @@ function isDBCached(dataset, explanation){
     return new Promise((resolve) => {
         if (db.cache_key == undefined){
             resolve(false);
+        } else {
+            db.cache_key.toCollection().first().then((row) => {
+                if(row == undefined){
+                    resolve(false);
+                } else {
+                    resolve(row.key == dataset + "_" + explanation);
+                }
+            })
         }
-        db.cache_key.toCollection().first().then((row) => {
-            resolve(row.key == dataset + "_" + explanation);
-        })
     });
 }
 

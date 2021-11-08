@@ -77,7 +77,7 @@ export class Task_ extends React.Component{
                         <h2>{(this.state.task && this.state.entityInfo) ? this.state.task.IsHead === 1 ? this.state.entityInfo.Label ? this.state.entityInfo.Label : this.state.entityInfo.Curie : "?" : ""}</h2>
                     </Col>
                     <Col>
-                        <h2>{(this.state.task && this.state.entityInfo) ? this.state.task.RelationLabel : ""}</h2>
+                        <h2>{(this.state.task && this.state.entityInfo) ? this.state.task.RelationLabel? this.state.task.RelationLabel : this.state.task.RelationName : ""}</h2>
                     </Col>
                     <Col>
                         <h2>{(this.state.task && this.state.entityInfo) ? this.state.task.IsHead === 0 ? this.state.entityInfo.Label ? this.state.entityInfo.Label : this.state.entityInfo.Curie : "?" : ""}</h2>

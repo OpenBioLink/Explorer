@@ -102,9 +102,9 @@ export class Entity_ extends React.Component{
                             <tr>
                                 <td className="p-0">
                                 <h2>
-                                {this.state.info? this.state.info.Labels.map((label)=>
+                                {this.state.info? this.state.info.Labels? this.state.info.Labels.map((label)=>
                                     <Badge className="m-1" variant="secondary">{label}</Badge>
-                                ) : "" }
+                                ) : "" : "" }
                                 </h2>
                                 </td>
                             </tr>
@@ -191,7 +191,7 @@ export class Entity_ extends React.Component{
                                                         ?
                                                     </td>
                                                     <td className="w-50">
-                                                        {row["RelationLabel"]}
+                                                        {row["RelationLabel"]? row["RelationLabel"] : row["RelationName"]}
                                                     </td>
                                                     <td  className="w-25">
                                                         {this.state.info?.Label ? this.state.info?.Label : this.state.info?.Curie}

@@ -22,14 +22,18 @@ let rpcmethods = {
         exec(body) {
             return new Promise((resolve) => {
                 tic();
-                if(body.endpoint){
+                if(body.datasetID != 'undefined'){
                     graph.getAllTestEntities(body.endpoint).then((data) => {
                         resolve({entities: data[0], types: data[1]} || {});
                         toc("getAllTestEntities");
                     });
-                } else{
+                } else {
                     db.getAllTestEntities(body.datasetID, body.explanationID).then((entities) => {
-                        resolve({entities: entities.values(), types: []} || {});
+                        let entities_ = []
+                        entities.forEach((row) => {
+                            entities_.push([row.NAME, null, 'Entity'])
+                        })
+                        resolve({entities: entities_, types: ["Entity"]} || {});
                         toc("getAllTestEntities");
                     });
                 }
