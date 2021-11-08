@@ -67,6 +67,7 @@ export function Entities(){
     
     let sort = null;
     if(asc){
+      console.log(filter)
       sort = filter.sortBy("label")
     } else {
       sort = filter.reverse().sortBy("label")

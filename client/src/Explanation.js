@@ -152,7 +152,7 @@ export class Explanation_ extends React.Component{
                                                 }
                                             </td>
                                             <td className="w-50 border-top-0">
-                                                {body.relationLabel}
+                                                {body.relationLabel? body.relationLabel : body.relation}
                                             </td>
                                             <td className="w-25 border-top-0">
                                                 {(this.state.info.head && this.state.info.tail) ?

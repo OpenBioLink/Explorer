@@ -5,6 +5,7 @@ const axios = require('axios');
 const {variables, URI2Code, Code2URI, namespace, tic, toc}  = require('./util');
 
 function runSPARQL(endpoint, query){
+    console.log(query)
     return new Promise((resolve) => {
         tic()
         axios.post(
@@ -125,6 +126,34 @@ let rdfMethods = {
                             }
                             body.relationLabel = label_map[body.relation];
                         })
+
+                        console.log("HHAAAAAAAAAAAAAAAAAAAA")
+
+                        let bodies_ = rule.Definition.bodies;
+                        console.log(bodies_)
+                        console.log(rule.Definition.bodies);
+                        let bodies = [];
+                        bodies_.forEach((body)=>{
+                            // why no [-1] javascript?
+                            let lastIdx = bodies.length - 1;
+                            if(lastIdx >= 0 && bodies[lastIdx].relation == body.relation && bodies[lastIdx].head == body.head){
+                                bodies[lastIdx].head = bodies[lastIdx].tail
+                                bodies[lastIdx].headLabel = bodies[lastIdx].tailLabel
+                                bodies[lastIdx].relationLabel = "shares head(s) of \'" + (bodies[lastIdx].relationLabel? bodies[lastIdx].relationLabel : bodies[lastIdx].relation) + "\' with"
+                                bodies[lastIdx].tail = body.tail
+                                bodies[lastIdx].tailLabel = body.tailLabel
+                            } else if (lastIdx >= 0 && bodies[lastIdx].relation == body.relation && bodies[lastIdx].tail == body.tail){
+                                bodies[lastIdx].head = bodies[lastIdx].head
+                                bodies[lastIdx].headLabel = bodies[lastIdx].headLabel
+                                bodies[lastIdx].relationLabel = "shares tail(s) of \'" + (bodies[lastIdx].relationLabel? bodies[lastIdx].relationLabel : bodies[lastIdx].relation) + "\' with"
+                                bodies[lastIdx].tail = body.head
+                                bodies[lastIdx].tailLabel = body.headLabel
+                            } else {
+                                bodies.push(body);
+                            }
+                        });
+                        console.log(bodies)
+                        rule.Definition.bodies = bodies
                     })
                 });
                 resolve(groups);

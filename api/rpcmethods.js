@@ -300,6 +300,9 @@ function splitRule(ruleStr, entities, relations){
             tail: tail
         })
     });
+
+
+
     return def
 }
 
