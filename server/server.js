@@ -17,11 +17,11 @@ let routes = {
             let _json = JSON.parse(body); // might throw error
             let func = Object.keys(_json)[0];
             console.log("Request:")
-            console.log(func)
-            console.log(_json[func])
+            //console.log(func)
+            //console.log(_json[func])
             api.callLocal(func, _json[func]).then(response => {
                 console.log("Response:")
-                console.log(response);
+                //console.log(response);
                 console.log("\n");
                 resolve(response);
             }).catch(err => {

@@ -127,11 +127,7 @@ let rdfMethods = {
                             body.relationLabel = label_map[body.relation];
                         })
 
-                        console.log("HHAAAAAAAAAAAAAAAAAAAA")
-
                         let bodies_ = rule.Definition.bodies;
-                        console.log(bodies_)
-                        console.log(rule.Definition.bodies);
                         let bodies = [];
                         bodies_.forEach((body)=>{
                             // why no [-1] javascript?
@@ -153,12 +149,12 @@ let rdfMethods = {
                                 bodies[lastIdx].tailLabel = body.headLabel
                            // A r B, B r C → A r children (degree 1) C
                             } else if (lastIdx >= 0 && bodies[lastIdx].relation == body.relation && bodies[lastIdx].tail == body.head){
-                                if (bodies[lastIdx].relationLabel.includes("(degree ")){
-                                    let levelIdx = bodies[lastIdx].relationLabel.length - 2
-                                    let level = parseInt(bodies[lastIdx].relationLabel[levelIdx])
-                                    bodies[lastIdx].relationLabel = bodies[lastIdx].relationLabel.substring(0, levelIdx) + level + bodies[lastIdx].relationLabel.substring(levelIdx)
+                                if (bodies[lastIdx].relationLabel.includes(" degree ")){
+                                    let levelIdx = bodies[lastIdx].relationLabel.search(" degree ") + 8
+                                    let level = parseInt(bodies[lastIdx].relationLabel[levelIdx]) + 1
+                                    bodies[lastIdx].relationLabel = bodies[lastIdx].relationLabel.substring(0, levelIdx) + level + bodies[lastIdx].relationLabel.substring(levelIdx + 1)
                                 } else {
-                                    bodies[lastIdx].relationLabel = "\(" + (bodies[lastIdx].relationLabel? bodies[lastIdx].relationLabel : bodies[lastIdx].relation) + "\) children (degree 1)"
+                                    bodies[lastIdx].relationLabel = "children degree 1 \(" + (bodies[lastIdx].relationLabel? bodies[lastIdx].relationLabel : bodies[lastIdx].relation) + "\)"
                                 }
                                 bodies[lastIdx].head = bodies[lastIdx].head
                                 bodies[lastIdx].headLabel = bodies[lastIdx].headLabel
@@ -166,25 +162,22 @@ let rdfMethods = {
                                 bodies[lastIdx].tailLabel = body.tailLabel
                             // B r A, C r B → A r ancestor (degree 1) C
                             } else if (lastIdx >= 0 && bodies[lastIdx].relation == body.relation && bodies[lastIdx].head == body.tail){
-                                if (bodies[lastIdx].relationLabel.includes("(degree ")){
-                                    let levelIdx = bodies[lastIdx].relationLabel.length - 2
-                                    let level = parseInt(bodies[lastIdx].relationLabel[levelIdx])
+                                if (bodies[lastIdx].relationLabel.includes(" degree ")){
+                                    let levelIdx = bodies[lastIdx].relationLabel.search(" degree ") + 8
+                                    let level = parseInt(bodies[lastIdx].relationLabel[levelIdx]) + 1
                                     bodies[lastIdx].relationLabel[levelIdx] = level
                                 } else {
-                                    bodies[lastIdx].relationLabel = "\(" + (bodies[lastIdx].relationLabel? bodies[lastIdx].relationLabel : bodies[lastIdx].relation) + "\) ancestor (degree 1)"
+                                    bodies[lastIdx].relationLabel = "ancestor degree 1 \(" + (bodies[lastIdx].relationLabel? bodies[lastIdx].relationLabel : bodies[lastIdx].relation) + "\)"
                                 }
                                 bodies[lastIdx].head = bodies[lastIdx].tail
                                 bodies[lastIdx].headLabel = bodies[lastIdx].tailLabel
                                 bodies[lastIdx].tail = body.head
                                 bodies[lastIdx].tailLabel = body.headLabel
                             }
-                            
-                            
                             else {
                                 bodies.push(body);
                             }
                         });
-                        console.log(bodies)
                         rule.Definition.bodies = bodies
                     })
                 });
@@ -208,7 +201,6 @@ let rdfMethods = {
             runSPARQL(endpoint, query).then((data) => {
                 tic()
                 var edge = data["results"]["bindings"][0];
-                console.log(edge);
                 var res = {
                     Label: edge?.label?.value,
                     Description: edge?.comment?.value,
