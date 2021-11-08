@@ -132,9 +132,10 @@ let rdfMethods = {
                         bodies_.forEach((body)=>{
                             // why no [-1] javascript?
                             let lastIdx = bodies.length - 1;
-
+                            if(lastIdx >= 0 && (bodies[lastIdx].relationLabel.startsWith("shares") || bodies[lastIdx].relationLabel.startsWith("ancestors") || bodies[lastIdx].relationLabel.startsWith("children"))){
+                                bodies.push(body);
                             // B r A, B r C → A shares heads of r with C
-                            if(lastIdx >= 0 && bodies[lastIdx].relation == body.relation && bodies[lastIdx].head == body.head && variables.includes(body.head)){
+                            } else if(lastIdx >= 0 && bodies[lastIdx].relation == body.relation && bodies[lastIdx].head == body.head && variables.includes(body.head)){
                                 bodies[lastIdx].head = bodies[lastIdx].tail
                                 bodies[lastIdx].headLabel = bodies[lastIdx].tailLabel
                                 bodies[lastIdx].relationLabel = "shares head/s of \(" + (bodies[lastIdx].relationLabel? bodies[lastIdx].relationLabel : bodies[lastIdx].relation) + "\) with"
