@@ -136,19 +136,51 @@ let rdfMethods = {
                         bodies_.forEach((body)=>{
                             // why no [-1] javascript?
                             let lastIdx = bodies.length - 1;
-                            if(lastIdx >= 0 && bodies[lastIdx].relation == body.relation && bodies[lastIdx].head == body.head){
+
+                            // B r A, B r C → A shares heads of r with C
+                            if(lastIdx >= 0 && bodies[lastIdx].relation == body.relation && bodies[lastIdx].head == body.head && variables.includes(body.head)){
                                 bodies[lastIdx].head = bodies[lastIdx].tail
                                 bodies[lastIdx].headLabel = bodies[lastIdx].tailLabel
-                                bodies[lastIdx].relationLabel = "shares head(s) of \'" + (bodies[lastIdx].relationLabel? bodies[lastIdx].relationLabel : bodies[lastIdx].relation) + "\' with"
+                                bodies[lastIdx].relationLabel = "shares head/s of \(" + (bodies[lastIdx].relationLabel? bodies[lastIdx].relationLabel : bodies[lastIdx].relation) + "\) with"
                                 bodies[lastIdx].tail = body.tail
                                 bodies[lastIdx].tailLabel = body.tailLabel
-                            } else if (lastIdx >= 0 && bodies[lastIdx].relation == body.relation && bodies[lastIdx].tail == body.tail){
+                            // A r B, C r B → A shares tails of r with C
+                            } else if (lastIdx >= 0 && bodies[lastIdx].relation == body.relation && bodies[lastIdx].tail == body.tail && variables.includes(body.tail)){
                                 bodies[lastIdx].head = bodies[lastIdx].head
                                 bodies[lastIdx].headLabel = bodies[lastIdx].headLabel
-                                bodies[lastIdx].relationLabel = "shares tail(s) of \'" + (bodies[lastIdx].relationLabel? bodies[lastIdx].relationLabel : bodies[lastIdx].relation) + "\' with"
+                                bodies[lastIdx].relationLabel = "shares tail/s of \(" + (bodies[lastIdx].relationLabel? bodies[lastIdx].relationLabel : bodies[lastIdx].relation) + "\) with"
                                 bodies[lastIdx].tail = body.head
                                 bodies[lastIdx].tailLabel = body.headLabel
-                            } else {
+                           // A r B, B r C → A r children (degree 1) C
+                            } else if (lastIdx >= 0 && bodies[lastIdx].relation == body.relation && bodies[lastIdx].tail == body.head){
+                                if (bodies[lastIdx].relationLabel.includes("(degree ")){
+                                    let levelIdx = bodies[lastIdx].relationLabel.length - 2
+                                    let level = parseInt(bodies[lastIdx].relationLabel[levelIdx])
+                                    bodies[lastIdx].relationLabel = bodies[lastIdx].relationLabel.substring(0, levelIdx) + level + bodies[lastIdx].relationLabel.substring(levelIdx)
+                                } else {
+                                    bodies[lastIdx].relationLabel = "\(" + (bodies[lastIdx].relationLabel? bodies[lastIdx].relationLabel : bodies[lastIdx].relation) + "\) children (degree 1)"
+                                }
+                                bodies[lastIdx].head = bodies[lastIdx].head
+                                bodies[lastIdx].headLabel = bodies[lastIdx].headLabel
+                                bodies[lastIdx].tail = body.tail
+                                bodies[lastIdx].tailLabel = body.tailLabel
+                            // B r A, C r B → A r ancestor (degree 1) C
+                            } else if (lastIdx >= 0 && bodies[lastIdx].relation == body.relation && bodies[lastIdx].head == body.tail){
+                                if (bodies[lastIdx].relationLabel.includes("(degree ")){
+                                    let levelIdx = bodies[lastIdx].relationLabel.length - 2
+                                    let level = parseInt(bodies[lastIdx].relationLabel[levelIdx])
+                                    bodies[lastIdx].relationLabel[levelIdx] = level
+                                } else {
+                                    bodies[lastIdx].relationLabel = "\(" + (bodies[lastIdx].relationLabel? bodies[lastIdx].relationLabel : bodies[lastIdx].relation) + "\) ancestor (degree 1)"
+                                }
+                                bodies[lastIdx].head = bodies[lastIdx].tail
+                                bodies[lastIdx].headLabel = bodies[lastIdx].tailLabel
+                                bodies[lastIdx].tail = body.head
+                                bodies[lastIdx].tailLabel = body.headLabel
+                            }
+                            
+                            
+                            else {
                                 bodies.push(body);
                             }
                         });
