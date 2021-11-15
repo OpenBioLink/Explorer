@@ -11,7 +11,7 @@ function logd(obj) {
   console.log(JSON.stringify(obj, null, 4))
 }
 
-const variables = ["X", "Y", "A", "B", "C"];
+const variables = ["X", "Y", "A", "B", "C", "D", "E", "F"];
 
 const namespace = "https://ai-strategies.org/kgc/"
 

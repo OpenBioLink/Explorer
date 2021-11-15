@@ -36,7 +36,6 @@ export function Entities(){
         API.getAllTestEntities(dataset, explanation, (entities) => {
           setDB(entities["entities"], entities["types"], dataset, explanation).then(() => {
             setAsc(true);
-            update();
           })
         });
       } else {
@@ -46,16 +45,28 @@ export function Entities(){
   }, []);
 
   useEffect(() => {
-    update()
-  }, [asc, searchTerm, selectedType]);
+    sort()
+  }, [asc]);
 
-  
   function toggle_sort(){
     setAsc(!asc)
   }
 
-  function update(){
-    let filter = db.entities.filter(entity => (
+  function sort(){
+    console.log("sort")
+    let sort = null;
+    if(asc){
+      sort = db.entities.toCollection().sortBy("label")
+    } else {
+      sort = db.entities.toCollection().reverse().sortBy("label")
+    }
+    sort.then((sorted) => {
+      setEntities(sorted)
+    })
+  }
+
+  function filter_search(arr){
+    return arr.filter(entity => (
       (
         searchTerm === "" 
         || entity.id.toLowerCase().includes(searchTerm.toLowerCase()) 
@@ -64,19 +75,7 @@ export function Entities(){
         selectedType === "All types"
         || entity.types.includes(selectedType)
       )))
-    
-    let sort = null;
-    if(asc){
-      console.log(filter)
-      sort = filter.sortBy("label")
-    } else {
-      sort = filter.reverse().sortBy("label")
-    }
-    sort.then((sorted) => {
-      setEntities(sorted)
-    })
   }
-
 
   return (
     <div style={{minHeight: "100vh"}}>
@@ -103,16 +102,16 @@ export function Entities(){
             <FormControl type="text" placeholder="Quicksearch" value={searchTerm} onChange = {(e) => editSearchTerm(e.target.value)} className="mr-sm-2" />
           </Form>
         </Navbar>
-        {entities ? renderPagination() : ""}
+        {entities ? renderPagination(filter_search(entities)) : ""}
     </div>
   );
 
-  function renderPagination(){
+  function renderPagination(entities_){
     return(
       <>
-        <Pagination className="Entities-pagination justify-content-center my-2">{getItems(Math.floor(entities.length / pageSize))}</Pagination>
-        {entities ? renderResult(entities) : ""}
-        <Pagination className="Entities-pagination justify-content-center my-2">{getItems(Math.floor(entities.length / pageSize))}</Pagination>
+        <Pagination className="Entities-pagination justify-content-center my-2">{getItems(Math.floor(entities_.length / pageSize))}</Pagination>
+        {entities ? renderResult(entities_) : ""}
+        <Pagination className="Entities-pagination justify-content-center my-2">{getItems(Math.floor(entities_.length / pageSize))}</Pagination>
       </>
     );
   }

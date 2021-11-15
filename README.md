@@ -5,7 +5,7 @@
 The LinkExplorer is a web-based tool for exploring nodes and relations of link prediction benchmark datasets and explanations of predictions done with the rule-based approach [SAFRAN](https://github.com/OpenBioLink/SAFRAN). A running instance of this tool can be found at:
 
 <p align="center">
-    <a style="font-size:20px;" href="explore.ai.strategies.org">explore.ai.strategies.org</a>
+    <a style="font-size:20px;" href="explore.ai-strategies.org">explore.ai.strategies.org</a>
 </p>
 
 Included are three biomedical knowledge bases:

@@ -7,11 +7,11 @@ from os.path import exists
 import argparse
 
 datasets = {
-    "obl": "https://github.com/OpenBioLink/Utilities/raw/main/data/KGCLabelgraphs/OBL/data.zip",
-    "hetio": "https://github.com/OpenBioLink/Utilities/raw/main/data/KGCLabelgraphs/Hetionet/data.zip",
-    "pkl": "https://github.com/OpenBioLink/Utilities/raw/main/data/KGCLabelgraphs/Pheknowlator/data.zip",
-    "wn18rr": "https://github.com/OpenBioLink/Utilities/raw/main/data/KGCLabelgraphs/WN18RR/data.zip",
-    "yago310": "https://github.com/OpenBioLink/Utilities/raw/main/data/KGCLabelgraphs/YAGO3-10/data.zip",
+    "obl": "https://github.com/OpenBioLink/Utilities/raw/main/data/dataset-metadata-graphs/OBL/data.zip",
+    "hetio": "https://github.com/OpenBioLink/Utilities/raw/main/data/dataset-metadata-graphs/Hetionet/data.zip",
+    "pkl": "https://github.com/OpenBioLink/Utilities/raw/main/data/dataset-metadata-graphs/Pheknowlator/data.zip",
+    "wn18rr": "https://github.com/OpenBioLink/Utilities/raw/main/data/dataset-metadata-graphs/WN18RR/data.zip",
+    "yago310": "https://github.com/OpenBioLink/Utilities/raw/main/data/dataset-metadata-graphs/YAGO3-10/data.zip",
 }
 
 def get_config(namespace):
