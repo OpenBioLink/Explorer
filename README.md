@@ -21,6 +21,8 @@ and two general-domain benchmarks:
 
 ## Tutorial
 
+A screenshot tutorial of the main functionalities can be found at [openbiolink.github.io/explorer](openbiolink.github.io/explorer)
+
 ## BYOD (Bring your own data)
 
 ### Dataset metadata (RDF)

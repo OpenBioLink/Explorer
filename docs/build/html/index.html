@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LinkExplorer &mdash; LinkExplorer 0.1 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Explore" href="tutorial/explore.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="#" class="icon icon-home"> LinkExplorer
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="tutorial/explore.html">Explore</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial/explain.html">Explain</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial/loader.html">Loader</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">LinkExplorer</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="#" class="icon icon-home"></a> &raquo;</li>
+      <li>LinkExplorer</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="linkexplorer">
+<h1>LinkExplorer<a class="headerlink" href="#linkexplorer" title="Permalink to this headline"></a></h1>
+<p>OpenBioLink is a resource and evaluation framework for evaluating link prediction models on heterogeneous biomedical graph data. It contains benchmark datasets as well as tools for creating custom benchmarks and evaluating models.</p>
+<a class="with-shadow reference internal image-reference" href="_images/icon.svg"><img alt="_images/icon.svg" class="with-shadow" src="_images/icon.svg" width="400" /></a>
+<p><a class="reference external" href="https://arxiv.org/abs/1912.04616">Paper preprint on arXiv</a></p>
+<p><a class="reference external" href="https://doi.org/10.1093/bioinformatics/btaa274">Peer reviewed version in the journal Bioinformatics (for citations)</a></p>
+<p><a class="reference external" href="https://github.com/OpenBioLink/OpenBioLink/raw/master/paper/supplementary%20data.pdf">Supplementary data</a></p>
+<p>The OpenBioLink benchmark aims to meet the following criteria:</p>
+<ul class="simple">
+<li><p>Openly available</p></li>
+<li><p>Large-scale</p></li>
+<li><p>Wide coverage of current biomedical knowledge and entity types</p></li>
+<li><p>Standardized, balanced train-test split</p></li>
+<li><p>Open-source code for benchmark dataset generation</p></li>
+<li><p>Open-source code for evaluation (independent of model)</p></li>
+<li><p>Integrating and differentiating multiple types of biological entities and relations (i.e., formalized as a heterogeneous graph)</p></li>
+<li><p>Minimized information leakage between train and test sets (e.g., avoid inclusion of trivially inferable relations in the test set)</p></li>
+<li><p>Coverage of true negative relations, where available</p></li>
+<li><p>Differentiating high-quality data from noisy, low-quality data</p></li>
+<li><p>Differentiating benchmarks for directed and undirected graphs in order to be applicable to a wide variety of link prediction methods</p></li>
+<li><p>Clearly defined release cycle with versions of the benchmark and public leaderboard</p></li>
+</ul>
+<div class="toctree-wrapper compound" id="quickstart">
+<p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="tutorial/explore.html">Explore</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tutorial/explore.html#view-entities-of-dataset">View entities of dataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial/explore.html#filter-entites-based-on-type">Filter entites based on type</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial/explore.html#search-based-on-entity-label">Search based on entity label</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial/explore.html#get-additional-information-on-entities">Get additional information on entities</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial/explain.html">Explain</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tutorial/explain.html#select-prediction-task">Select prediction task</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial/explain.html#view-ranked-predictions">View ranked predictions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial/explain.html#explore-rules-that-generated-a-prediction">Explore rules that generated a prediction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial/explain.html#explore-instantiatons-of-rules-with-variables">Explore instantiatons of rules with variables</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial/loader.html">Loader</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tutorial/loader.html#select-dataset">Select dataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial/loader.html#select-explanation-file">Select explanation file</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial/loader.html#wait-for-the-data-to-load">Wait for the data to load</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="tutorial/explore.html" class="btn btn-neutral float-right" title="Explore" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, Simon Ott.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
