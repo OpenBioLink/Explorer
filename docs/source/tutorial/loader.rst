@@ -1,5 +1,6 @@
-Loader
-======
+Load
+====
+
 Select dataset
 --------------
 
@@ -19,3 +20,4 @@ This might take a few seconds depending on the size of the dataset. You will be 
 
 .. image:: ../img/tuto08.png
    :class: with-shadow
+   
