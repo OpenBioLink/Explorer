@@ -5,6 +5,8 @@
 *.jnl
 *.log
 
+docs/build/
+
 apache-jena-fuseki-3.17.0/
 apache-jena-fuseki-4.0.0/
 
