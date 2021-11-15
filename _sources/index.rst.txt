@@ -28,8 +28,8 @@ and two general-domain benchmarks:
 .. toctree::
    :caption: Getting Started
    :name: quickstart
-   :maxdepth: 2
+   :maxdepth: 1
 
+   tutorial/loader
    tutorial/explore
    tutorial/explain
-   tutorial/loader
