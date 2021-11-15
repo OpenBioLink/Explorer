@@ -1,6 +1,6 @@
 name: "Screenshot docs build"
 on: 
-- pull_request
+- commit
 - workflow_dispatch
 
 jobs:
