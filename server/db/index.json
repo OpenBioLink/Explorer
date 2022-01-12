@@ -119,7 +119,7 @@
 		},
         {
             "ID": "undefined",
-            "Endpoint": "http://explore.ai-strategies.org:9999/blazegraph/namespace/undefined/sparql",
+            "Endpoint": "",
             "Name": "None",
             "Version":	"",
             "Description":	"When selecting no metadata graph LinkExplorer will show you entities as they appear in the benchmark dataset (No labels of encoded entities, no descriptions, ...)",

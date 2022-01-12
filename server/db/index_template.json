@@ -1,0 +1,57 @@
+{
+    "Dataset": [
+        {
+            "ID": "the id of the dataset, should contain no special chars, defines dataset in URL",
+            "Endpoint": "url to a sparql endpoint cointaining metadata about the dataset, more information about the schema of the rdf can be found here",
+            "Name": "name of the dataset",
+            "Version":	"version of the dataset (optional)",
+            "Description":	"description of the dataset (optional)",
+			"Explanation": [
+				{
+					"ID": "the id of the explanation regarding this dataset, should contain no special chars, defines dataset in URL",
+					"Label": "label of the explanation file",
+					"Date": 1624529144,
+					"Comment": "further comments regarding explanation (optional)",
+					"Method": "used method can be max, noisy, or nrno which stands for Maximum, Noisy-OR or Non-redundant Noisy-OR respectively",
+					"RuleConfig": "information about the configuration used for learning the rules (optional)",
+					"ClusteringConfig": "information about the configuration used for learning the clustering (optional)"
+				},
+				{
+					"ID": "...",
+					"Label": "...",
+					"Date": 1624529144,
+					"Comment": "...",
+					"Method": "...",
+					"RuleConfig": "...",
+					"ClusteringConfig": "..."
+				}
+			]
+        },
+		{
+            "ID": "...",
+            "Endpoint": "...",
+            "Name": "...",
+            "Version":	"...",
+            "Description":	"...",
+			"Explanation": [
+				{
+					"ID": "...",
+					"Label": "...",
+					"Date": 1624529144,
+					"Comment": "...",
+					"Method": "...",
+					"RuleConfig": "...",
+					"ClusteringConfig": "..."
+				}
+			]
+        },
+        {
+            "ID": "undefined",
+            "Endpoint": "",
+            "Name": "None",
+            "Version":	"",
+            "Description":	"When selecting no metadata graph LinkExplorer will show you entities as they appear in the benchmark dataset (No labels of encoded entities, no descriptions, ...)",
+			"Explanation": []
+		}
+    ]
+}
