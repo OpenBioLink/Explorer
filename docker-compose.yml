@@ -1,0 +1,22 @@
+version: "3.9"
+services:
+  client:
+    build: 
+      context: .
+      dockerfile: ./client/Dockerfile
+    ports:
+      - "5000:5000"
+  server:
+    build: 
+      context: .
+      dockerfile: ./server/Dockerfile
+    ports:
+      - "3001:3001"
+    volumes:
+      - "./server/db:/usr/src/app/server/db"
+  blazegraph:
+    build:
+      context: .
+      dockerfile: ./blazegraph/Dockerfile
+    ports:
+      - "9999:9999"

@@ -57,9 +57,11 @@ function callRemote(func, body){
 function callLocal(func, body){
     return new Promise((resolve, reject) => {
         // TBD check if it makes a difference if call own URL instead of localhost
+
         if(thisIsServer() && body.endpoint){
             body.endpoint = body.endpoint.replace("explore.ai-strategies.org", "localhost");
         }
+
 
         let execPromise = null;
         if (rpcmethods[func] && typeof (rpcmethods[func].exec) === 'function') {

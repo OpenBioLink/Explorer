@@ -2,15 +2,15 @@
 	"version": "2.0.0",
 	"tasks": [
 		{
-            "label": "Run all",
-            "dependsOn": [
-                "npm: start - client",
-                "npm: dev - server",
-                "python: start - blazegraph",
-            ],
-            "dependsOrder": "parallel",
-            "isBackground": true
-        },
+			"label": "Run all",
+			"dependsOn": [
+				"npm: start - client",
+				"npm: dev - server",
+				"python: start - blazegraph"
+			],
+			"dependsOrder": "parallel",
+			"isBackground": true
+		},
 		{
 			"type": "npm",
 			"script": "start",
@@ -34,7 +34,7 @@
 			"command": "python ./server/blazegraph/run.py",
 			"windows": {
 				"command": "python .\\server\\blazegraph\\run.py"
-			  },
+			}
 		}
 	]
 }

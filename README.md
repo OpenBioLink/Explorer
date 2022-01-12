@@ -27,7 +27,7 @@ A screenshot tutorial of the main functionalities can be found at [https://openb
 
 ### Dataset metadata (RDF)
 
-LinkExplorer retrieves metadata of benchmark datasets from RDF graphs, which provides labels, descriptions of nodes and relations in the dataset, as well as the edges of the dataset. You can extend LinkExplorer with your own dataset metadata graph by specifying the endpoint of your RDF graph after clicking on the button 'Load custom endpoint' in the dataset loading screen (`/loader`). Further information about the schema of the RDF graphs can be found [here](https://github.com/OpenBioLink/Utilities/tree/main/data/KGCLabelgraphs).
+LinkExplorer retrieves metadata of benchmark datasets from RDF graphs, which provides labels, descriptions of nodes and relations in the dataset, as well as the edges of the dataset. You can extend LinkExplorer with your own dataset metadata graph by specifying the endpoint of your RDF graph after clicking on the button 'Load custom endpoint' in the dataset loading screen (`/loader`). Further information about the schema of the RDF graphs can be found [here](https://github.com/OpenBioLink/Utilities/tree/main/data/dataset-metadata-graphs).
 
 **If you want to make your RDF graph publicly available, please contact us!**
 
@@ -36,6 +36,41 @@ LinkExplorer retrieves metadata of benchmark datasets from RDF graphs, which pro
 You can load any explanation file produced with SAFRAN, by clicking on 'Load local explanation' and selecting the generated `.db` file. Metadata graphs of custom explanation files can be either 'None', a public graph (From the dropdown) or a custom graph (see [here](#dataset-metadata-rdf)).
 
 ## Host LinkExplorer yourself
+
+### Docker
+
+The LinkExplorer application can be run with *Docker*. We divide our application into three containers:
+
++ Client (The frontend of LinkExplorer)
++ API/Server (Hosts sqlite-Databases storing explanations of predictions in Benchmarks)
++ Blazegraph/RDF-Database (Database for metadata (Labels, Descriptions, ...) of entities in Benchmarks)
+
+The LinkExplorer application is orchestrated through *Docker Compose* and can be run following these steps:
+
+1. Install [Docker](https://docker.com)
+2. Clone repository
+3. Run `docker-compose up --build` from the `Explorer` folder
+
+That's it!
+
+Now the LinkExplorer app is accessible via http://localhost:5000, while Blazegraph is accessible via http://localhost:9999. Explanation files (sqlite) and the `index.json` should be added to `/server/db`. The host of all SPARQL endpoints that are running in the docker blazegraph container should be `blazegraph`, f.e. 
+
+```text
+{
+    "Dataset": [
+        {
+            "ID": "wn18rr",
+            "Endpoint": "http://blazegraph:9999/blazegraph/namespace/wn18rr/sparql",
+            "Name": "WN18RR",
+            "Version":	"",
+            "Description":	"WN18RR is a link prediction dataset created from WN18, ...",
+			"Explanation": [
+				{
+					"ID": "max",
+          ...
+```
+
+### Manual execution
 
 1. Clone repository
 
