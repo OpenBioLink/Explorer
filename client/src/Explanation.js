@@ -180,12 +180,13 @@ export class Explanation_ extends React.Component{
                     </Modal.Header>
                     <Modal.Body>
                         <h2>Rule</h2>
+                        <hr/>
                         <div className="text-center">   
                             {this.state.selectedRule?
                             <Table style={{fontSize: "22px"}}>
                                 <tbody>
                                     <tr>
-                                        <td style={{verticalAlign: "middle"}}>
+                                        <td style={{textAlign: "right", verticalAlign: "middle", padding: "0px", borderWidth:"0px"}}>
                                             <span>
                                                 {this.getRelationName(this.state.selectedRule.Definition) 
                                                 + "(" + this.getHeadName(this.state.selectedRule.Definition) + "," + 
@@ -194,10 +195,10 @@ export class Explanation_ extends React.Component{
                                             
                                             </span>
                                         </td>
-                                        <td style={{verticalAlign: "middle"}}>
+                                        <td style={{verticalAlign: "middle", padding: "0px", borderWidth:"0px"}}>
                                             <span>&lt;=</span>
                                         </td>
-                                        <td>
+                                        <td style={{textAlign: "left", padding: "0px", borderWidth:"0px"}}>
                                             <div>
                                             {this.state.selectedRule.Definition.bodies.map(x => 
                                                     <div>{this.getRelationName(x) + "(" + this.getHeadName(x) + "," + this.getTailName(x) + ")"}</div>
@@ -210,15 +211,19 @@ export class Explanation_ extends React.Component{
                             : "" }
                         </div>
                         <VisNetwork data={this.state.graph}/>
-                        <div className='text-center'>
-                        <svg width="65" height="10" xmlns="http://www.w3.org/2000/svg">
-                            <g>
-                            <title>Layer 1</title>
-                            <path id="svg_1" d="m5,5l45,0" opacity="undefined" stroke-linecap="undefined" stroke-linejoin="undefined" stroke-dasharray="5,5" stroke="#72bcd4" fill="none"/>
-                            <path transform="rotate(90, 57.4167, 4.91667)" id="svg_3" d="m52.41667,10.41667l5,-11l5,11l-10.00001,0z" fill="#72bcd4"/>
-                            </g>
-                            </svg>
-                        <p>Predicted</p>
+                        <div className='text-center mx-3' style={{display: "flex", flexFlow: "row wrap", justifyContent: "space-between"}}>
+                            <p style={{visibility: "hidden", fontSize: "12px"}}>(Interactive graph)</p>
+                            <div>
+                                <svg width="65" height="10" xmlns="http://www.w3.org/2000/svg">
+                                    <g>
+                                    <title>Layer 1</title>
+                                    <path id="svg_1" d="m5,5l45,0" opacity="undefined" stroke-linecap="undefined" stroke-linejoin="undefined" stroke-dasharray="5,5" stroke="#72bcd4" fill="none"/>
+                                    <path transform="rotate(90, 57.4167, 4.91667)" id="svg_3" d="m52.41667,10.41667l5,-11l5,11l-10.00001,0z" fill="#72bcd4"/>
+                                    </g>
+                                    </svg>
+                                <p>Predicted</p>
+                            </div>
+                            <p style={{fontSize: "12px"}}>(Interactive graph)</p>
                         </div>
                         
                         <h2>Instantiations</h2>
