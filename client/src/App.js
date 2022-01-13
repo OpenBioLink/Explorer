@@ -5,7 +5,6 @@ import PropTypes from "prop-types";
 import { useHistory, withRouter, useLocation } from "react-router";
 import {Loader} from './Loader.js'
 import {Entities} from './Entities'
-import {Start} from './Start'
 import {Task} from './Task'
 import {Explanation} from './Explanation'
 import { Entity } from './Entity';

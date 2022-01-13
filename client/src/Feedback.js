@@ -5,6 +5,7 @@ import './App.css';
 import {Button} from 'react-bootstrap';
 import {FaGithub} from 'react-icons/fa';
 import {GrMail} from 'react-icons/gr';
+
 export class Feedback_ extends React.Component{
 
     static propTypes = {

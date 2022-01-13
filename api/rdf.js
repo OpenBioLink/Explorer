@@ -127,6 +127,8 @@ let rdfMethods = {
                             body.relationLabel = label_map[body.relation];
                         })
 
+                        /*
+                        Experimented with patterns, uncomment to reinstate them
                         let bodies_ = rule.Definition.bodies;
                         let bodies = [];
                         bodies_.forEach((body)=>{
@@ -180,6 +182,7 @@ let rdfMethods = {
                             }
                         });
                         rule.Definition.bodies = bodies
+                        */
                     })
                 });
                 resolve(groups);
@@ -361,6 +364,12 @@ let rdfMethods = {
             rule.bodies.forEach((element) => {
                 where = where + "<<" + getEntity(element.head) + " " + getRelation(element.relation) + " " + getEntity(element.tail) + ">> obl:split obl:train . \n";
             });
+
+            if(used_variables.size == 0){
+                console.log(used_variables)
+                resolve([]);
+                return;
+            }
 
             used_variables.forEach((element) => {
                 where = where + "OPTIONAL { ?" + element + "_ <http://www.w3.org/2000/01/rdf-schema#label> " + "?" + element + " . }\n"

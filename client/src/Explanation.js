@@ -1,4 +1,4 @@
-import React, {useState, useContext} from 'react';
+import React, {useState, useContext, useEffect, useRef} from 'react';
 import { useAccordionToggle } from "react-bootstrap/AccordionToggle";
 import PropTypes from "prop-types";
 import { withRouter } from "react-router";
@@ -6,9 +6,9 @@ import './App.css';
 import {Container, Row, Col, ListGroup, Modal, Spinner, Table, Accordion, Card, Button, AccordionContext, OverlayTrigger, Tooltip} from 'react-bootstrap';
 import { IconContext } from "react-icons";
 import { RiArrowDropDownLine, RiArrowDropRightLine } from "react-icons/ri";
-import { HiVariable, HiOutlineVariable } from "react-icons/hi"
-import { AiOutlineFunction } from "react-icons/ai"
+import { HiOutlineDocumentSearch, HiOutlineVariable } from "react-icons/hi"
 import { FaArrowRight } from "react-icons/fa";
+import { Network } from "vis-network";
 
 import { ellipsis } from './util';
 
@@ -57,20 +57,80 @@ export class Explanation_ extends React.Component{
         });
     }
 
+    getTailName(x){
+        return x["tailLabel"] ? x["tailLabel"] : x["tail"]
+    }
+
+    getHeadName(x){
+        return x["headLabel"] ? x["headLabel"] : x["head"]
+    }
+
+    getRelationName(x){
+        return x["relationLabel"] ? x["relationLabel"] : x["relation"]
+    }
+
+    toId(x){
+        return x.replace(/[^a-zA-Z0-9]/g, "_")
+    }
+
     showInstantiations(rule){
         this.setState({
             selectedRule: rule,
             showInstantiations: true
         })
+
+        const nodesX = rule.Definition.bodies.map(x => this.getHeadName(x));
+        const nodesY = rule.Definition.bodies.map(x => this.getTailName(x));
+        var nodes_ = new Set(nodesX.concat(nodesY))
+        nodes_.add(this.getHeadName(rule.Definition))
+        nodes_.add(this.getTailName(rule.Definition))
+        nodes_ = [...nodes_]
+        const nodes = nodes_.map(x => ({id: this.toId(x), label: x}))
+
+        const edges = rule.Definition.bodies.map(x => ({from: this.toId(this.getHeadName(x)), to: this.toId(this.getTailName(x)), label: this.getRelationName(x)}))
+        edges.push({from: this.toId(this.getHeadName(rule.Definition)), to: this.toId(this.getTailName(rule.Definition)), label: this.getRelationName(rule.Definition), color: {color: "#72bcd4"}, dashes: true})
+
+        
+
+        this.setState({
+            graph: {
+                nodes: nodes,
+                edges: edges
+            }
+        })
+
         API.getInstantiations(this.state.datasetID, this.state.explanationID, rule["ID"], this.state.info.head.curie, this.state.info.tail.curie, (instantiations) => {
             this.setState({
                 instantiations: instantiations
             });
+
+
+            /*
+            const nodesX = instantiations.map(x => this.getName(x[0]));
+            const nodesY = instantiations.map(x => this.getName(x[1]));
+
+            const edges = instantiations.map(x => ({from: this.getName(x[0]), to: this.getName(x[1]), label: ""}))
+
+            const nodes_ = Set(nodesX.concat(nodesY))
+            const nodes = nodes_.map(x => ({id: x.replace(/[^a-zA-Z0-9]/g, "_"), label: x}))
+
+
+
+            var graph = {
+                nodes: [],
+                edges: []
+            }
+
+            instantiations.forEach((instantiation) => {
+
+            })
+            */
         });
     }
 
     render(){
         console.log(this.state.info)
+
         return (
             <div>
             {this.state.info ?
@@ -116,9 +176,53 @@ export class Explanation_ extends React.Component{
                 : "" }
                 <Modal show={this.state.showInstantiations} size="lg" onHide={() => {this.setState({instantiations: null, showInstantiations: false})}}>
                     <Modal.Header closeButton>
-                    <Modal.Title>Instantiations</Modal.Title>
+                    <Modal.Title>Details</Modal.Title>
                     </Modal.Header>
                     <Modal.Body>
+                        <h2>Rule</h2>
+                        <div className="text-center">   
+                            {this.state.selectedRule?
+                            <Table style={{fontSize: "22px"}}>
+                                <tbody>
+                                    <tr>
+                                        <td style={{verticalAlign: "middle"}}>
+                                            <span>
+                                                {this.getRelationName(this.state.selectedRule.Definition) 
+                                                + "(" + this.getHeadName(this.state.selectedRule.Definition) + "," + 
+                                                this.getTailName(this.state.selectedRule.Definition) + ")"
+                                                }
+                                            
+                                            </span>
+                                        </td>
+                                        <td style={{verticalAlign: "middle"}}>
+                                            <span>&lt;=</span>
+                                        </td>
+                                        <td>
+                                            <div>
+                                            {this.state.selectedRule.Definition.bodies.map(x => 
+                                                    <div>{this.getRelationName(x) + "(" + this.getHeadName(x) + "," + this.getTailName(x) + ")"}</div>
+                                            )}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </Table>
+                            : "" }
+                        </div>
+                        <VisNetwork data={this.state.graph}/>
+                        <div className='text-center'>
+                        <svg width="65" height="10" xmlns="http://www.w3.org/2000/svg">
+                            <g>
+                            <title>Layer 1</title>
+                            <path id="svg_1" d="m5,5l45,0" opacity="undefined" stroke-linecap="undefined" stroke-linejoin="undefined" stroke-dasharray="5,5" stroke="#72bcd4" fill="none"/>
+                            <path transform="rotate(90, 57.4167, 4.91667)" id="svg_3" d="m52.41667,10.41667l5,-11l5,11l-10.00001,0z" fill="#72bcd4"/>
+                            </g>
+                            </svg>
+                        <p>Predicted</p>
+                        </div>
+                        
+                        <h2>Instantiations</h2>
+                        <hr/>
                         <Table className="m-0 text-center mb-3">
                             <tbody>
                                 <tr>
@@ -200,6 +304,32 @@ export class Explanation_ extends React.Component{
 }
 
 export const Explanation = withRouter(Explanation_);
+
+function VisNetwork(props){
+    const visJsRef = useRef(null);
+    useEffect(() => {
+        const options = {
+            edges: {
+                color: '#000000',
+                arrows: "to"
+            },
+            height: "300px"
+        };
+    
+        const events = {
+            select: function(event) {
+                console.log(event);
+            }
+        };
+        console.log(props.nodes)
+		const network =
+			visJsRef.current &&
+			new Network(visJsRef.current, props.data, options);
+		// Use `network` here to configure events, etc
+	}, [visJsRef, props.data]);
+
+    return <div className="mx-3" style={{borderStyle: "solid", borderWidth: "1px", borderColor: "lightgray"}} ref={visJsRef} />;
+};
 
 
 function CustomToggle({eventKey, confidence, activeKey}) {
@@ -331,29 +461,29 @@ function Cluster({cluster, info, showInstantiations, datasetID, explanationID}){
                         {rule["Predicted"]}
                     </td>
                     <td className="align-middle">
-                        {rule.Definition["hasUnboundVariables"] ? 
                         <OverlayTrigger
                             key='top'
                             placement='top'
                             overlay={
                             <Tooltip id={`tooltip-top`}>
-                                Show instantiations of variables.
+                                Details (Rule, Instantiations, ...)
                             </Tooltip>
                             }
                         >
                             <Button onClick={() => {showInstantiations(rule)}} className="p-1">
                                 <IconContext.Provider value={{ size: "1.25em", className: "global-class-name" }}>
                                     <div>
-                                        <HiOutlineVariable className="m-1"/>
+                                        <HiOutlineDocumentSearch className="m-1"/>
                                     </div>
                                 </IconContext.Provider>
                             </Button> 
                         </OverlayTrigger>
-                        : ""}
                     </td>
                 </tr>
             )}
             </tbody>
         </Table>
     )
+
+    
 }

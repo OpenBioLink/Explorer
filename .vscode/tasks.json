@@ -31,9 +31,9 @@
 			"type": "shell",
 			"problemMatcher": [],
 			"label": "python: start - blazegraph",
-			"command": "python ./server/blazegraph/run.py",
+			"command": "python ./blazegraph/run.py",
 			"windows": {
-				"command": "python .\\server\\blazegraph\\run.py"
+				"command": "python .\\blazegraph\\run.py"
 			}
 		}
 	]
