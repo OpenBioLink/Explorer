@@ -226,6 +226,39 @@ export class Explanation_ extends React.Component{
                             <p style={{fontSize: "12px"}}>(Interactive graph)</p>
                         </div>
                         
+                        <div className="text-center">
+                            {this.state.selectedRule?
+                                <Table className="w-auto m-auto">
+                                    <thead>
+                                        <tr>
+                                            <th className="align-middle border-bottom-0">
+                                                <abbr title="Probability that rule predicts correct entity">Confidence</abbr>
+                                            </th>
+                                            <th className="align-middle border-bottom-0">
+                                                <abbr title="Total number of correctly predicted entities by rule in training set">Correctly predicted</abbr>
+                                            </th>
+                                            <th className="align-middle border-bottom-0">
+                                                <abbr title="Total number of predicted entities by rule in training set">Predicted</abbr>
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody> 
+                                        <tr className="mb-2">
+                                            <td className="align-middle">
+                                                {this.state.selectedRule["Confidence"].toFixed(5)}
+                                            </td>
+                                            <td className="align-middle">
+                                                {this.state.selectedRule["CorrectlyPredicted"]}
+                                            </td>
+                                            <td className="align-middle">
+                                                {this.state.selectedRule["Predicted"]}
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </Table>
+                                : "" }
+                            </div>
+                        
                         <h2>Instantiations</h2>
                         <hr/>
                         <Table className="m-0 text-center mb-3">
@@ -376,13 +409,7 @@ function Cluster({cluster, info, showInstantiations, datasetID, explanationID}){
                         Rule
                     </th>
                     <th className="align-middle">
-                        Confidence
-                    </th>
-                    <th className="align-middle">
-                        Correctly predicted
-                    </th>
-                    <th className="align-middle">
-                        Predicted
+                        <abbr title="Probability that predicted entity is correct">Confidence</abbr>
                     </th>
                     <th/>
                 </tr>
@@ -394,37 +421,6 @@ function Cluster({cluster, info, showInstantiations, datasetID, explanationID}){
                         <Table className="m-0">
                             <tbody>
                             {rule.Definition.bodies.map((body) =>
-                            /*
-                                        <tr>
-                                            <td className="w-25 border-top-0">
-                                                {(info.head && info.tail) ?
-                                                    body.headLabel ? 
-                                                        <a style={{wordBreak: "break-word"}} href={'/entity?term=' + body.head}>{body.headLabel}</a> 
-                                                    : body.head === "X" ? 
-                                                        <b><a style={{wordBreak: "break-word"}} href={'/entity?term=' + info.head.curie}>{info.head.label ? info.head.label : info.head.curie}</a></b>
-                                                    : body.head === "Y" ? 
-                                                        <b><a  style={{wordBreak: "break-word"}} href={'/entity?term=' + info.tail.curie}>{info.tail.label ? info.tail.label : info.tail.curie}</a> </b>
-                                                    : body.head
-                                                    : ""
-                                                }
-                                            </td>
-                                            <td className="w-50 border-top-0">
-                                                {body.relationLabel}
-                                            </td>
-                                            <td className="w-25 border-top-0">
-                                                {(info.head && info.tail) ?
-                                                    body.tailLabel ? 
-                                                        <a style={{wordBreak: "break-word"}} href={'/entity?term=' + body.tail}>{body.tailLabel}</a> 
-                                                    : body.tail === "X" ? 
-                                                        <b><a style={{wordBreak: "break-word"}} href={'/entity?term=' + info.head.curie}>{info.head.label ? info.head.label : info.head.curie}</a></b>
-                                                    : body.tail === "Y" ? 
-                                                        <b><a style={{wordBreak: "break-word"}} href={'/entity?term=' + info.tail.curie}>{info.tail.label ? info.tail.label : info.tail.curie}</a> </b> 
-                                                    : body.tail
-                                                    : ""
-                                                }
-                                            </td>
-                                        </tr>
-                            */
                                         <tr>
                                         <td className="w-100 border-top-0">
                                             {(info.head && info.tail) ?
@@ -458,12 +454,6 @@ function Cluster({cluster, info, showInstantiations, datasetID, explanationID}){
                     </td>
                     <td className="align-middle">
                         {rule["Confidence"].toFixed(5)}
-                    </td>
-                    <td className="align-middle">
-                        {rule["CorrectlyPredicted"]}
-                    </td>
-                    <td className="align-middle">
-                        {rule["Predicted"]}
                     </td>
                     <td className="align-middle">
                         <OverlayTrigger

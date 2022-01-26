@@ -3,10 +3,11 @@ import PropTypes from "prop-types";
 import { withRouter } from "react-router";
 import { useAccordionToggle } from "react-bootstrap/AccordionToggle";
 import './App.css';
-import {Button, Pagination, Modal, Badge, Container, Row, Col, Table, ListGroup, Spinner, Accordion, AccordionContext, Card} from 'react-bootstrap';
+import {Button, Pagination, Modal, Badge, Container, Row, Col, Table, ListGroup, Spinner, Accordion, AccordionContext, Card, OverlayTrigger, Tooltip} from 'react-bootstrap';
 import { IconContext } from "react-icons";
 import { RiArrowDropDownLine, RiArrowDropRightLine } from "react-icons/ri";
 import { BiLinkExternal } from "react-icons/bi";
+import { AiOutlineInfoCircle } from "react-icons/ai"
 import API from "api";
 
 export class Entity_ extends React.Component{
@@ -168,8 +169,21 @@ export class Entity_ extends React.Component{
                             </Col>
                         </Row>
                         <Row>
-                            <Col>
-                                <h4 className="pb-1 mt-2 underlinedHeading">Predictions</h4>
+                            <Col className="pr-0">
+                                <h4 className="pb-1 mt-2 pr-0 underlinedHeading">Predictions</h4>
+                            </Col>
+                            <Col xs="auto" className="px-0 mb-2 underlinedHeading" style={{marginRight: "15px"}}>
+                                <OverlayTrigger
+                                    key='top'
+                                    placement='top'
+                                    overlay={
+                                    <Tooltip id={`tooltip-top`}>
+                                        Predictions made for this entity. Only relations for which at least one entity was predicted are shown.
+                                    </Tooltip>
+                                    }
+                                >
+                                    <AiOutlineInfoCircle className="mr-2 mt-3"/>
+                                </OverlayTrigger>
                             </Col>
                         </Row>
                         <Row>
