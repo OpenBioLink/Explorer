@@ -411,6 +411,12 @@ function Cluster({cluster, info, showInstantiations, datasetID, explanationID}){
                     <th className="align-middle">
                         <abbr title="Probability that predicted entity is correct">Confidence</abbr>
                     </th>
+                    <th className="align-middle">
+                        <abbr title="Total number of correctly predicted entities by this rule in training set">Correctly predicted</abbr>
+                    </th>
+                    <th className="align-middle border-bottom-0">
+                        <abbr title="Total number of predicted entities by this rule in training set">Predicted</abbr>
+                    </th>
                     <th/>
                 </tr>
             </thead>
@@ -454,6 +460,12 @@ function Cluster({cluster, info, showInstantiations, datasetID, explanationID}){
                     </td>
                     <td className="align-middle">
                         {rule["Confidence"].toFixed(5)}
+                    </td>
+                    <td className="align-middle">
+                        {rule["CorrectlyPredicted"]}
+                    </td>
+                    <td className="align-middle">
+                        {rule["Predicted"]}
                     </td>
                     <td className="align-middle">
                         <OverlayTrigger
