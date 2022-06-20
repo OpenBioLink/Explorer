@@ -56,11 +56,14 @@ The LinkExplorer application is orchestrated through *Docker Compose* and can be
 
 1. Install [Docker](https://docker.com)
 2. Clone repository
-3. Run `docker-compose up --build` from the `Explorer` folder
+3. Copy db-file/s to `server/db` (Db files of our graphs are hosted [here](https://zenodo.org/record/6669241))
+4. Insert RDF-graph/s containing labels, descriptions, ... into the blazegraph database (For our graphs we provide a script for that, see `/blazegraph/setup.py`, the actual graphs are hosted [here](https://github.com/OpenBioLink/Utilities/tree/main/data/dataset-metadata-graphs))
+5. Create/update index.json in `server/db`
+6. Run `docker-compose up --build` from the `Explorer` folder
 
-That's it!
+That's it! A full example of running YAGO3-10 can be found [here](https://github.com/OpenBioLink/Explorer/wiki/YAGO3-10-Cookbook).
 
-Now the LinkExplorer app is accessible via http://localhost:5000, while Blazegraph is accessible via http://localhost:9999. Explanation files (sqlite) and the `index.json` should be added to `/server/db`. The host of all SPARQL endpoints that are running in the docker blazegraph container should be `blazegraph`, f.e. 
+Now the LinkExplorer app is accessible via http://localhost:5000, while Blazegraph is accessible via http://localhost:9999. Explanation files (sqlite) and the `index.json` should be added to `/server/db`. **Important: The host of all SPARQL endpoints that are running in the docker blazegraph container should be `blazegraph`**, f.e. 
 
 ```text
 {
