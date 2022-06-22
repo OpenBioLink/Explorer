@@ -440,7 +440,7 @@ function Cluster({cluster, info, showInstantiations, datasetID, explanationID}){
                                                 : ""
                                             }
                                             &nbsp;
-                                            {body.relationLabel}
+                                            {body.relationLabel ? body.relationLabel: body.relation}
                                             &nbsp;
                                             {(info.head && info.tail) ?
                                                 body.tailLabel ? 
