@@ -22,7 +22,7 @@ let rpcmethods = {
         exec(body) {
             return new Promise((resolve) => {
                 tic();
-                if(body.endpoint != '' && body.datasetID != 'undefined'){
+                if(body.endpoint != '' && body.datasetID != 'undefined' && !body.endpoint.includes("/blazegraph/namespace/kb/sparql")){
                     graph.getAllTestEntities(body.endpoint).then((data) => {
                         resolve({entities: data[0], types: data[1]} || {});
                         toc("getAllTestEntities");
