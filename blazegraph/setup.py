@@ -58,7 +58,10 @@ def setup(requested_datasets):
             print(f'DELETE {url}')
             r = requests.delete(url)
             print(f"Status: " + str(r.status_code))
-            print(f"Text: " + r.text)
+            if r.status_code != 404:
+                print(f"Text: " + r.text)
+            else:
+                print("No namespace to delete")
             
             print(f'CREATE {url}')
             r = requests.post('http://localhost:9999/blazegraph/namespace', headers={'Content-Type': 'text/plain'}, data=get_config(namespace))

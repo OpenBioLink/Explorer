@@ -68,7 +68,7 @@ let indexmethods = {
                 var dataset = index["Dataset"].find(dataset => dataset["ID"] == body.datasetID);
                 // TODO not existant datasetID?
                 toc("getEndpointFromDatasetID");
-                resolve(dataset["Endpoint"] || {});
+                resolve(dataset["Endpoint"] || "");
             });
         }
     },

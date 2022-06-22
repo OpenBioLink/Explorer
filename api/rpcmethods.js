@@ -22,7 +22,7 @@ let rpcmethods = {
         exec(body) {
             return new Promise((resolve) => {
                 tic();
-                if(body.datasetID != 'undefined'){
+                if(body.endpoint != '' && body.datasetID != 'undefined'){
                     graph.getAllTestEntities(body.endpoint).then((data) => {
                         resolve({entities: data[0], types: data[1]} || {});
                         toc("getAllTestEntities");
